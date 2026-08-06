@@ -2,7 +2,7 @@ import { useState } from "react";
 import { CheckCircle2, Loader2, ShieldCheck } from "lucide-react";
 
 const HIDDEN_FIELDS = {
-  campaign: "FreeDevice",
+  campaign: "BHA3000-FreeDevice",
   source: "SMS",
   medium: "SMS Marketing",
   product: "GETEIN BHA3000",
@@ -47,7 +47,7 @@ export function LeadForm() {
               "اعلام شفاف اعتبار خرید لوازم مصرفی",
             ].map((t) => (
               <li key={t} className="flex items-start gap-2">
-                <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-teal" />
+                <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-ember" />
                 <span>{t}</span>
               </li>
             ))}
@@ -57,7 +57,7 @@ export function LeadForm() {
         <div className="rounded-4xl border border-border bg-card p-6 shadow-card sm:p-8">
           {status === "done" ? (
             <div className="py-8 text-center">
-              <CheckCircle2 className="mx-auto h-14 w-14 text-teal" />
+              <CheckCircle2 className="mx-auto h-14 w-14 text-ember" />
               <h3 className="mt-4 text-xl font-extrabold">درخواست شما ثبت شد</h3>
               <p className="mt-3 text-sm leading-7 text-muted-foreground">
                 کارشناس محصول ما در نخستین فرصت کاری با شما تماس خواهد گرفت. سپاس از اعتماد شما.
@@ -127,7 +127,7 @@ export function LeadForm() {
               </button>
 
               <p className="mt-4 flex items-start gap-2 text-xs leading-6 text-muted-foreground">
-                <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-teal" />
+                <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-ember" />
                 اطلاعات شما محرمانه است و تنها برای تماس کارشناس فروش استفاده می‌شود.
               </p>
             </form>
