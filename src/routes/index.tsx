@@ -1,24 +1,46 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { Hero } from "@/components/landing/Hero";
+import { LeadForm } from "@/components/landing/LeadForm";
+import {
+  PainPoints,
+  Features,
+  Offer,
+  WhyUs,
+  Faq,
+  StickyCta,
+  Footer,
+} from "@/components/landing/Sections";
 
-// No head() here: the home route inherits title/description/og/twitter from
-// __root.tsx, and ships no og:image so serve-time hosting can inject the
-// project's social preview (explicit og:image or latest screenshot).
+const title = "واگذاری رایگان سل کانتر GETEIN BHA3000 | سانا شفابخش راسپینا";
+const description =
+  "طرح ویژه واگذاری دستگاه سل کانتر GETEIN BHA3000 با دریافت اعتبار خرید لوازم مصرفی آزمایشگاه معادل ارزش دستگاه. ظرفیت محدود پیش از نمایشگاه ایران هلث.";
+
 export const Route = createFileRoute("/")({
+  head: () => ({
+    meta: [
+      { title },
+      { name: "description", content: description },
+      { property: "og:title", content: title },
+      { property: "og:description", content: description },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
+  }),
   component: Index,
 });
 
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
 function Index() {
   return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
-    </div>
+    <main>
+      <Hero />
+      <PainPoints />
+      <Features />
+      <Offer />
+      <WhyUs />
+      <Faq />
+      <LeadForm />
+      <Footer />
+      <StickyCta />
+    </main>
   );
 }
