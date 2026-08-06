@@ -273,7 +273,14 @@ export function Footer() {
       <div className="mx-auto max-w-6xl px-5">
         <div className="grid gap-10 md:grid-cols-3">
           <div>
-            <div className="text-lg font-extrabold">سانا شفابخش راسپینا</div>
+            <img
+              src={logo}
+              alt="سانا شفابخش راسپینا (اورتانیس)"
+              width={640}
+              height={200}
+              loading="lazy"
+              className="h-11 w-auto object-contain brightness-0 invert"
+            />
             <p className="mt-4 text-sm leading-8 opacity-80">
               تامین‌کننده تجهیزات آزمایشگاهی و محصولات تشخیص پزشکی با مجوزهای رسمی، خدمات پس از فروش
               و پشتیبانی فنی تخصصی برای آزمایشگاه‌های خصوصی، درمانگاهی و بیمارستانی.
@@ -285,15 +292,30 @@ export function Footer() {
             <ul className="mt-4 space-y-3 text-sm opacity-85">
               <li className="flex items-start gap-2">
                 <MapPin className="mt-0.5 h-4 w-4 shrink-0" />
-                نشانی دفتر مرکزی: تهران — (نشانی کامل)
+                استان البرز، شهرک صنعتی بهارستان، فاز سه، نبش بهار دوم
               </li>
-              <li className="flex items-start gap-2">
-                <Phone className="mt-0.5 h-4 w-4 shrink-0" />
-                تلفن: ۰۲۱-۰۰۰۰۰۰۰۰
+              <li>
+                <a href="tel:+982633107" className="flex items-start gap-2 hover:opacity-100">
+                  <Phone className="mt-0.5 h-4 w-4 shrink-0" />
+                  <span dir="ltr">۰۲۶ ۳۳۱۰۷</span>
+                </a>
               </li>
-              <li className="flex items-start gap-2">
-                <Mail className="mt-0.5 h-4 w-4 shrink-0" />
-                رایانامه: info@ortanes.com
+              <li>
+                <a href="mailto:info@ortanes.com" className="flex items-start gap-2 hover:opacity-100">
+                  <Mail className="mt-0.5 h-4 w-4 shrink-0" />
+                  info@ortanes.com
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://ortanes.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-start gap-2 hover:opacity-100"
+                >
+                  <Globe className="mt-0.5 h-4 w-4 shrink-0" />
+                  ortanes.com
+                </a>
               </li>
               <li className="flex items-start gap-2">
                 <Clock className="mt-0.5 h-4 w-4 shrink-0" />
