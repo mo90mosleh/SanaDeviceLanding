@@ -1,16 +1,33 @@
 import { ShieldCheck, BadgeCheck, Headset, Truck, Phone, ArrowLeft } from "lucide-react";
-import device from "@/assets/bha3000.jpg";
+import device from "@/assets/bha3000-official.jpg";
+import logo from "@/assets/ortanes-logo.png";
 
 const badges = [
-  { icon: ShieldCheck, label: "مجوز رسمی IRC" },
-  { icon: BadgeCheck, label: "گارانتی رسمی شرکت" },
+  { icon: ShieldCheck, label: "۱ سال گارانتی بی‌قید و شرط" },
+  { icon: BadgeCheck, label: "مجوز رسمی IRC" },
   { icon: Headset, label: "پشتیبانی فنی تخصصی" },
   { icon: Truck, label: "تامین مستقیم تجهیزات" },
 ];
 
 export function Hero() {
   return (
-    <section className="relative overflow-hidden bg-gradient-soft pt-10 pb-16 sm:pt-16 sm:pb-24">
+    <section className="relative overflow-hidden bg-gradient-soft pt-6 pb-16 sm:pt-8 sm:pb-24">
+      <div className="relative mx-auto mb-8 flex max-w-6xl items-center justify-between gap-4 px-5 sm:mb-12">
+        <img
+          src={logo}
+          alt="سانا شفابخش راسپینا (اورتانیس)"
+          width={640}
+          height={200}
+          className="h-11 w-auto object-contain sm:h-13"
+        />
+        <a
+          href="tel:+982633107"
+          className="inline-flex items-center gap-2 rounded-2xl border border-primary/20 bg-card/80 px-4 py-2 text-sm font-bold text-primary"
+        >
+          <Phone className="h-4 w-4" />
+          <span dir="ltr">۰۲۶ ۳۳۱۰۷</span>
+        </a>
+      </div>
       <div
         aria-hidden
         className="pointer-events-none absolute -top-32 -left-32 h-80 w-80 rounded-full bg-primary/10 blur-3xl"
@@ -22,8 +39,8 @@ export function Hero() {
       <div className="relative mx-auto grid max-w-6xl items-center gap-12 px-5 lg:grid-cols-2">
         <div className="animate-rise">
           <span className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-card/80 px-4 py-1.5 text-xs font-semibold text-primary sm:text-sm">
-            <span className="h-2 w-2 rounded-full bg-teal" />
-            طرح ویژه پیش از نمایشگاه ایران هلث — ظرفیت محدود
+            <span className="h-2 w-2 rounded-full bg-ember" />
+            طرح ویژه سانا شفابخش راسپینا (اورتانیس)
           </span>
 
           <h1 className="mt-6 text-3xl font-extrabold leading-[1.35] tracking-tight sm:text-4xl lg:text-5xl lg:leading-[1.3]">
@@ -48,7 +65,7 @@ export function Hero() {
               <ArrowLeft className="h-5 w-5" />
             </a>
             <a
-              href="tel:02100000000"
+              href="tel:+982633107"
               className="inline-flex items-center justify-center gap-2 rounded-2xl border border-primary/25 bg-card px-7 py-4 text-base font-bold text-primary transition-colors hover:bg-secondary"
             >
               <Phone className="h-5 w-5" />
@@ -62,7 +79,7 @@ export function Hero() {
                 key={b.label}
                 className="flex min-w-0 flex-col items-center gap-2 rounded-2xl border border-border bg-card/80 px-3 py-4 text-center shadow-card"
               >
-                <b.icon className="h-6 w-6 shrink-0 text-teal" />
+                <b.icon className="h-6 w-6 shrink-0 text-ember" />
                 <span className="text-xs font-semibold leading-5">{b.label}</span>
               </li>
             ))}
@@ -74,8 +91,8 @@ export function Hero() {
             <img
               src={device}
               alt="دستگاه سل کانتر تمام‌اتوماتیک GETEIN BHA3000"
-              width={1200}
-              height={1200}
+              width={787}
+              height={850}
               className="mx-auto w-full max-w-md animate-float object-contain"
             />
             <div className="mt-6 grid grid-cols-3 gap-3 text-center">

@@ -2,9 +2,10 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Icon } from "./Icon";
 import { painPoints, features, steps, trustItems, faqs } from "./data";
 import labImg from "@/assets/lab.jpg";
-import technicianImg from "@/assets/technician.jpg";
+import detailImg from "@/assets/bha3000-detail.jpg";
 import engineerImg from "@/assets/engineer.jpg";
-import { AlertTriangle, Gift, ArrowLeft, Phone, MapPin, Mail, Clock } from "lucide-react";
+import logo from "@/assets/ortanes-logo.png";
+import { AlertTriangle, Gift, ArrowLeft, Phone, MapPin, Mail, Clock, Globe } from "lucide-react";
 
 function SectionHead({
   eyebrow,
@@ -56,8 +57,8 @@ export function PainPoints() {
         <div className="mt-10 flex flex-col items-start gap-4 rounded-3xl border border-border bg-secondary p-6 sm:flex-row sm:items-center">
           <AlertTriangle className="h-7 w-7 shrink-0 text-primary" />
           <p className="min-w-0 flex-1 text-sm font-semibold leading-7 sm:text-base">
-            پیش از نمایشگاه ایران هلث، فرصت جایگزینی دستگاه فرسوده با GETEIN BHA3000 بدون پرداخت
-            بهای دستگاه فراهم شده است.
+            همین امروز می‌توانید دستگاه فرسوده آزمایشگاه را با GETEIN BHA3000 جایگزین کنید؛ بدون
+            پرداخت بهای دستگاه.
           </p>
           <a
             href="#lead-form"
@@ -102,12 +103,12 @@ export function Features() {
 
           <div className="space-y-4">
             <img
-              src={technicianImg}
-              alt="کارشناس آزمایشگاه در حال کار با دستگاه هماتولوژی آنالایزر"
-              width={1200}
-              height={900}
+              src={detailImg}
+              alt="نمایشگر لمسی و بخش چاپگر دستگاه هماتولوژی آنالایزر GETEIN BHA3000"
+              width={294}
+              height={1010}
               loading="lazy"
-              className="h-64 w-full rounded-3xl border border-border object-cover shadow-card"
+              className="h-64 w-full rounded-3xl border border-border bg-secondary object-cover object-top shadow-card"
             />
             <img
               src={labImg}
@@ -246,7 +247,7 @@ export function StickyCta() {
             درخواست مشاوره رایگان
           </a>
           <a
-            href="tel:02100000000"
+            href="tel:+982633107"
             aria-label="تماس تلفنی با کارشناس فروش"
             className="inline-flex h-13 w-13 shrink-0 items-center justify-center rounded-2xl border border-primary/25 bg-card text-primary"
           >
@@ -256,7 +257,7 @@ export function StickyCta() {
       </div>
 
       <a
-        href="tel:02100000000"
+        href="tel:+982633107"
         aria-label="تماس تلفنی با کارشناس فروش"
         className="fixed bottom-8 left-8 z-40 hidden h-14 w-14 items-center justify-center rounded-full bg-gradient-brand text-primary-foreground shadow-glow transition-transform hover:scale-105 md:inline-flex"
       >
@@ -272,7 +273,14 @@ export function Footer() {
       <div className="mx-auto max-w-6xl px-5">
         <div className="grid gap-10 md:grid-cols-3">
           <div>
-            <div className="text-lg font-extrabold">سانا شفابخش راسپینا</div>
+            <img
+              src={logo}
+              alt="سانا شفابخش راسپینا (اورتانیس)"
+              width={640}
+              height={200}
+              loading="lazy"
+              className="h-11 w-auto object-contain brightness-0 invert"
+            />
             <p className="mt-4 text-sm leading-8 opacity-80">
               تامین‌کننده تجهیزات آزمایشگاهی و محصولات تشخیص پزشکی با مجوزهای رسمی، خدمات پس از فروش
               و پشتیبانی فنی تخصصی برای آزمایشگاه‌های خصوصی، درمانگاهی و بیمارستانی.
@@ -284,15 +292,30 @@ export function Footer() {
             <ul className="mt-4 space-y-3 text-sm opacity-85">
               <li className="flex items-start gap-2">
                 <MapPin className="mt-0.5 h-4 w-4 shrink-0" />
-                نشانی دفتر مرکزی: تهران — (نشانی کامل)
+                استان البرز، شهرک صنعتی بهارستان، فاز سه، نبش بهار دوم
               </li>
-              <li className="flex items-start gap-2">
-                <Phone className="mt-0.5 h-4 w-4 shrink-0" />
-                تلفن: ۰۲۱-۰۰۰۰۰۰۰۰
+              <li>
+                <a href="tel:+982633107" className="flex items-start gap-2 hover:opacity-100">
+                  <Phone className="mt-0.5 h-4 w-4 shrink-0" />
+                  <span dir="ltr">۰۲۶ ۳۳۱۰۷</span>
+                </a>
               </li>
-              <li className="flex items-start gap-2">
-                <Mail className="mt-0.5 h-4 w-4 shrink-0" />
-                رایانامه: info@ortanes.com
+              <li>
+                <a href="mailto:info@ortanes.com" className="flex items-start gap-2 hover:opacity-100">
+                  <Mail className="mt-0.5 h-4 w-4 shrink-0" />
+                  info@ortanes.com
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://ortanes.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-start gap-2 hover:opacity-100"
+                >
+                  <Globe className="mt-0.5 h-4 w-4 shrink-0" />
+                  ortanes.com
+                </a>
               </li>
               <li className="flex items-start gap-2">
                 <Clock className="mt-0.5 h-4 w-4 shrink-0" />
