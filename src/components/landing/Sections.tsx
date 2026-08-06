@@ -2,9 +2,10 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Icon } from "./Icon";
 import { painPoints, features, steps, trustItems, faqs } from "./data";
 import labImg from "@/assets/lab.jpg";
-import technicianImg from "@/assets/technician.jpg";
+import detailImg from "@/assets/bha3000-detail.jpg";
 import engineerImg from "@/assets/engineer.jpg";
-import { AlertTriangle, Gift, ArrowLeft, Phone, MapPin, Mail, Clock } from "lucide-react";
+import logo from "@/assets/ortanes-logo.png";
+import { AlertTriangle, Gift, ArrowLeft, Phone, MapPin, Mail, Clock, Globe } from "lucide-react";
 
 function SectionHead({
   eyebrow,
@@ -56,8 +57,8 @@ export function PainPoints() {
         <div className="mt-10 flex flex-col items-start gap-4 rounded-3xl border border-border bg-secondary p-6 sm:flex-row sm:items-center">
           <AlertTriangle className="h-7 w-7 shrink-0 text-primary" />
           <p className="min-w-0 flex-1 text-sm font-semibold leading-7 sm:text-base">
-            پیش از نمایشگاه ایران هلث، فرصت جایگزینی دستگاه فرسوده با GETEIN BHA3000 بدون پرداخت
-            بهای دستگاه فراهم شده است.
+            همین امروز می‌توانید دستگاه فرسوده آزمایشگاه را با GETEIN BHA3000 جایگزین کنید؛ بدون
+            پرداخت بهای دستگاه.
           </p>
           <a
             href="#lead-form"
@@ -102,12 +103,12 @@ export function Features() {
 
           <div className="space-y-4">
             <img
-              src={technicianImg}
-              alt="کارشناس آزمایشگاه در حال کار با دستگاه هماتولوژی آنالایزر"
-              width={1200}
-              height={900}
+              src={detailImg}
+              alt="نمایشگر لمسی و بخش چاپگر دستگاه هماتولوژی آنالایزر GETEIN BHA3000"
+              width={294}
+              height={1010}
               loading="lazy"
-              className="h-64 w-full rounded-3xl border border-border object-cover shadow-card"
+              className="h-64 w-full rounded-3xl border border-border bg-secondary object-cover object-top shadow-card"
             />
             <img
               src={labImg}
@@ -246,7 +247,7 @@ export function StickyCta() {
             درخواست مشاوره رایگان
           </a>
           <a
-            href="tel:02100000000"
+            href="tel:+982633107"
             aria-label="تماس تلفنی با کارشناس فروش"
             className="inline-flex h-13 w-13 shrink-0 items-center justify-center rounded-2xl border border-primary/25 bg-card text-primary"
           >
@@ -256,7 +257,7 @@ export function StickyCta() {
       </div>
 
       <a
-        href="tel:02100000000"
+        href="tel:+982633107"
         aria-label="تماس تلفنی با کارشناس فروش"
         className="fixed bottom-8 left-8 z-40 hidden h-14 w-14 items-center justify-center rounded-full bg-gradient-brand text-primary-foreground shadow-glow transition-transform hover:scale-105 md:inline-flex"
       >
