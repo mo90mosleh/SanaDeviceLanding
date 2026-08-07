@@ -103,8 +103,8 @@ export function Features() {
 
           <div className="grid h-full grid-cols-1 grid-rows-2 gap-4">
             <img
-              src={screenImg}
-              alt="نمایشگر لمسی و هیستوگرام‌های سلولی دستگاه هماتولوژی آنالایزر GETEIN BHA3000"
+              src={featureImg.url}
+              alt="دستگاه هماتولوژی آنالایزر GETEIN BHA3000 با صفحه نمایش لمسی و عملیات آسان"
               width={1200}
               height={900}
               loading="lazy"
