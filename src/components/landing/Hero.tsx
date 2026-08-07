@@ -1,5 +1,5 @@
 import { ShieldCheck, BadgeCheck, Headset, Truck, Phone, ArrowLeft } from "lucide-react";
-import device from "@/assets/bha3000-official.jpg";
+import deviceAsset from "@/assets/bha3000-hero.png.asset.json";
 import logo from "@/assets/ortanes-logo.png";
 
 const badges = [
@@ -43,7 +43,7 @@ export function Hero() {
             طرح ویژه سانا شفابخش راسپینا (اورتانیس)
           </span>
 
-          <h1 className="mt-6 text-3xl font-extrabold leading-[1.35] tracking-tight sm:text-4xl lg:text-5xl lg:leading-[1.3]">
+          <h1 className="mt-6 text-2xl font-extrabold leading-[1.4] tracking-tight sm:text-3xl lg:text-4xl lg:whitespace-nowrap lg:leading-[1.35]">
             واگذاری رایگان دستگاه سل کانتر
             <span className="mt-2 block bg-gradient-brand bg-clip-text text-transparent">
               GETEIN BHA3000
@@ -89,11 +89,11 @@ export function Hero() {
         <div className="animate-rise">
           <div className="relative rounded-4xl border border-border bg-card p-6 shadow-card sm:p-10">
             <img
-              src={device}
+              src={deviceAsset.url}
               alt="دستگاه سل کانتر تمام‌اتوماتیک GETEIN BHA3000"
-              width={787}
-              height={850}
-              className="mx-auto w-full max-w-md animate-float object-contain"
+              width={1024}
+              height={1024}
+              className="mx-auto w-full max-w-md animate-float rounded-3xl bg-white object-contain"
             />
             <div className="mt-6 grid grid-cols-3 gap-3 text-center">
               {[
