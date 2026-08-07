@@ -2,7 +2,6 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Icon } from "./Icon";
 import { painPoints, features, steps, trustItems, faqs } from "./data";
 import engineerImg from "@/assets/engineer.jpg";
-import engineerImg from "@/assets/engineer.jpg";
 import logo from "@/assets/ortanes-logo.png";
 import { AlertTriangle, Gift, ArrowLeft, Phone, MapPin, Mail, Clock, Globe } from "lucide-react";
 
@@ -82,42 +81,21 @@ export function Features() {
           text="هماتولوژی آنالایزر تمام‌اتوماتیک با گزارش ۲۱ پارامتر، طراحی شده برای دقت بالا، مصرف اقتصادی و کارکرد بی‌وقفه در آزمایشگاه‌های پرتراکم."
         />
 
-        <div className="mt-12 grid items-stretch gap-8 lg:grid-cols-[minmax(0,1fr)_360px]">
-          <div className="grid gap-4 sm:grid-cols-2">
-            {features.map((f) => (
-              <article
-                key={f.title}
-                className="flex min-w-0 gap-4 rounded-3xl border border-border bg-card p-5 shadow-card transition-transform hover:-translate-y-1"
-              >
-                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-accent text-accent-foreground">
-                  <Icon name={f.icon} className="h-5 w-5" />
-                </div>
-                <div className="min-w-0">
-                  <h3 className="text-base font-bold leading-7">{f.title}</h3>
-                  <p className="mt-2 text-sm leading-7 text-muted-foreground">{f.text}</p>
-                </div>
-              </article>
-            ))}
-          </div>
-
-          <div className="grid h-full grid-cols-1 grid-rows-2 gap-4">
-            <img
-              src={featureImg.url}
-              alt="دستگاه هماتولوژی آنالایزر GETEIN BHA3000 با صفحه نمایش لمسی و عملیات آسان"
-              width={1200}
-              height={900}
-              loading="lazy"
-              className="h-full min-h-56 w-full rounded-3xl border border-border bg-white object-cover shadow-card"
-            />
-            <img
-              src={labImg}
-              alt="آزمایشگاه مدرن تشخیص طبی مجهز به تجهیزات پیشرفته"
-              width={1400}
-              height={900}
-              loading="lazy"
-              className="h-full min-h-56 w-full rounded-3xl border border-border object-cover shadow-card"
-            />
-          </div>
+        <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {features.map((f) => (
+            <article
+              key={f.title}
+              className="flex min-w-0 gap-4 rounded-3xl border border-border bg-card p-5 shadow-card transition-transform hover:-translate-y-1"
+            >
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-accent text-accent-foreground">
+                <Icon name={f.icon} className="h-5 w-5" />
+              </div>
+              <div className="min-w-0">
+                <h3 className="text-base font-bold leading-7">{f.title}</h3>
+                <p className="mt-2 text-sm leading-7 text-muted-foreground">{f.text}</p>
+              </div>
+            </article>
+          ))}
         </div>
       </div>
     </section>
