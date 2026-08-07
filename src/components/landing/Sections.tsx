@@ -1,8 +1,7 @@
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Icon } from "./Icon";
 import { painPoints, features, steps, trustItems, faqs } from "./data";
-import labImg from "@/assets/lab.jpg";
-import featureImg from "@/assets/bha3000-feature.jpg.asset.json";
+import engineerImg from "@/assets/engineer.jpg";
 import engineerImg from "@/assets/engineer.jpg";
 import logo from "@/assets/ortanes-logo.png";
 import { AlertTriangle, Gift, ArrowLeft, Phone, MapPin, Mail, Clock, Globe } from "lucide-react";
