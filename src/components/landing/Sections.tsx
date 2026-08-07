@@ -2,7 +2,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Icon } from "./Icon";
 import { painPoints, features, steps, trustItems, faqs } from "./data";
 import labImg from "@/assets/lab.jpg";
-import detailImg from "@/assets/bha3000-detail.jpg";
+import screenImg from "@/assets/bha3000-screen.jpg";
 import engineerImg from "@/assets/engineer.jpg";
 import logo from "@/assets/ortanes-logo.png";
 import { AlertTriangle, Gift, ArrowLeft, Phone, MapPin, Mail, Clock, Globe } from "lucide-react";
@@ -83,7 +83,7 @@ export function Features() {
           text="هماتولوژی آنالایزر تمام‌اتوماتیک با گزارش ۲۱ پارامتر، طراحی شده برای دقت بالا، مصرف اقتصادی و کارکرد بی‌وقفه در آزمایشگاه‌های پرتراکم."
         />
 
-        <div className="mt-12 grid gap-8 lg:grid-cols-[minmax(0,1fr)_360px]">
+        <div className="mt-12 grid items-stretch gap-8 lg:grid-cols-[minmax(0,1fr)_360px]">
           <div className="grid gap-4 sm:grid-cols-2">
             {features.map((f) => (
               <article
@@ -101,14 +101,14 @@ export function Features() {
             ))}
           </div>
 
-          <div className="space-y-4">
+          <div className="grid h-full grid-cols-1 grid-rows-2 gap-4">
             <img
-              src={detailImg}
-              alt="نمایشگر لمسی و بخش چاپگر دستگاه هماتولوژی آنالایزر GETEIN BHA3000"
-              width={294}
-              height={1010}
+              src={screenImg}
+              alt="نمایشگر لمسی و هیستوگرام‌های سلولی دستگاه هماتولوژی آنالایزر GETEIN BHA3000"
+              width={1200}
+              height={900}
               loading="lazy"
-              className="h-64 w-full rounded-3xl border border-border bg-secondary object-cover object-top shadow-card"
+              className="h-full min-h-56 w-full rounded-3xl border border-border bg-white object-cover shadow-card"
             />
             <img
               src={labImg}
@@ -116,7 +116,7 @@ export function Features() {
               width={1400}
               height={900}
               loading="lazy"
-              className="h-64 w-full rounded-3xl border border-border object-cover shadow-card"
+              className="h-full min-h-56 w-full rounded-3xl border border-border object-cover shadow-card"
             />
           </div>
         </div>
@@ -319,7 +319,7 @@ export function Footer() {
               </li>
               <li className="flex items-start gap-2">
                 <Clock className="mt-0.5 h-4 w-4 shrink-0" />
-                ساعات کاری: شنبه تا چهارشنبه، ۹ تا ۱۷
+                ساعات کاری: شنبه تا پنجشنبه، ۹ تا ۱۷
               </li>
             </ul>
           </div>
