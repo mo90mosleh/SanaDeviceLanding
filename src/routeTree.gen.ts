@@ -10,33 +10,102 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as CbcBha3000RouteImport } from './routes/cbc.bha3000'
+import { Route as CbcBha5000RouteImport } from './routes/cbc.bha5000'
+import { Route as CbcBha5100RouteImport } from './routes/cbc.bha5100'
+import { Route as PoctFs114RouteImport } from './routes/poct.fs-114'
+import { Route as PoctFs205RouteImport } from './routes/poct.fs-205'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CbcBha3000Route = CbcBha3000RouteImport.update({
+  id: '/cbc/bha3000',
+  path: '/cbc/bha3000',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CbcBha5000Route = CbcBha5000RouteImport.update({
+  id: '/cbc/bha5000',
+  path: '/cbc/bha5000',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CbcBha5100Route = CbcBha5100RouteImport.update({
+  id: '/cbc/bha5100',
+  path: '/cbc/bha5100',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PoctFs114Route = PoctFs114RouteImport.update({
+  id: '/poct/fs-114',
+  path: '/poct/fs-114',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PoctFs205Route = PoctFs205RouteImport.update({
+  id: '/poct/fs-205',
+  path: '/poct/fs-205',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/cbc/bha3000': typeof CbcBha3000Route
+  '/cbc/bha5000': typeof CbcBha5000Route
+  '/cbc/bha5100': typeof CbcBha5100Route
+  '/poct/fs-114': typeof PoctFs114Route
+  '/poct/fs-205': typeof PoctFs205Route
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/cbc/bha3000': typeof CbcBha3000Route
+  '/cbc/bha5000': typeof CbcBha5000Route
+  '/cbc/bha5100': typeof CbcBha5100Route
+  '/poct/fs-114': typeof PoctFs114Route
+  '/poct/fs-205': typeof PoctFs205Route
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/cbc/bha3000': typeof CbcBha3000Route
+  '/cbc/bha5000': typeof CbcBha5000Route
+  '/cbc/bha5100': typeof CbcBha5100Route
+  '/poct/fs-114': typeof PoctFs114Route
+  '/poct/fs-205': typeof PoctFs205Route
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/cbc/bha3000'
+    | '/cbc/bha5000'
+    | '/cbc/bha5100'
+    | '/poct/fs-114'
+    | '/poct/fs-205'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/cbc/bha3000'
+    | '/cbc/bha5000'
+    | '/cbc/bha5100'
+    | '/poct/fs-114'
+    | '/poct/fs-205'
+  id:
+    | '__root__'
+    | '/'
+    | '/cbc/bha3000'
+    | '/cbc/bha5000'
+    | '/cbc/bha5100'
+    | '/poct/fs-114'
+    | '/poct/fs-205'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  CbcBha3000Route: typeof CbcBha3000Route
+  CbcBha5000Route: typeof CbcBha5000Route
+  CbcBha5100Route: typeof CbcBha5100Route
+  PoctFs114Route: typeof PoctFs114Route
+  PoctFs205Route: typeof PoctFs205Route
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +117,51 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/cbc/bha3000': {
+      id: '/cbc/bha3000'
+      path: '/cbc/bha3000'
+      fullPath: '/cbc/bha3000'
+      preLoaderRoute: typeof CbcBha3000RouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cbc/bha5000': {
+      id: '/cbc/bha5000'
+      path: '/cbc/bha5000'
+      fullPath: '/cbc/bha5000'
+      preLoaderRoute: typeof CbcBha5000RouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cbc/bha5100': {
+      id: '/cbc/bha5100'
+      path: '/cbc/bha5100'
+      fullPath: '/cbc/bha5100'
+      preLoaderRoute: typeof CbcBha5100RouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/poct/fs-114': {
+      id: '/poct/fs-114'
+      path: '/poct/fs-114'
+      fullPath: '/poct/fs-114'
+      preLoaderRoute: typeof PoctFs114RouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/poct/fs-205': {
+      id: '/poct/fs-205'
+      path: '/poct/fs-205'
+      fullPath: '/poct/fs-205'
+      preLoaderRoute: typeof PoctFs205RouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  CbcBha3000Route: CbcBha3000Route,
+  CbcBha5000Route: CbcBha5000Route,
+  CbcBha5100Route: CbcBha5100Route,
+  PoctFs114Route: PoctFs114Route,
+  PoctFs205Route: PoctFs205Route,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
