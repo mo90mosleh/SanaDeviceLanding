@@ -264,9 +264,29 @@ main {
   padding: 4px 8px;
   border-radius: 4px;
 }
-.hero-showcase > img {
-  width: 100%;
+.showcase-slides {
+  position: relative;
   height: 290px;
+}
+.showcase-slide {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateX(18px);
+  transition:
+    opacity 0.3s ease,
+    transform 0.3s ease,
+    visibility 0.3s;
+}
+.showcase-slide.is-active {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+}
+.showcase-slide img {
+  width: 100%;
+  height: 100%;
   object-fit: contain;
   padding: 26px 15px 10px;
   filter: drop-shadow(0 20px 18px #26433516);
@@ -307,27 +327,6 @@ main {
   color: #7b8b74;
   letter-spacing: 1px;
 }
-.intro-strip {
-  margin: 0 5vw;
-  padding: 23px 0;
-  border-top: 1px solid var(--line);
-  border-bottom: 1px solid var(--line);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-size: 12px;
-}
-.intro-strip > span {
-  font-weight: bold;
-}
-.intro-strip p {
-  margin: 0;
-  font-size: 11px;
-}
-.intro-strip b {
-  margin: 0 18px;
-  color: #82947d;
-}
 .category {
   padding: 62px 5vw 4px;
 }
@@ -354,6 +353,62 @@ main {
   width: 135px;
   height: 44px;
   object-fit: contain;
+}
+.getein-mark {
+  display: block;
+  width: 180px;
+  height: auto;
+  aspect-ratio: 256 / 59;
+  overflow: hidden;
+  direction: ltr;
+  flex-shrink: 0;
+}
+.getein-mark img {
+  width: 156.25%;
+  max-width: none;
+  height: auto;
+}
+.slideshow-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  direction: ltr;
+  margin-top: 15px;
+  gap: 6px;
+}
+.slideshow-controls button {
+  display: grid;
+  place-items: center;
+  min-width: 36px;
+  min-height: 36px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: #174d46;
+  cursor: pointer;
+}
+.slideshow-controls button:hover {
+  background: #dce6d7;
+}
+.slideshow-dots {
+  display: flex;
+}
+.slideshow-dots button {
+  min-width: 28px;
+}
+.slideshow-dots button span {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #8b9b80;
+}
+.slideshow-dots button.is-active span {
+  width: 18px;
+  border-radius: 8px;
+  background: #174d46;
+}
+.slideshow-toggle {
+  margin-left: 8px;
 }
 .product-grid {
   display: grid;
@@ -916,7 +971,7 @@ footer {
     min-height: 380px;
     padding: 20px;
   }
-  .hero-showcase > img {
+  .showcase-slides {
     height: 260px;
   }
   .home-hero h1 {
@@ -945,9 +1000,6 @@ footer {
   .spec-section,
   .faq-section {
     gap: 30px;
-  }
-  .intro-strip b {
-    margin: 0 9px;
   }
   .key-features li {
     font-size: 12px;
@@ -1008,27 +1060,14 @@ footer {
     min-height: 320px;
     padding: 17px 20px 30px;
   }
-  .hero-showcase > img {
+  .showcase-slides {
     height: 220px;
+  }
+  .showcase-slide img {
     padding: 20px 30px 8px;
   }
   .showcase-bottom bdi {
     font-size: 18px;
-  }
-  .intro-strip {
-    margin: 0 20px;
-    display: block;
-    padding: 19px 0;
-  }
-  .intro-strip p {
-    font-size: 10px;
-    margin-top: 9px;
-  }
-  .intro-strip b {
-    margin: 0 8px;
-  }
-  .intro-strip > span {
-    font-size: 11px;
   }
   .category {
     padding: 36px 20px 0;
@@ -1050,6 +1089,10 @@ footer {
     height: 30px;
     flex-shrink: 0;
     margin-top: 25px;
+  }
+  .getein-mark {
+    width: 110px;
+    height: auto;
   }
   .three,
   .two {

@@ -3,6 +3,7 @@ import { readAttribution } from "@/lib/attribution";
 import { products } from "./products";
 import type { Product } from "./products";
 import { Consultation } from "./Consultation";
+import { ProductSlideshow } from "./ProductSlideshow";
 const assets = "/product-assets";
 export function Header() {
   useEffect(() => {
@@ -89,14 +90,26 @@ function Category({ category }: { category: "CBC" | "POCT" }) {
               : "دو راهکار Finecare، متناسب با محل استفاده و حجم آزمون‌ها."}
           </p>
         </div>
-        <img
-          className="manufacturer-logo"
-          src={`${assets}/${isCbc ? "getein/branding/getein-logo.png" : "wondfo/branding/wondfo-logo.png"}`}
-          alt={isCbc ? "Getein" : "Wondfo"}
-          width="160"
-          height="55"
-          loading="lazy"
-        />
+        {isCbc ? (
+          <span className="manufacturer-logo getein-mark">
+            <img
+              src={`${assets}/getein/branding/getein-logo.png`}
+              alt="Getein"
+              width="400"
+              height="59"
+              loading="lazy"
+            />
+          </span>
+        ) : (
+          <img
+            className="manufacturer-logo"
+            src={`${assets}/${isCbc ? "getein/branding/getein-logo.png" : "wondfo/branding/wondfo-logo.png"}`}
+            alt={isCbc ? "Getein" : "Wondfo"}
+            width="160"
+            height="55"
+            loading="lazy"
+          />
+        )}
       </div>
       <div className={`product-grid ${isCbc ? "three" : "two"}`}>
         {products
@@ -175,37 +188,8 @@ export function Home() {
               <span>یک مسیر برای انتخاب آگاهانه</span>
             </div>
           </div>
-          <div className="hero-showcase">
-            <div className="showcase-tag">
-              <span className="status-dot" /> FINECARE COLLECTION <span>POCT</span>
-            </div>
-            <img
-              src={`${assets}/wondfo/images/fs-114.webp`}
-              alt="آنالایزر Finecare FS-114"
-              width="620"
-              height="440"
-              fetchPriority="high"
-            />
-            <div className="showcase-bottom">
-              <div>
-                <bdi>Finecare FS-114</bdi>
-                <span>جمع‌وجور. قابل حمل. کاربردی.</span>
-              </div>
-              <a href="/poct/fs-114" aria-label="مشاهده Finecare FS-114">
-                ↖
-              </a>
-            </div>
-            <span className="showcase-number" aria-hidden="true">
-              01 — 05
-            </span>
-          </div>
+          <ProductSlideshow />
         </section>
-        <div className="intro-strip">
-          <span>فناوری متناسب با نیاز شما</span>
-          <p>
-            مشخصات روشن <b>·</b> تصاویر اصیل دستگاه <b>·</b> کاتالوگ اختصاصی <b>·</b> مشاوره انتخاب
-          </p>
-        </div>
         <Category category="CBC" />
         <Category category="POCT" />
         <section className="help-banner">
