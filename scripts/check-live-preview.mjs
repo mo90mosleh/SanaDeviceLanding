@@ -52,7 +52,10 @@ try {
       const response = await page.goto(origin + route, { waitUntil: "networkidle" });
       assert.equal(response?.status(), 200, `${route}@${width}: live browser response`);
       await prepareReviewPage(page);
-      assert.doesNotMatch(await page.locator("body").innerText(), /نمایشگاه|ثبت آنلاین هنوز متصل نیست/u);
+      assert.doesNotMatch(
+        await page.locator("body").innerText(),
+        /نمایشگاه|ثبت آنلاین هنوز متصل نیست/u,
+      );
       const layout = await page.evaluate(() => ({
         width: document.documentElement.clientWidth,
         scrollWidth: document.documentElement.scrollWidth,

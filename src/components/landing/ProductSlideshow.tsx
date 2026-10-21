@@ -43,7 +43,8 @@ export function ProductSlideshow() {
       }}
     >
       <div className="showcase-tag">
-        <span>دستگاه‌های سانا</span><bdi>{product.category}</bdi>
+        <span>دستگاه‌های سانا</span>
+        <bdi>{product.category}</bdi>
       </div>
       <div className="showcase-slides" aria-live="off">
         {products.map((item, slideIndex) => (
@@ -103,7 +104,13 @@ export function ProductSlideshow() {
         <button
           className="slideshow-toggle"
           type="button"
-          onClick={() => setPaused(!paused)}
+          onClick={() => {
+            setPaused(!paused);
+            if (paused) {
+              setFocused(false);
+              setHovered(false);
+            }
+          }}
           aria-label={paused ? "ادامه نمایش خودکار" : "توقف نمایش خودکار"}
           aria-pressed={paused}
         >
@@ -117,4 +124,3 @@ export function ProductSlideshow() {
     </section>
   );
 }
-

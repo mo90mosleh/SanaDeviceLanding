@@ -11,8 +11,10 @@ const notice = `        <p className="small">
           ثبت آنلاین هنوز متصل نیست. در حال حاضر، برای دریافت مشاوره تماس بگیرید.
         </p>
 `;
-const oldMessage = "اطلاعات از نظر ساختار بررسی شد، اما ثبت آنلاین هنوز متصل نیست و درخواستی ارسال نشده است. برای مشاوره با ۰۲۶ ۳۳۱۰۷ تماس بگیرید.";
-const newMessage = "اطلاعات از نظر ساختار بررسی شد و درخواستی ارسال نشده است. برای مشاوره با ۰۲۶ ۳۳۱۰۷ تماس بگیرید.";
+const oldMessage =
+  "اطلاعات از نظر ساختار بررسی شد، اما ثبت آنلاین هنوز متصل نیست و درخواستی ارسال نشده است. برای مشاوره با ۰۲۶ ۳۳۱۰۷ تماس بگیرید.";
+const newMessage =
+  "اطلاعات از نظر ساختار بررسی شد و درخواستی ارسال نشده است. برای مشاوره با ۰۲۶ ۳۳۱۰۷ تماس بگیرید.";
 assert.ok(before.includes(notice) && before.includes(oldMessage));
 const expected = before.replace(notice, "").replace(oldMessage, newMessage);
 const actual = await readFile(file, "utf8");
@@ -21,4 +23,6 @@ assert.equal(
   await format(expected, { parser: "typescript" }),
   "Only the owner-requested consultation copy changes are allowed; fields and logic must remain unchanged",
 );
-console.log("CONSULTATION COPY PASS: requested notice removed; form structure and behavior preserved");
+console.log(
+  "CONSULTATION COPY PASS: requested notice removed; form structure and behavior preserved",
+);

@@ -184,28 +184,41 @@ async function reviewSlideshow() {
       });
       observer.observe(carousel, { attributes: true, attributeFilter: ["data-slide-index"] });
     });
-    await page.waitForFunction(() => window.__slideReviewTimes.length >= 2, null, { timeout: 6500 });
+    await page.waitForFunction(() => window.__slideReviewTimes.length >= 2, null, {
+      timeout: 6500,
+    });
     const times = await page.evaluate(() => window.__slideReviewTimes.slice(0, 2));
     assert.equal((times[1].index - times[0].index + 5) % 5, 1);
     const interval = times[1].at - times[0].at;
-    assert.ok(interval >= 1700 && interval <= 2800, `Slideshow interval differs from two seconds: ${interval}`);
+    assert.ok(
+      interval >= 1700 && interval <= 2800,
+      `Slideshow interval differs from two seconds: ${interval}`,
+    );
     await page.getByRole("button", { name: "توقف نمایش خودکار" }).click();
     const pausedIndex = await page.locator(".hero-showcase").getAttribute("data-slide-index");
     await page.waitForTimeout(2200);
-    assert.equal(await page.locator(".hero-showcase").getAttribute("data-slide-index"), pausedIndex);
+    assert.equal(
+      await page.locator(".hero-showcase").getAttribute("data-slide-index"),
+      pausedIndex,
+    );
     const routes = ["/cbc/bha3000", "/cbc/bha5000", "/cbc/bha5100", "/poct/fs-114", "/poct/fs-205"];
     for (let index = 0; index < routes.length; index++) {
       await page.locator(".slideshow-dots button").nth(index).click();
-      await page.waitForFunction((index) =>
-        document.querySelector(".hero-showcase").dataset.slideIndex === String(index), index);
+      await page.waitForFunction(
+        (index) => document.querySelector(".hero-showcase").dataset.slideIndex === String(index),
+        index,
+      );
       assert.equal(await page.locator(".showcase-details").getAttribute("href"), routes[index]);
       await page.locator(".showcase-slide.is-active .product-image").evaluate(async (node) => {
         const image = new Image();
-        image.src = node.localName === "svg" ? node.querySelector("image").getAttribute("href") : node.src;
+        image.src =
+          node.localName === "svg" ? node.querySelector("image").getAttribute("href") : node.src;
         await image.decode();
       });
     }
-    console.log("SLIDESHOW PASS: five authentic devices, two-second rotation, pause and manual navigation");
+    console.log(
+      "SLIDESHOW PASS: five authentic devices, two-second rotation, pause and manual navigation",
+    );
   } finally {
     await context.close();
   }
@@ -232,7 +245,10 @@ try {
         const response = await page.goto(new URL(route, base).href, { waitUntil: "networkidle" });
         assert.equal(response?.status(), 200, `${route}: HTTP response`);
         await prepareReviewPage(page);
-        assert.doesNotMatch(await page.locator("body").innerText(), /نمایشگاه|ثبت آنلاین هنوز متصل نیست/u);
+        assert.doesNotMatch(
+          await page.locator("body").innerText(),
+          /نمایشگاه|ثبت آنلاین هنوز متصل نیست/u,
+        );
         if (route === "/") await reviewFamilySelector(page, await response.text(), width);
         const layout = await page.evaluate(() => ({
           width: document.documentElement.clientWidth,

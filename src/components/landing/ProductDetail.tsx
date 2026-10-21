@@ -16,13 +16,13 @@ export function ProductPage({ product: p }: { product: Product }) {
         data-product={p.id}
       >
         <div className="product-topbar">
-        <nav className="breadcrumbs" aria-label="مسیر صفحه">
-          <a href="/">همه دستگاه‌ها</a>
-          <span aria-hidden="true">/</span>
-          <a href={`/#${p.category.toLowerCase()}`}>{p.category}</a>
-          <span aria-hidden="true">/</span>
-          <bdi aria-current="page">{p.model}</bdi>
-        </nav>
+          <nav className="breadcrumbs" aria-label="مسیر صفحه">
+            <a href="/">همه دستگاه‌ها</a>
+            <span aria-hidden="true">/</span>
+            <a href={`/#${p.category.toLowerCase()}`}>{p.category}</a>
+            <span aria-hidden="true">/</span>
+            <bdi aria-current="page">{p.model}</bdi>
+          </nav>
           <a href="/" className="button light change-product">
             <span>تغییر محصول</span>
             <ArrowRight className="cta-icon" size={20} aria-hidden="true" />
