@@ -85,7 +85,7 @@ function Category({ category }: { category: "CBC" | "POCT" }) {
     <section id={category.toLowerCase()} className={`category ${isCbc ? "cbc" : "poct"}`}>
       <div className="section-heading">
         <div>
-          <span className="eyebrow">{isCbc ? "۰۱ / هماتولوژی" : "۰۲ / ایمونوفلورسانس"}</span>
+          <span className="eyebrow">{isCbc ? "۱ / هماتولوژی" : "۲ / ایمونوفلورسانس"}</span>
           <h2>{isCbc ? "دستگاه‌های آنالیز خون CBC" : "دستگاه‌های تشخیص سریع POCT"}</h2>
           <p>
             {isCbc
@@ -123,7 +123,6 @@ function Category({ category }: { category: "CBC" | "POCT" }) {
                 <span>{isCbc ? "HEMATOLOGY" : "FLUORESCENCE IMMUNOASSAY"}</span>
                 <span>
                   {String(i + 1)
-                    .padStart(2, "0")
                     .replace(/\d/g, (d) => "۰۱۲۳۴۵۶۷۸۹"[Number(d)]!)}
                 </span>
               </div>
@@ -263,7 +262,6 @@ export function ProductPage({ product: p }: { product: Product }) {
             <li key={f}>
               <span>
                 {String(i + 1)
-                  .padStart(2, "0")
                   .replace(/\d/g, (d) => "۰۱۲۳۴۵۶۷۸۹"[Number(d)]!)}
               </span>
               {f}
@@ -286,7 +284,6 @@ export function ProductPage({ product: p }: { product: Product }) {
               <article key={a.title}>
                 <span className="advantage-number">
                   {String(i + 1)
-                    .padStart(2, "0")
                     .replace(/\d/g, (d) => "۰۱۲۳۴۵۶۷۸۹"[Number(d)]!)}
                 </span>
                 <h3>{a.title}</h3>
@@ -362,7 +359,6 @@ export function ProductPage({ product: p }: { product: Product }) {
               <li key={s}>
                 <span>
                   {String(i + 1)
-                    .padStart(2, "0")
                     .replace(/\d/g, (d) => "۰۱۲۳۴۵۶۷۸۹"[Number(d)]!)}
                 </span>
                 <p>{s}</p>
