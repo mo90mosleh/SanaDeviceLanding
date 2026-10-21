@@ -11,7 +11,14 @@ const { chromium } = await import(
 const base = process.env.SANA_QA_URL || "http://127.0.0.1:4173";
 const output = path.resolve("artifacts/ui-review");
 await mkdir(output, { recursive: true });
-const routes = ["/", "/cbc/bha3000", "/cbc/bha5000", "/cbc/bha5100", "/poct/fs-114", "/poct/fs-205"];
+const routes = [
+  "/",
+  "/cbc/bha3000",
+  "/cbc/bha5000",
+  "/cbc/bha5100",
+  "/poct/fs-114",
+  "/poct/fs-205",
+];
 const widths = [360, 390, 430, 768, 1024, 1440];
 const report = [];
 
@@ -21,19 +28,34 @@ async function reviewFamilySelector(page, html, width) {
     poct: ["/poct/fs-114", "/poct/fs-205"],
   };
   for (const route of Object.values(expected).flat()) {
-    assert.ok(html.includes(`href="${route}"`), `${route}: route must remain present in server-rendered home HTML`);
+    assert.ok(
+      html.includes(`href="${route}"`),
+      `${route}: route must remain present in server-rendered home HTML`,
+    );
   }
-  assert.equal(await page.getByRole("tablist").count(), 1, "Device families need one labelled tab selector");
-  const selectorLabel = await page.getByRole("tablist").evaluate((node) =>
-    node.getAttribute("aria-label") || document.getElementById(node.getAttribute("aria-labelledby"))?.textContent.trim());
+  assert.equal(
+    await page.getByRole("tablist").count(),
+    1,
+    "Device families need one labelled tab selector",
+  );
+  const selectorLabel = await page
+    .getByRole("tablist")
+    .evaluate(
+      (node) =>
+        node.getAttribute("aria-label") ||
+        document.getElementById(node.getAttribute("aria-labelledby"))?.textContent.trim(),
+    );
   assert.ok(selectorLabel, "The family selector needs an accessible name");
   assert.equal(await page.getByRole("tab").count(), 2);
   const tab = (family) => page.locator(`#family-tab-${family}`);
   const panel = (family) => page.locator(`#${family}[role=tabpanel]`);
   async function selected(family) {
-    await page.waitForFunction((family) =>
-      document.querySelector(`#family-tab-${family}`)?.getAttribute("aria-selected") === "true" &&
-      !document.querySelector(`#${family}`)?.hidden, family);
+    await page.waitForFunction(
+      (family) =>
+        document.querySelector(`#family-tab-${family}`)?.getAttribute("aria-selected") === "true" &&
+        !document.querySelector(`#${family}`)?.hidden,
+      family,
+    );
     const other = family === "cbc" ? "poct" : "cbc";
     assert.equal(await tab(family).getAttribute("aria-controls"), family);
     assert.equal(await panel(family).getAttribute("aria-labelledby"), `family-tab-${family}`);
@@ -42,13 +64,33 @@ async function reviewFamilySelector(page, html, width) {
     assert.equal(await tab(other).getAttribute("aria-selected"), "false");
     assert.equal(await panel(family).isVisible(), true);
     assert.equal(await panel(other).isVisible(), false);
-    const routes = await panel(family).locator(".product-card a[href]").evaluateAll((nodes) =>
-      [...new Set(nodes.map((node) => node.getAttribute("href")))].sort());
-    assert.deepEqual(routes, [...expected[family]].sort(), `${family}: device routes changed while switching families`);
-    assert.equal(await panel(family).locator(".product-card:visible").count(), expected[family].length);
+    const routes = await panel(family)
+      .locator(".product-card a[href]")
+      .evaluateAll((nodes) => [...new Set(nodes.map((node) => node.getAttribute("href")))].sort());
+    assert.deepEqual(
+      routes,
+      [...expected[family]].sort(),
+      `${family}: device routes changed while switching families`,
+    );
+    assert.equal(
+      await panel(family).locator(".product-card:visible").count(),
+      expected[family].length,
+    );
     await prepareReviewPage(page);
-    assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1), `Home@${width}: family switching creates horizontal overflow`);
-    assert.deepEqual(await panel(family).locator("img").evaluateAll((images) => images.filter((image) => !image.naturalWidth).map((image) => image.src)), []);
+    assert.ok(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1,
+      ),
+      `Home@${width}: family switching creates horizontal overflow`,
+    );
+    assert.deepEqual(
+      await panel(family)
+        .locator("img")
+        .evaluateAll((images) =>
+          images.filter((image) => !image.naturalWidth).map((image) => image.src),
+        ),
+      [],
+    );
   }
   await selected("cbc");
   for (const family of ["cbc", "poct"]) {
@@ -78,27 +120,42 @@ async function reviewFamilySelector(page, html, width) {
     style: getComputedStyle(node).outlineStyle,
   }));
   assert.equal(focus.active, true, "Keyboard focus must follow the selected family");
-  assert.ok(focus.outline > 0 && focus.style !== "none", "Keyboard family choice needs a visible focus indicator");
+  assert.ok(
+    focus.outline > 0 && focus.style !== "none",
+    "Keyboard family choice needs a visible focus indicator",
+  );
   await page.keyboard.press("Home");
   await selected("cbc");
   await tab("cbc").focus();
   await page.keyboard.press("Tab");
-  assert.equal(await panel("cbc").evaluate((node) => node === document.activeElement || node.contains(document.activeElement)), true,
-    "Tab must enter the active product family rather than hidden content");
+  assert.equal(
+    await panel("cbc").evaluate(
+      (node) => node === document.activeElement || node.contains(document.activeElement),
+    ),
+    true,
+    "Tab must enter the active product family rather than hidden content",
+  );
 
   for (const family of ["poct", "cbc"]) {
     await page.goto(new URL(`/#${family}`, base).href, { waitUntil: "networkidle" });
     await selected(family);
   }
-  await page.goto(new URL("/?utm_source=ui-review&utm_medium=browser", base).href, { waitUntil: "networkidle" });
+  await page.goto(new URL("/?utm_source=ui-review&utm_medium=browser", base).href, {
+    waitUntil: "networkidle",
+  });
   await selected("cbc");
   await tab("poct").click();
   await selected("poct");
   await panel("poct").locator(".card-link").first().click();
   await page.waitForURL("**/poct/fs-114");
-  assert.deepEqual(await page.evaluate(() => JSON.parse(sessionStorage.getItem("sana:attribution:v1"))), {
-    utm_source: "ui-review", utm_medium: "browser",
-  }, "Campaign attribution must survive family choice and device navigation");
+  assert.deepEqual(
+    await page.evaluate(() => JSON.parse(sessionStorage.getItem("sana:attribution:v1"))),
+    {
+      utm_source: "ui-review",
+      utm_medium: "browser",
+    },
+    "Campaign attribution must survive family choice and device navigation",
+  );
   await page.goto(base, { waitUntil: "networkidle" });
   await selected("cbc");
 }
@@ -115,6 +172,9 @@ try {
       const page = await context.newPage();
       const errors = [];
       page.on("pageerror", (error) => errors.push(error.message));
+      page.on("console", (message) => {
+        if (message.type() === "error") errors.push(message.text());
+      });
       const name = route === "/" ? "home" : route.replaceAll("/", "-").slice(1);
       const result = { route, width, status: "failed" };
       report.push(result);
@@ -126,7 +186,14 @@ try {
         const layout = await page.evaluate(() => ({
           width: document.documentElement.clientWidth,
           scrollWidth: document.documentElement.scrollWidth,
-          broken: [...document.images].filter((image) => image.getClientRects().length > 0 && getComputedStyle(image).visibility !== "hidden" && !image.naturalWidth).map((image) => image.src),
+          broken: [...document.images]
+            .filter(
+              (image) =>
+                image.getClientRects().length > 0 &&
+                getComputedStyle(image).visibility !== "hidden" &&
+                !image.naturalWidth,
+            )
+            .map((image) => image.src),
         }));
         assert.ok(layout.scrollWidth <= layout.width + 1, `${route}@${width}: document overflows`);
         assert.deepEqual(layout.broken, [], `${route}@${width}: broken photographs or branding`);
@@ -139,7 +206,11 @@ try {
             text: node.textContent,
             icons: [...node.querySelectorAll("svg.cta-icon")].map((icon) => {
               const rect = icon.getBoundingClientRect();
-              return { width: rect.width, height: rect.height, hidden: getComputedStyle(node).display === "none" };
+              return {
+                width: rect.width,
+                height: rect.height,
+                hidden: getComputedStyle(node).display === "none",
+              };
             }),
           }));
         });
@@ -155,8 +226,16 @@ try {
         if (route !== "/") {
           const navigation = page.locator(".section-nav");
           const links = navigation.locator("a");
-          assert.equal(await links.count(), 4, `${route}: four main section links must fit without scrolling`);
-          assert.equal(await navigation.locator('a[href="#catalog"], a[href="#faq"]').count(), 0, `${route}: catalog and FAQ links should not crowd the section menu`);
+          assert.equal(
+            await links.count(),
+            4,
+            `${route}: four main section links must fit without scrolling`,
+          );
+          assert.equal(
+            await navigation.locator('a[href="#catalog"], a[href="#faq"]').count(),
+            0,
+            `${route}: catalog and FAQ links should not crowd the section menu`,
+          );
           const navLayout = await navigation.evaluate((node) => ({
             width: node.clientWidth,
             scrollWidth: node.scrollWidth,
@@ -174,20 +253,44 @@ try {
                 borderStyle: style.borderTopStyle,
                 borderColor: style.borderTopColor,
                 targetExists: !!target,
-                clipped: link.scrollWidth > link.clientWidth + 1 ||
-                  text.left < rect.left - 1 || text.right > rect.right + 1 ||
-                  text.top < rect.top - 1 || text.bottom > rect.bottom + 1,
+                clipped:
+                  link.scrollWidth > link.clientWidth + 1 ||
+                  text.left < rect.left - 1 ||
+                  text.right > rect.right + 1 ||
+                  text.top < rect.top - 1 ||
+                  text.bottom > rect.bottom + 1,
               };
             }),
           }));
-          assert.ok(navLayout.scrollWidth <= navLayout.width + 1, `${route}@${width}: section menu still requires horizontal scrolling`);
+          assert.ok(
+            navLayout.scrollWidth <= navLayout.width + 1,
+            `${route}@${width}: section menu still requires horizontal scrolling`,
+          );
           for (const button of navLayout.buttons) {
-            assert.ok(Math.abs(button.top - navLayout.buttons[0].top) <= 1, `${route}@${width}: section links wrap to another row`);
+            assert.ok(
+              Math.abs(button.top - navLayout.buttons[0].top) <= 1,
+              `${route}@${width}: section links wrap to another row`,
+            );
             assert.ok(button.height >= 44, `${route}@${width}: section link is difficult to tap`);
-            assert.ok(button.borderWidth >= 1 && button.borderStyle !== "none", `${route}: section link lacks a visible boundary`);
-            assert.doesNotMatch(button.borderColor, /(?:transparent|rgba\([^)]*,\s*0\))/u, `${route}: section link boundary is transparent`);
-            assert.equal(button.targetExists, true, `${route}: section link points to a missing destination`);
-            assert.equal(button.clipped, false, `${route}@${width}: section button text is clipped`);
+            assert.ok(
+              button.borderWidth >= 1 && button.borderStyle !== "none",
+              `${route}: section link lacks a visible boundary`,
+            );
+            assert.doesNotMatch(
+              button.borderColor,
+              /(?:transparent|rgba\([^)]*,\s*0\))/u,
+              `${route}: section link boundary is transparent`,
+            );
+            assert.equal(
+              button.targetExists,
+              true,
+              `${route}: section link points to a missing destination`,
+            );
+            assert.equal(
+              button.clipped,
+              false,
+              `${route}@${width}: section button text is clipped`,
+            );
           }
 
           // The last main section must be reachable through the compact, non-scrolling menu.
@@ -199,23 +302,53 @@ try {
             const nav = link.closest("nav").getBoundingClientRect();
             return rect.left >= nav.left - 1 && rect.right <= nav.right + 1;
           });
-          assert.equal(lastVisible, true, `${route}@${width}: final section link cannot be revealed`);
+          assert.equal(
+            lastVisible,
+            true,
+            `${route}@${width}: final section link cannot be revealed`,
+          );
           await lastLink.click();
           await page.waitForFunction(() => {
             const heading = document.querySelector("#workflow h2").getBoundingClientRect();
-            return location.hash === "#workflow" && heading.top >= 0 && heading.bottom < window.innerHeight;
+            return (
+              location.hash === "#workflow" &&
+              heading.top >= 0 &&
+              heading.bottom < window.innerHeight
+            );
           });
           assert.ok(
-            await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1),
+            await page.evaluate(
+              () =>
+                document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1,
+            ),
             `${route}@${width}: scrolling section navigation overflows the document`,
           );
-          assert.equal(await page.locator("#catalog h2").isVisible(), true, `${route}: catalog section was removed with its menu link`);
-          assert.ok(await page.locator("#catalog a[download][href]").count() > 0, `${route}: catalog download is no longer available`);
-          assert.equal(await page.locator("#faq h2").isVisible(), true, `${route}: FAQ section was removed with its menu link`);
+          assert.equal(
+            await page.locator("#catalog h2").isVisible(),
+            true,
+            `${route}: catalog section was removed with its menu link`,
+          );
+          assert.ok(
+            (await page.locator("#catalog a[download][href]").count()) > 0,
+            `${route}: catalog download is no longer available`,
+          );
+          assert.equal(
+            await page.locator("#faq h2").isVisible(),
+            true,
+            `${route}: FAQ section was removed with its menu link`,
+          );
           const firstQuestion = page.locator("#faq details").first();
           await firstQuestion.locator("summary").click();
-          assert.equal(await firstQuestion.getAttribute("open"), "", `${route}: FAQ can no longer be expanded`);
-          assert.equal(await firstQuestion.locator("p").isVisible(), true, `${route}: FAQ answer is inaccessible`);
+          assert.equal(
+            await firstQuestion.getAttribute("open"),
+            "",
+            `${route}: FAQ can no longer be expanded`,
+          );
+          assert.equal(
+            await firstQuestion.locator("p").isVisible(),
+            true,
+            `${route}: FAQ answer is inaccessible`,
+          );
           await firstQuestion.locator("summary").click();
 
           const highlights = await page.locator(".key-features li").evaluateAll((nodes) =>
@@ -227,12 +360,21 @@ try {
               const range = document.createRange();
               if (text) range.selectNodeContents(text);
               const textRect = text ? range.getBoundingClientRect() : null;
-              const contains = (rect) => !!rect && rect.width > 0 && rect.height > 0 &&
-                rect.left >= cardRect.left - 1 && rect.right <= cardRect.right + 1 &&
-                rect.top >= cardRect.top - 1 && rect.bottom <= cardRect.bottom + 1;
-              const overlaps = !!badgeRect && !!textRect &&
-                badgeRect.left < textRect.right - 1 && badgeRect.right > textRect.left + 1 &&
-                badgeRect.top < textRect.bottom - 1 && badgeRect.bottom > textRect.top + 1;
+              const contains = (rect) =>
+                !!rect &&
+                rect.width > 0 &&
+                rect.height > 0 &&
+                rect.left >= cardRect.left - 1 &&
+                rect.right <= cardRect.right + 1 &&
+                rect.top >= cardRect.top - 1 &&
+                rect.bottom <= cardRect.bottom + 1;
+              const overlaps =
+                !!badgeRect &&
+                !!textRect &&
+                badgeRect.left < textRect.right - 1 &&
+                badgeRect.right > textRect.left + 1 &&
+                badgeRect.top < textRect.bottom - 1 &&
+                badgeRect.bottom > textRect.top + 1;
               return {
                 text: text?.textContent.trim(),
                 visible: !!text && getComputedStyle(text).visibility === "visible",
@@ -241,22 +383,51 @@ try {
                 icons: badge?.querySelectorAll("svg").length,
                 contained: contains(badgeRect) && contains(textRect),
                 overlaps,
-                clipped: !!text && ((text.clientWidth > 0 && text.scrollWidth > text.clientWidth + 1) ||
-                  (text.clientHeight > 0 && text.scrollHeight > text.clientHeight + 1)),
+                clipped:
+                  !!text &&
+                  ((text.clientWidth > 0 && text.scrollWidth > text.clientWidth + 1) ||
+                    (text.clientHeight > 0 && text.scrollHeight > text.clientHeight + 1)),
                 interactive: node.querySelectorAll("a, button, [role=button]").length,
               };
             }),
           );
-          assert.equal(highlights.length, 3, `${route}: three independent product highlights must be present`);
+          assert.equal(
+            highlights.length,
+            3,
+            `${route}: three independent product highlights must be present`,
+          );
           for (const highlight of highlights) {
-            assert.ok(highlight.text && highlight.visible, `${route}@${width}: product highlight text is missing or hidden`);
+            assert.ok(
+              highlight.text && highlight.visible,
+              `${route}@${width}: product highlight text is missing or hidden`,
+            );
             assert.equal(highlight.icons, 1, `${route}: product highlight needs one symbol`);
-            assert.equal(highlight.decorative, "true", `${route}: highlight symbol must remain decorative`);
-            assert.doesNotMatch(highlight.badgeText, /[0-9۰-۹٠-٩]/u, `${route}: highlights should use symbols rather than numbered steps`);
-            assert.equal(highlight.contained, true, `${route}@${width}: highlight content escapes its card`);
-            assert.equal(highlight.overlaps, false, `${route}@${width}: highlight symbol overlaps its text`);
+            assert.equal(
+              highlight.decorative,
+              "true",
+              `${route}: highlight symbol must remain decorative`,
+            );
+            assert.doesNotMatch(
+              highlight.badgeText,
+              /[0-9۰-۹٠-٩]/u,
+              `${route}: highlights should use symbols rather than numbered steps`,
+            );
+            assert.equal(
+              highlight.contained,
+              true,
+              `${route}@${width}: highlight content escapes its card`,
+            );
+            assert.equal(
+              highlight.overlaps,
+              false,
+              `${route}@${width}: highlight symbol overlaps its text`,
+            );
             assert.equal(highlight.clipped, false, `${route}@${width}: highlight text is clipped`);
-            assert.equal(highlight.interactive, 0, `${route}: product highlights should not imply a separate action`);
+            assert.equal(
+              highlight.interactive,
+              0,
+              `${route}: product highlights should not imply a separate action`,
+            );
           }
 
           const numbers = await page.locator(".advantage-number").evaluateAll((nodes) =>
@@ -268,11 +439,24 @@ try {
           );
           assert.ok(numbers.length >= 3, `${route}: advantage markers are missing`);
           for (const number of numbers) {
-            assert.ok(number.size >= 16, `${route}@${width}: Persian number ${number.text} is too small`);
-            assert.match(number.font, /Vazirmatn/u, `${route}: Persian numerals must use the page typeface`);
-            assert.doesNotMatch(number.font, /^\s*Arial(?:,|$)/iu, `${route}: numeral font differs from the page`);
+            assert.ok(
+              number.size >= 16,
+              `${route}@${width}: Persian number ${number.text} is too small`,
+            );
+            assert.match(
+              number.font,
+              /Vazirmatn/u,
+              `${route}: Persian numerals must use the page typeface`,
+            );
+            assert.doesNotMatch(
+              number.font,
+              /^\s*Arial(?:,|$)/iu,
+              `${route}: numeral font differs from the page`,
+            );
           }
-          await navigation.evaluate((node) => { node.scrollLeft = 0; });
+          await navigation.evaluate((node) => {
+            node.scrollLeft = 0;
+          });
           await page.evaluate(() => window.scrollTo(0, 0));
           await page.waitForFunction(() => window.scrollY <= 1);
 
@@ -285,35 +469,79 @@ try {
                 valueRight: value.getBoundingClientRect().right,
                 headingAlign: getComputedStyle(heading).textAlign,
                 valueAlign: getComputedStyle(value).textAlign,
-                overflowing: [heading, value].some((cell) => cell.scrollWidth > cell.clientWidth + 1),
+                overflowing: [heading, value].some(
+                  (cell) => cell.scrollWidth > cell.clientWidth + 1,
+                ),
               };
             });
-            return { cells, width: node.getBoundingClientRect().width, wrap: node.parentElement.clientWidth };
+            return {
+              cells,
+              width: node.getBoundingClientRect().width,
+              wrap: node.parentElement.clientWidth,
+            };
           });
           assert.ok(table.cells.length >= 8, `${route}: technical specifications are incomplete`);
           assert.ok(table.width <= table.wrap + 1, `${route}: table overflows its container`);
           for (const cell of table.cells) {
-            assert.equal(cell.headingAlign, "right", `${route}: row headings must share RTL alignment`);
-            assert.equal(cell.valueAlign, "right", `${route}: mixed-language values must share RTL alignment`);
-            assert.ok(Math.abs(cell.headingRight - table.cells[0].headingRight) <= 1, `${route}: label column drifts`);
-            assert.ok(Math.abs(cell.valueRight - table.cells[0].valueRight) <= 1, `${route}: value column drifts`);
-            assert.equal(cell.overflowing, false, `${route}: specification text overflows its cell`);
+            assert.equal(
+              cell.headingAlign,
+              "right",
+              `${route}: row headings must share RTL alignment`,
+            );
+            assert.equal(
+              cell.valueAlign,
+              "right",
+              `${route}: mixed-language values must share RTL alignment`,
+            );
+            assert.ok(
+              Math.abs(cell.headingRight - table.cells[0].headingRight) <= 1,
+              `${route}: label column drifts`,
+            );
+            assert.ok(
+              Math.abs(cell.valueRight - table.cells[0].valueRight) <= 1,
+              `${route}: value column drifts`,
+            );
+            assert.equal(
+              cell.overflowing,
+              false,
+              `${route}: specification text overflows its cell`,
+            );
           }
         }
 
-        await page.screenshot({ path: path.join(output, `${name}-${width}.png`), fullPage: true, animations: "disabled" });
+        await page.screenshot({
+          path: path.join(output, `${name}-${width}.png`),
+          fullPage: true,
+          animations: "disabled",
+        });
         if (["/cbc/bha5000", "/poct/fs-205"].includes(route) && [390, 1440].includes(width)) {
           await captureReviewPreview(page, `after-${name}-${width}-top`);
         }
+        if (route === "/cbc/bha5000" && width === 390) {
+          await captureReviewPreview(page, "after-bha5000-390-specs", {
+            locator: page.locator("#specs"),
+          });
+          await captureReviewPreview(page, "after-bha5000-390-faq", {
+            locator: page.locator("#faq"),
+          });
+          await page.evaluate(() => window.scrollTo(0, 0));
+        }
         if (route === "/cbc/bha3000") {
-          await page.locator("#specs").screenshot({ path: path.join(output, `specifications-${width}.png`), animations: "disabled" });
+          await page
+            .locator("#specs")
+            .screenshot({
+              path: path.join(output, `specifications-${width}.png`),
+              animations: "disabled",
+            });
         }
 
         if (route !== "/") {
           const form = page.locator("#consultation form");
           assert.equal(await form.locator("input:not([type=hidden]), select, textarea").count(), 3);
           await form.getByRole("button", { name: "بررسی اطلاعات درخواست" }).click();
-          await page.waitForFunction(() => document.querySelectorAll("#consultation [aria-invalid=true]").length === 3);
+          await page.waitForFunction(
+            () => document.querySelectorAll("#consultation [aria-invalid=true]").length === 3,
+          );
           const mutations = [];
           await page.route("**/*", async (request) => {
             if (["POST", "PUT", "PATCH", "DELETE"].includes(request.request().method())) {
@@ -327,17 +555,25 @@ try {
           await form.locator("#lead-organization").fill("آزمایشگاه آزمایشی");
           await form.locator("#lead-mobile").fill("۰۹۱۲۳۴۵۶۷۸۹");
           await form.getByRole("button", { name: "بررسی اطلاعات درخواست" }).click();
-          await page.waitForFunction(() => document.querySelector("#consultation [role=status]")?.textContent.includes("درخواستی ارسال نشده"));
+          await page.waitForFunction(() =>
+            document
+              .querySelector("#consultation [role=status]")
+              ?.textContent.includes("درخواستی ارسال نشده"),
+          );
           assert.equal(await form.locator("[aria-invalid=true]").count(), 0);
           assert.deepEqual(mutations, [], `${route}: disconnected form attempted to transmit data`);
         }
 
         assert.deepEqual(errors, [], `${route}@${width}: browser runtime errors`);
         result.status = "passed";
-        console.log(`PASS ${route} at ${width}px: layout, images, CTA icons${route === "/" ? "" : ", section navigation, symbolic highlights, advantage numerals, table and three-field consultation"}`);
+        console.log(
+          `PASS ${route} at ${width}px: layout, images, CTA icons${route === "/" ? "" : ", section navigation, symbolic highlights, advantage numerals, table and three-field consultation"}`,
+        );
       } catch (error) {
         result.error = error.message;
-        await page.screenshot({ path: path.join(output, `failure-${name}-${width}.png`), fullPage: true }).catch(() => {});
+        await page
+          .screenshot({ path: path.join(output, `failure-${name}-${width}.png`), fullPage: true })
+          .catch(() => {});
         throw error;
       } finally {
         await writeFile(path.join(output, "results.json"), JSON.stringify(report, null, 2));

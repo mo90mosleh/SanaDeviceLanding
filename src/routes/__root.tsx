@@ -82,4 +82,3 @@ function Root() {
     </QueryClientProvider>
   );
 }
-

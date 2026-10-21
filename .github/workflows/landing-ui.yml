@@ -39,7 +39,7 @@ jobs:
       - name: Full lint report
         id: lint
         continue-on-error: true
-        run: pnpm lint 2>&1 | tee artifacts/ui-review/after-lint.log
+        run: pnpm lint --format json --output-file artifacts/ui-review/after-lint.json
       - run: pnpm build
       - run: pnpm typecheck
       - run: pnpm test
@@ -53,10 +53,12 @@ jobs:
           pnpm --dir "$SANA_BEFORE_DIR" install --frozen-lockfile
           pnpm --dir "$SANA_BEFORE_DIR" build
           set +e
-          pnpm --dir "$SANA_BEFORE_DIR" lint > artifacts/ui-review/before-lint.log 2>&1
+          pnpm --dir "$SANA_BEFORE_DIR" lint --format json --output-file "$GITHUB_WORKSPACE/artifacts/ui-review/before-lint.json"
           SANA_BEFORE_LINT_STATUS=$?
           set -e
           printf '%s\n' "$SANA_BEFORE_LINT_STATUS" > artifacts/ui-review/before-lint-status.txt
+      - name: Check lint against the immutable baseline
+        run: node scripts/check-lint-regressions.mjs
       - name: Measure before and after and review all routes
         env:
           HOST: 0.0.0.0
@@ -77,6 +79,8 @@ jobs:
           pnpm test:routes
           node scripts/ui-review.mjs
           SANA_METRICS_PHASE=after node scripts/measure-home-baseline.mjs
+      - name: Verify the deployed preview
+        run: node scripts/check-live-preview.mjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -84,11 +88,6 @@ jobs:
           path: artifacts/ui-review
           retention-days: 7
           if-no-files-found: ignore
-      - name: Enforce lint result after preserving review evidence
-        if: always() && steps.lint.outcome == 'failure'
-        run: |
-          echo "Full lint failed; see after-lint.log and the baseline lint report in the review artifact."
-          exit 1
   format-review:
     runs-on: ubuntu-latest
     timeout-minutes: 5

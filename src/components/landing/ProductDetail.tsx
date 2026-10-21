@@ -9,7 +9,12 @@ export function ProductPage({ product: p }: { product: Product }) {
   return (
     <>
       <Header />
-      <main id="main" className="product-detail" data-family={p.category.toLowerCase()} data-product={p.id}>
+      <main
+        id="main"
+        className="product-detail"
+        data-family={p.category.toLowerCase()}
+        data-product={p.id}
+      >
         <nav className="breadcrumbs" aria-label="مسیر صفحه">
           <a href="/">همه دستگاه‌ها</a>
           <span aria-hidden="true">/</span>
@@ -21,7 +26,9 @@ export function ProductPage({ product: p }: { product: Product }) {
           <div className="device-copy">
             <div className="device-meta">
               <span className="device-category">{p.category}</span>
-              <span className="device-manufacturer" dir="ltr">{p.manufacturer.toUpperCase()}</span>
+              <span className="device-manufacturer" dir="ltr">
+                {p.manufacturer.toUpperCase()}
+              </span>
             </div>
             <p className="model-name" dir="ltr">
               {p.name}
@@ -42,12 +49,7 @@ export function ProductPage({ product: p }: { product: Product }) {
             </div>
           </div>
           <div className="device-photo">
-            <ProductImage
-              product={p}
-              width="650"
-              height="490"
-              fetchPriority="high"
-            />
+            <ProductImage product={p} width="650" height="490" fetchPriority="high" />
             <div className="device-media-caption" dir="ltr">
               <span>{p.manufacturer}</span>
               <span aria-hidden="true">/</span>
@@ -71,8 +73,7 @@ export function ProductPage({ product: p }: { product: Product }) {
             {p.advantages.map((a, i) => (
               <article key={a.title}>
                 <span className="advantage-number">
-                  {String(i + 1)
-                    .replace(/\d/g, (d) => "۰۱۲۳۴۵۶۷۸۹"[Number(d)]!)}
+                  {String(i + 1).replace(/\d/g, (d) => "۰۱۲۳۴۵۶۷۸۹"[Number(d)]!)}
                 </span>
                 <h3>{a.title}</h3>
                 <p>{a.text}</p>
@@ -119,7 +120,11 @@ export function ProductPage({ product: p }: { product: Product }) {
             </table>
           </div>
         </section>
-        <section className="detail-section" id="applications" aria-labelledby="applications-heading">
+        <section
+          className="detail-section"
+          id="applications"
+          aria-labelledby="applications-heading"
+        >
           <div className="detail-heading">
             <span className="eyebrow">زمینه‌های کاربرد</span>
             <h2 id="applications-heading">
@@ -145,7 +150,11 @@ export function ProductPage({ product: p }: { product: Product }) {
               : "تفسیر نتایج و بررسی هشدارها بر عهده متخصص آزمایشگاه است؛ آماده‌سازی و کنترل کیفیت مطابق راهنمای دستگاه انجام شود."}
           </p>
         </section>
-        <section className="detail-section workflow-section" id="workflow" aria-labelledby="workflow-heading">
+        <section
+          className="detail-section workflow-section"
+          id="workflow"
+          aria-labelledby="workflow-heading"
+        >
           <div className="detail-heading">
             <span className="eyebrow">از نمونه تا نتیجه</span>
             <h2 id="workflow-heading">گردش کار دستگاه</h2>
@@ -153,10 +162,7 @@ export function ProductPage({ product: p }: { product: Product }) {
           <ol className="workflow">
             {p.workflow.map((s, i) => (
               <li key={s}>
-                <span>
-                  {String(i + 1)
-                    .replace(/\d/g, (d) => "۰۱۲۳۴۵۶۷۸۹"[Number(d)]!)}
-                </span>
+                <span>{String(i + 1).replace(/\d/g, (d) => "۰۱۲۳۴۵۶۷۸۹"[Number(d)]!)}</span>
                 <p>{s}</p>
               </li>
             ))}
@@ -188,7 +194,13 @@ export function ProductPage({ product: p }: { product: Product }) {
               <details className="faq-item" key={f.q}>
                 <summary>
                   <span className="faq-question">{f.q}</span>
-                  <Plus className="faq-toggle" size={20} strokeWidth={1.8} aria-hidden="true" focusable="false" />
+                  <Plus
+                    className="faq-toggle"
+                    size={20}
+                    strokeWidth={1.8}
+                    aria-hidden="true"
+                    focusable="false"
+                  />
                 </summary>
                 <p>{f.a}</p>
               </details>
@@ -200,7 +212,9 @@ export function ProductPage({ product: p }: { product: Product }) {
       <Footer />
       <div className="mobile-cta">
         <a href="#consultation" className="button primary">
-          <span className="button-label">مشاوره خرید <bdi>{p.model}</bdi></span>
+          <span className="button-label">
+            مشاوره خرید <bdi>{p.model}</bdi>
+          </span>
           <ArrowLeft className="cta-icon" size={20} strokeWidth={2} aria-hidden="true" />
         </a>
         <a href="tel:+982633107" className="mobile-phone">
@@ -211,4 +225,3 @@ export function ProductPage({ product: p }: { product: Product }) {
     </>
   );
 }
-

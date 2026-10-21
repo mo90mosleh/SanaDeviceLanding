@@ -12,6 +12,8 @@ const files = [
   "scripts/ui-review.mjs",
   "scripts/measure-home-baseline.mjs",
   "scripts/capture-review-previews.mjs",
+  "scripts/check-live-preview.mjs",
+  "scripts/check-lint-regressions.mjs",
   ".github/workflows/landing-ui.yml",
 ];
 
