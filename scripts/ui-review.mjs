@@ -540,6 +540,12 @@ try {
           await page.waitForFunction(
             () => document.querySelectorAll("#consultation [aria-invalid=true]").length === 3,
           );
+          // Validation schedules focus for the next frame. Let it settle before filling
+          // controlled inputs so browser automation does not race the focus change.
+          await page.evaluate(
+            () =>
+              new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))),
+          );
           const mutations = [];
           await page.route("**/*", async (request) => {
             if (["POST", "PUT", "PATCH", "DELETE"].includes(request.request().method())) {
@@ -549,9 +555,17 @@ try {
               await request.continue();
             }
           });
-          await form.locator("#lead-name").fill("کاربر آزمایشی");
-          await form.locator("#lead-organization").fill("آزمایشگاه آزمایشی");
-          await form.locator("#lead-mobile").fill("۰۹۱۲۳۴۵۶۷۸۹");
+          for (const [field, value] of [
+            ["name", "کاربر آزمایشی"],
+            ["organization", "آزمایشگاه آزمایشی"],
+            ["mobile", "۰۹۱۲۳۴۵۶۷۸۹"],
+          ]) {
+            await form.locator(`#lead-${field}`).fill(value);
+            await page.evaluate(
+              () =>
+                new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))),
+            );
+          }
           await form.getByRole("button", { name: "بررسی اطلاعات درخواست" }).click();
           await page.waitForFunction(() =>
             document
