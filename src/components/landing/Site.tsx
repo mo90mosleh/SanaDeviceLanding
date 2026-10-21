@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { ArrowDown, ArrowLeft } from "lucide-react";
 import { readAttribution } from "@/lib/attribution";
 import { products } from "./products";
 import type { Product } from "./products";
@@ -149,8 +150,8 @@ function Category({ category }: { category: "CBC" | "POCT" }) {
                   ))}
                 </ul>
                 <a className="card-link" href={p.route}>
-                  <span>مشاهده دستگاه</span>
-                  <span aria-hidden="true">↖</span>
+                  <span>مشاهده مشخصات دستگاه</span>
+                  <ArrowLeft className="cta-icon" size={18} strokeWidth={1.8} aria-hidden="true" />
                 </a>
               </div>
             </article>
@@ -235,7 +236,8 @@ export function ProductPage({ product: p }: { product: Product }) {
                 <span aria-hidden="true">←</span>
               </a>
               <a className="text-link" href="#specs">
-                مشاهده مشخصات فنی ↓
+                مشاهده مشخصات فنی
+                <ArrowDown className="cta-icon" size={18} strokeWidth={1.8} aria-hidden="true" />
               </a>
             </div>
           </div>
@@ -303,7 +305,8 @@ export function ProductPage({ product: p }: { product: Product }) {
               پیکربندی نسخه پیشنهادی را هنگام خرید تأیید کنید.
             </p>
             <a href={p.catalog} className="text-link" download>
-              دریافت کاتالوگ اصلی ↓
+              دریافت کاتالوگ اصلی
+              <ArrowDown className="cta-icon" size={18} strokeWidth={1.8} aria-hidden="true" />
             </a>
           </div>
           <dl>
@@ -397,3 +400,4 @@ export function ProductPage({ product: p }: { product: Product }) {
     </>
   );
 }
+

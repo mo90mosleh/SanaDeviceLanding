@@ -3,8 +3,6 @@ export type LeadFields = {
   name: string;
   mobile: string;
   organization: string;
-  city: string;
-  requestType: string;
 };
 export type LeadPayload = LeadFields & {
   productModel: string;
@@ -31,11 +29,7 @@ export function validateLead(fields: LeadFields): LeadErrors {
   if (!/^09\d{9}$/.test(normalizeMobile(fields.mobile)))
     errors.mobile = "شماره موبایل معتبر ایران را وارد کنید؛ مانند ۰۹۱۲۳۴۵۶۷۸۹.";
   if (fields.organization.trim().length < 2 || fields.organization.length > 150)
-    errors.organization = "نام آزمایشگاه یا مرکز درمانی را وارد کنید.";
-  if (fields.city.trim().length < 2 || fields.city.length > 80)
-    errors.city = "نام شهر را وارد کنید.";
-  if (!["purchase", "specifications", "comparison"].includes(fields.requestType))
-    errors.requestType = "نوع درخواست را انتخاب کنید.";
+    errors.organization = "نام آزمایشگاه را وارد کنید.";
   return errors;
 }
 export type SubmissionResult = { status: "not-connected" } | { status: "submitted" };
@@ -44,3 +38,4 @@ export type SubmissionHandler = (payload: LeadPayload) => Promise<SubmissionResu
 export const submitConsultation: SubmissionHandler = async (_payload) => ({
   status: "not-connected",
 });
+

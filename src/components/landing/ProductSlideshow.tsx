@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { ArrowLeft } from "lucide-react";
 import { products } from "./products";
 
 export function ProductSlideshow() {
@@ -58,8 +59,8 @@ export function ProductSlideshow() {
             {product.category === "CBC" ? "آنالایزر هماتولوژی" : "آنالایزر ایمونوفلورسانس"}
           </span>
         </div>
-        <a href={product.route} aria-label={`مشاهده ${product.name}`}>
-          ↖
+        <a href={product.route} aria-label={`مشاهده مشخصات ${product.name}`}>
+          <ArrowLeft className="cta-icon" size={18} strokeWidth={1.8} aria-hidden="true" />
         </a>
       </div>
       <div className="slideshow-controls">
@@ -96,3 +97,4 @@ export function ProductSlideshow() {
     </section>
   );
 }
+

@@ -4,7 +4,7 @@ import type { Product } from "./products";
 import { readAttribution } from "@/lib/attribution";
 import { normalizeMobile, submitConsultation, validateLead } from "@/lib/consultation";
 import type { LeadErrors, LeadFields, SubmissionHandler } from "@/lib/consultation";
-const empty: LeadFields = { name: "", mobile: "", organization: "", city: "", requestType: "" };
+const empty: LeadFields = { name: "", organization: "", mobile: "" };
 export function Consultation({
   product,
   handler = submitConsultation,
@@ -35,8 +35,6 @@ export function Consultation({
         name: fields.name.trim(),
         mobile: normalizeMobile(fields.mobile),
         organization: fields.organization.trim(),
-        city: fields.city.trim(),
-        requestType: fields.requestType,
         productModel: product.model,
         manufacturer: product.manufacturer,
         productCategory: product.category,
@@ -86,15 +84,14 @@ export function Consultation({
           دستگاه انتخاب‌شده <strong dir="ltr">{product.name}</strong>
         </p>
         <div className="form-grid">
-          {(["name", "mobile", "organization", "city"] as const).map((key) => (
-            <div className="field" key={key}>
+          {(["name", "organization", "mobile"] as const).map((key) => (
+            <div className={`field${key === "mobile" ? " full" : ""}`} key={key}>
               <label htmlFor={`lead-${key}`}>
                 {
                   {
                     name: "نام و نام خانوادگی",
                     mobile: "شماره موبایل",
-                    organization: "نام آزمایشگاه یا مرکز درمانی",
-                    city: "شهر",
+                    organization: "نام آزمایشگاه",
                   }[key]
                 }{" "}
                 <span aria-hidden="true">*</span>
@@ -112,10 +109,9 @@ export function Consultation({
                     name: "name",
                     mobile: "tel",
                     organization: "organization",
-                    city: "address-level2",
                   }[key]
                 }
-                maxLength={key === "mobile" ? 20 : 150}
+                maxLength={key === "mobile" ? 20 : key === "name" ? 100 : 150}
                 required
                 aria-invalid={!!errors[key]}
                 aria-describedby={errors[key] ? `error-${key}` : undefined}
@@ -127,29 +123,6 @@ export function Consultation({
               )}
             </div>
           ))}
-          <div className="field full">
-            <label htmlFor="lead-requestType">
-              نوع درخواست <span aria-hidden="true">*</span>
-            </label>
-            <select
-              id="lead-requestType"
-              value={fields.requestType}
-              required
-              aria-invalid={!!errors.requestType}
-              aria-describedby={errors.requestType ? "error-requestType" : undefined}
-              onChange={(e) => setFields({ ...fields, requestType: e.target.value })}
-            >
-              <option value="">انتخاب کنید</option>
-              <option value="purchase">مشاوره خرید</option>
-              <option value="specifications">اطلاعات فنی دستگاه</option>
-              <option value="comparison">راهنمای انتخاب و مقایسه</option>
-            </select>
-            {errors.requestType && (
-              <p className="field-error" id="error-requestType">
-                {errors.requestType}
-              </p>
-            )}
-          </div>
         </div>
         <p className="small">اطلاعات واردشده در این نسخه ارسال یا ذخیره نمی‌شوند.</p>
         <button className="button primary full" type="submit" disabled={busy}>
@@ -162,3 +135,4 @@ export function Consultation({
     </section>
   );
 }
+

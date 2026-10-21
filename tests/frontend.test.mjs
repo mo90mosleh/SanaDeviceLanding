@@ -18,8 +18,6 @@ const valid = {
   name: "کاربر آزمایشی",
   mobile: "۰۹۱۲۳۴۵۶۷۸۹",
   organization: "مرکز آزمایشی",
-  city: "تهران",
-  requestType: "purchase",
 };
 test("Iranian mobiles accept Persian, Arabic and international digits", () => {
   for (const mobile of [
@@ -37,9 +35,9 @@ test("Invalid mobile and missing fields produce field errors", () => {
   for (const mobile of ["02112345678", "091234", "091234567890", "+971912345678", "abc"])
     assert.ok(validateLead({ ...valid, mobile }).mobile);
   assert.equal(
-    Object.keys(validateLead({ name: "", mobile: "", organization: "", city: "", requestType: "" }))
+    Object.keys(validateLead({ name: "", mobile: "", organization: "" }))
       .length,
-    5,
+    3,
   );
 });
 test("Default boundary never transmits personal information or reports success", async () => {
@@ -106,3 +104,4 @@ test("Five products have unique routes and real images and model-specific catalo
   }
   assert.doesNotMatch(JSON.stringify(products), /FS[- ]?301|واگذاری|رایگان|هدیه دستگاه/i);
 });
+
