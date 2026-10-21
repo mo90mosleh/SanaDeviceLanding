@@ -48,8 +48,24 @@ The redesign does not edit `Consultation.tsx`, `products.ts`, `src/lib/consultat
 - `scripts/measure-home-baseline.mjs`: reproducible before/after homepage measurements.
 - `scripts/capture-review-previews.mjs`: bounded visual-review previews and full PNG captures.
 - `scripts/check-live-preview.mjs`: deployed-preview checks.
+- `scripts/check-lint-regressions.mjs`: compare lint findings with the unchanged baseline.
 - `docs/SANA-UI-REVIEW.md`: this review record.
 
 ## Validation and comparison
 
-Final results and measured homepage heights will be recorded after the workflow completes. Screenshots and JSON measurements are saved in the `landing-ui-review` workflow artifact. Measurements explicitly compare the original all-five-device homepage with each selected family in the new design; all five devices remain accessible through the selector.
+The first redesigned build passed production build, TypeScript, six unit tests, route checks and Chromium review of all six routes at 360, 390, 430, 768, 1024 and 1440px. These checks cover family switching, keyboard focus, direct family links, attribution, image decoding, section navigation, technical-table alignment, number/icon legibility and preserved three-field consultation behavior. Manual visual inspection covered the home, BHA5000 and FS-205 at mobile and desktop widths. Final runs additionally collect console errors and verify the deployed preview.
+
+Full repository lint is run and its JSON report retained. The baseline itself has formatting errors and existing Fast Refresh warnings. The regression check compares finding signatures and multiplicities against the immutable baseline, fails for any additional finding and reports remaining baseline errors explicitly. It does not edit protected form or catalog files to silence their existing formatting findings.
+
+| Width | Before: all five | After: CBC | After: POCT | CBC reduction |
+| --- | ---: | ---: | ---: | ---: |
+| 360px | 5411px | 2108px | 1887px | 61.0% |
+| 390px | 5436px | 2108px | 1880px | 61.2% |
+| 430px | 5284px | 2036px | 1836px | 61.5% |
+| 768px | 3544px | 2050px | 1626px | 42.2% |
+| 1024px | 2917px | 1656px | 1656px | 43.2% |
+| 1440px | 2902px | 1683px | 1683px | 42.0% |
+
+Measurements explicitly compare the original all-five-device homepage with each selected family in the new design; all five devices remain accessible through the selector. At 390px, the first device starts at 767px instead of 1188px. No document overflow was detected in either selected family.
+
+[Before/after measurements and full PNG screenshots](https://github.com/mo90mosleh/ortanes-leb-gift/actions/runs/39681761176/artifacts/12384577593) are available in the initial review artifact. Each final workflow run saves updated screenshots, console checks, lint JSON, measurements and live-preview results as `landing-ui-review` (seven-day retention). See the latest run for the PR branch in [GitHub Actions](https://github.com/mo90mosleh/ortanes-leb-gift/actions/workflows/landing-ui.yml).

@@ -57,18 +57,21 @@ try {
         scrollWidth: document.documentElement.scrollWidth,
         direction: document.documentElement.dir,
         brand: getComputedStyle(document.documentElement).getPropertyValue("--brand").trim(),
-        fontLoaded: document.fonts.check("15px Vazirmatn") && [...document.fonts].some(
-          (font) => font.family.includes("Vazirmatn") && font.status === "loaded",
-        ),
-        images: [...document.querySelectorAll(".product-image")].filter(
-          (image) => image.getClientRects().length > 0,
-        ).map((image) => ({
-          source: image.localName === "svg"
-            ? image.querySelector("image")?.getAttribute("href")
-            : image.getAttribute("src"),
-          width: image.getBoundingClientRect().width,
-          height: image.getBoundingClientRect().height,
-        })),
+        fontLoaded:
+          document.fonts.check("15px Vazirmatn") &&
+          [...document.fonts].some(
+            (font) => font.family.includes("Vazirmatn") && font.status === "loaded",
+          ),
+        images: [...document.querySelectorAll(".product-image")]
+          .filter((image) => image.getClientRects().length > 0)
+          .map((image) => ({
+            source:
+              image.localName === "svg"
+                ? image.querySelector("image")?.getAttribute("href")
+                : image.getAttribute("src"),
+            width: image.getBoundingClientRect().width,
+            height: image.getBoundingClientRect().height,
+          })),
       }));
       assert.ok(layout.scrollWidth <= layout.width + 1, `${route}@${width}: live overflow`);
       assert.equal(layout.direction, "rtl", `${route}: Persian RTL direction changed`);
@@ -76,7 +79,11 @@ try {
       assert.equal(layout.fontLoaded, true, `${route}: Persian web font did not load`);
       assert.ok(layout.images.length > 0, `${route}: no visible product photograph`);
       for (const image of layout.images) {
-        assert.match(image.source, /^\/product-assets\//u, `${route}: unexpected product image source`);
+        assert.match(
+          image.source,
+          /^\/product-assets\//u,
+          `${route}: unexpected product image source`,
+        );
         assert.ok(image.width > 0 && image.height > 0, `${route}: product image has no area`);
       }
       if (route === "/") {
@@ -87,17 +94,21 @@ try {
           await panel.waitFor({ state: "visible" });
           await prepareReviewPage(page);
           assert.deepEqual(
-            await panel.locator(".card-link").evaluateAll(
-              (links) => links.map((link) => link.getAttribute("href")),
-            ),
+            await panel
+              .locator(".card-link")
+              .evaluateAll((links) => links.map((link) => link.getAttribute("href"))),
             family === "cbc" ? routes.slice(0, 3) : routes.slice(3),
             `Live ${family.toUpperCase()} family must retain every device`,
           );
           const other = family === "cbc" ? "poct" : "cbc";
           assert.equal(await page.locator(`#${other}[role=tabpanel]`).isVisible(), false);
-          assert.ok(await page.evaluate(
-            () => document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1,
-          ), `Home@${width}: family switching causes overflow`);
+          assert.ok(
+            await page.evaluate(
+              () =>
+                document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1,
+            ),
+            `Home@${width}: family switching causes overflow`,
+          );
           await page.screenshot({
             path: path.join(output, `live-home-${family}-${width}.png`),
             fullPage: true,
@@ -106,12 +117,16 @@ try {
         }
       } else {
         const nav = page.locator(".section-nav");
-        assert.deepEqual(await nav.locator("a").evaluateAll(
-          (links) => links.map((link) => link.getAttribute("href")),
-        ), expected);
-        assert.ok(await nav.evaluate(
-          (node) => node.scrollWidth <= node.clientWidth + 1,
-        ), `${route}@${width}: live section menu scrolls horizontally`);
+        assert.deepEqual(
+          await nav
+            .locator("a")
+            .evaluateAll((links) => links.map((link) => link.getAttribute("href"))),
+          expected,
+        );
+        assert.ok(
+          await nav.evaluate((node) => node.scrollWidth <= node.clientWidth + 1),
+          `${route}@${width}: live section menu scrolls horizontally`,
+        );
         await page.screenshot({
           path: path.join(output, `live-${route.slice(1).replaceAll("/", "-")}-${width}.png`),
           fullPage: true,

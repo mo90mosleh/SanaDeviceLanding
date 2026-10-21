@@ -7,12 +7,14 @@ const before = JSON.parse(await readFile(path.join(output, "before-lint.json"), 
 const after = JSON.parse(await readFile(path.join(output, "after-lint.json"), "utf8"));
 
 function findings(report, root) {
-  return report.flatMap((file) => file.messages.map((message) => ({
-    file: path.relative(root, file.filePath),
-    rule: message.ruleId,
-    severity: message.severity,
-    message: message.message,
-  })));
+  return report.flatMap((file) =>
+    file.messages.map((message) => ({
+      file: path.relative(root, file.filePath),
+      rule: message.ruleId,
+      severity: message.severity,
+      message: message.message,
+    })),
+  );
 }
 
 const baseline = findings(before, process.env.SANA_BEFORE_DIR);
@@ -37,7 +39,13 @@ const counts = (items) => ({
 const comparison = { before: counts(baseline), after: counts(current), introduced };
 await writeFile(path.join(output, "lint-comparison.json"), JSON.stringify(comparison, null, 2));
 console.log("SANA_LINT_COMPARISON " + JSON.stringify(comparison));
-assert.deepEqual(introduced, [], "The redesign introduced ESLint findings; see lint-comparison.json");
+assert.deepEqual(
+  introduced,
+  [],
+  "The redesign introduced ESLint findings; see lint-comparison.json",
+);
 if (comparison.after.errors) {
-  console.log("::warning::Full lint still reports pre-existing formatting errors. Baseline comparison confirms no new findings; see lint-comparison.json.");
+  console.log(
+    "::warning::Full lint still reports pre-existing formatting errors. Baseline comparison confirms no new findings; see lint-comparison.json.",
+  );
 }

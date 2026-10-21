@@ -527,12 +527,10 @@ try {
           await page.evaluate(() => window.scrollTo(0, 0));
         }
         if (route === "/cbc/bha3000") {
-          await page
-            .locator("#specs")
-            .screenshot({
-              path: path.join(output, `specifications-${width}.png`),
-              animations: "disabled",
-            });
+          await page.locator("#specs").screenshot({
+            path: path.join(output, `specifications-${width}.png`),
+            animations: "disabled",
+          });
         }
 
         if (route !== "/") {
