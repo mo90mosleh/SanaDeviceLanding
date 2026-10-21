@@ -43,7 +43,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         content: "انتخاب دستگاه‌های هماتولوژی Getein و ایمونوفلورسانس Finecare با SANA.",
       },
       { name: "author", content: "SANA" },
-      { name: "theme-color", content: "#9d2537" },
+      { name: "theme-color", content: "#02753b" },
       { property: "og:type", content: "website" },
       { property: "og:locale", content: "fa_IR" },
       { name: "twitter:card", content: "summary_large_image" },

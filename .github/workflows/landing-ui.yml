@@ -14,10 +14,17 @@ jobs:
     env:
       NITRO_PRESET: node-server
       SANA_QA_URL: http://127.0.0.1:4173
+      SANA_BASELINE_URL: http://127.0.0.1:4174
+      SANA_BASELINE_SHA: f56c922c5792988143e50ccefcc036d894eccf5a
     steps:
       - uses: actions/checkout@v4
-      - name: Set isolated browser tooling directory
-        run: echo "SANA_QA_DIR=$RUNNER_TEMP/sana-ui-qa" >> "$GITHUB_ENV"
+        with:
+          fetch-depth: 0
+      - name: Set isolated tooling and baseline directories
+        run: |
+          echo "SANA_QA_DIR=$RUNNER_TEMP/sana-ui-qa" >> "$GITHUB_ENV"
+          echo "SANA_BEFORE_DIR=$RUNNER_TEMP/sana-before" >> "$GITHUB_ENV"
+          mkdir -p artifacts/ui-review
       - uses: pnpm/action-setup@v4
         with:
           version: 10
@@ -26,6 +33,13 @@ jobs:
           node-version: 22
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - name: Preserve product content, consultation and attribution
+        run: |
+          git diff --exit-code "$SANA_BASELINE_SHA" -- src/lib/consultation.ts src/lib/attribution.ts src/components/landing/Consultation.tsx src/components/landing/products.ts
+      - name: Full lint report
+        id: lint
+        continue-on-error: true
+        run: pnpm lint 2>&1 | tee artifacts/ui-review/after-lint.log
       - run: pnpm build
       - run: pnpm typecheck
       - run: pnpm test
@@ -33,23 +47,36 @@ jobs:
         run: |
           npm install --prefix "$SANA_QA_DIR" --no-save playwright@1.56.1
           "$SANA_QA_DIR/node_modules/.bin/playwright" install --with-deps chromium
-      - name: Review routes, mobile layouts, tables and consultation
+      - name: Build the immutable before version
+        run: |
+          git worktree add --detach "$SANA_BEFORE_DIR" "$SANA_BASELINE_SHA"
+          pnpm --dir "$SANA_BEFORE_DIR" install --frozen-lockfile
+          pnpm --dir "$SANA_BEFORE_DIR" build
+          set +e
+          pnpm --dir "$SANA_BEFORE_DIR" lint > artifacts/ui-review/before-lint.log 2>&1
+          SANA_BEFORE_LINT_STATUS=$?
+          set -e
+          printf '%s\n' "$SANA_BEFORE_LINT_STATUS" > artifacts/ui-review/before-lint-status.txt
+      - name: Measure before and after and review all routes
         env:
           HOST: 0.0.0.0
-          PORT: 4173
+          SANA_TEST_URL: http://127.0.0.1:4173
         run: |
-          mkdir -p artifacts/ui-review
-          node .output/server/index.mjs > artifacts/ui-review/server.log 2>&1 &
-          SANA_SERVER_PID=$!
-          trap 'kill "$SANA_SERVER_PID" 2>/dev/null || true' EXIT
+          PORT=4174 node "$SANA_BEFORE_DIR/.output/server/index.mjs" > artifacts/ui-review/before-server.log 2>&1 &
+          SANA_BEFORE_PID=$!
+          PORT=4173 node .output/server/index.mjs > artifacts/ui-review/after-server.log 2>&1 &
+          SANA_AFTER_PID=$!
+          trap 'kill "$SANA_BEFORE_PID" "$SANA_AFTER_PID" 2>/dev/null || true' EXIT
           for attempt in {1..60}; do
-            if curl --fail --silent "$SANA_QA_URL" > /dev/null; then break; fi
+            if curl --fail --silent "$SANA_BASELINE_URL" > /dev/null && curl --fail --silent "$SANA_QA_URL" > /dev/null; then break; fi
             sleep 1
           done
+          curl --fail --silent "$SANA_BASELINE_URL" > /dev/null
           curl --fail --silent "$SANA_QA_URL" > /dev/null
+          SANA_METRICS_PHASE=before node scripts/measure-home-baseline.mjs
+          pnpm test:routes
           node scripts/ui-review.mjs
-      - name: Check the live preview menu and mobile hydration
-        run: node scripts/check-live-preview.mjs
+          SANA_METRICS_PHASE=after node scripts/measure-home-baseline.mjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -57,3 +84,23 @@ jobs:
           path: artifacts/ui-review
           retention-days: 7
           if-no-files-found: ignore
+      - name: Enforce lint result after preserving review evidence
+        if: always() && steps.lint.outcome == 'failure'
+        run: |
+          echo "Full lint failed; see after-lint.log and the baseline lint report in the review artifact."
+          exit 1
+  format-review:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Print formatted changed files without writing them
+        run: node scripts/print-format-review.mjs

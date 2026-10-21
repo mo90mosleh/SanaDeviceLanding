@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
+import { captureReviewPreview, prepareReviewPage } from "./capture-review-previews.mjs";
 
 assert.ok(process.env.SANA_QA_DIR, "SANA_QA_DIR must point to isolated Playwright tooling");
 const { chromium } = await import(
@@ -11,8 +12,97 @@ const base = process.env.SANA_QA_URL || "http://127.0.0.1:4173";
 const output = path.resolve("artifacts/ui-review");
 await mkdir(output, { recursive: true });
 const routes = ["/", "/cbc/bha3000", "/cbc/bha5000", "/cbc/bha5100", "/poct/fs-114", "/poct/fs-205"];
-const widths = [320, 375, 768, 1440];
+const widths = [360, 390, 430, 768, 1024, 1440];
 const report = [];
+
+async function reviewFamilySelector(page, html, width) {
+  const expected = {
+    cbc: ["/cbc/bha3000", "/cbc/bha5000", "/cbc/bha5100"],
+    poct: ["/poct/fs-114", "/poct/fs-205"],
+  };
+  for (const route of Object.values(expected).flat()) {
+    assert.ok(html.includes(`href="${route}"`), `${route}: route must remain present in server-rendered home HTML`);
+  }
+  assert.equal(await page.getByRole("tablist").count(), 1, "Device families need one labelled tab selector");
+  const selectorLabel = await page.getByRole("tablist").evaluate((node) =>
+    node.getAttribute("aria-label") || document.getElementById(node.getAttribute("aria-labelledby"))?.textContent.trim());
+  assert.ok(selectorLabel, "The family selector needs an accessible name");
+  assert.equal(await page.getByRole("tab").count(), 2);
+  const tab = (family) => page.locator(`#family-tab-${family}`);
+  const panel = (family) => page.locator(`#${family}[role=tabpanel]`);
+  async function selected(family) {
+    await page.waitForFunction((family) =>
+      document.querySelector(`#family-tab-${family}`)?.getAttribute("aria-selected") === "true" &&
+      !document.querySelector(`#${family}`)?.hidden, family);
+    const other = family === "cbc" ? "poct" : "cbc";
+    assert.equal(await tab(family).getAttribute("aria-controls"), family);
+    assert.equal(await panel(family).getAttribute("aria-labelledby"), `family-tab-${family}`);
+    assert.equal(await tab(family).getAttribute("tabindex"), "0");
+    assert.equal(await tab(other).getAttribute("tabindex"), "-1");
+    assert.equal(await tab(other).getAttribute("aria-selected"), "false");
+    assert.equal(await panel(family).isVisible(), true);
+    assert.equal(await panel(other).isVisible(), false);
+    const routes = await panel(family).locator(".product-card a[href]").evaluateAll((nodes) =>
+      [...new Set(nodes.map((node) => node.getAttribute("href")))].sort());
+    assert.deepEqual(routes, [...expected[family]].sort(), `${family}: device routes changed while switching families`);
+    assert.equal(await panel(family).locator(".product-card:visible").count(), expected[family].length);
+    await prepareReviewPage(page);
+    assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1), `Home@${width}: family switching creates horizontal overflow`);
+    assert.deepEqual(await panel(family).locator("img").evaluateAll((images) => images.filter((image) => !image.naturalWidth).map((image) => image.src)), []);
+  }
+  await selected("cbc");
+  for (const family of ["cbc", "poct"]) {
+    const control = await tab(family).evaluate((node) => {
+      const rect = node.getBoundingClientRect();
+      return { height: rect.height, clipped: node.scrollWidth > node.clientWidth + 1 };
+    });
+    assert.ok(control.height >= 44, `Home@${width}: family selector is difficult to tap`);
+    assert.equal(control.clipped, false, `Home@${width}: family label is clipped`);
+  }
+  await tab("poct").click();
+  await selected("poct");
+  await tab("cbc").click();
+  await selected("cbc");
+
+  // Both arrow keys must cycle the two choices; Home/End expose their stable endpoints.
+  await tab("cbc").focus();
+  await page.keyboard.press("ArrowLeft");
+  await selected("poct");
+  await page.keyboard.press("ArrowRight");
+  await selected("cbc");
+  await page.keyboard.press("End");
+  await selected("poct");
+  const focus = await tab("poct").evaluate((node) => ({
+    active: document.activeElement === node,
+    outline: parseFloat(getComputedStyle(node).outlineWidth),
+    style: getComputedStyle(node).outlineStyle,
+  }));
+  assert.equal(focus.active, true, "Keyboard focus must follow the selected family");
+  assert.ok(focus.outline > 0 && focus.style !== "none", "Keyboard family choice needs a visible focus indicator");
+  await page.keyboard.press("Home");
+  await selected("cbc");
+  await tab("cbc").focus();
+  await page.keyboard.press("Tab");
+  assert.equal(await panel("cbc").evaluate((node) => node === document.activeElement || node.contains(document.activeElement)), true,
+    "Tab must enter the active product family rather than hidden content");
+
+  for (const family of ["poct", "cbc"]) {
+    await page.goto(new URL(`/#${family}`, base).href, { waitUntil: "networkidle" });
+    await selected(family);
+  }
+  await page.goto(new URL("/?utm_source=ui-review&utm_medium=browser", base).href, { waitUntil: "networkidle" });
+  await selected("cbc");
+  await tab("poct").click();
+  await selected("poct");
+  await panel("poct").locator(".card-link").first().click();
+  await page.waitForURL("**/poct/fs-114");
+  assert.deepEqual(await page.evaluate(() => JSON.parse(sessionStorage.getItem("sana:attribution:v1"))), {
+    utm_source: "ui-review", utm_medium: "browser",
+  }, "Campaign attribution must survive family choice and device navigation");
+  await page.goto(base, { waitUntil: "networkidle" });
+  await selected("cbc");
+}
+
 const browser = await chromium.launch({ headless: true });
 
 try {
@@ -31,32 +121,12 @@ try {
       try {
         const response = await page.goto(new URL(route, base).href, { waitUntil: "networkidle" });
         assert.equal(response?.status(), 200, `${route}: HTTP response`);
-        await page.evaluate(async () => { await document.fonts.ready; });
-        const pause = page.getByRole("button", { name: "توقف نمایش خودکار" });
-        if (await pause.count()) await pause.click();
-
-        // Load lazy product photographs before judging image integrity or taking screenshots.
-        await page.evaluate(async () => {
-          for (let y = 0; y < document.documentElement.scrollHeight; y += window.innerHeight) {
-            window.scrollTo(0, y);
-            await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
-          }
-          window.scrollTo(0, 0);
-        });
-        await page.waitForFunction(() => [...document.images].every((image) => image.complete));
-        // Inline SVG viewports crop photo margins without changing the original device image.
-        // Decode their source images too; document.images covers only HTML image elements.
-        await page.evaluate(async () => {
-          await Promise.all([...document.querySelectorAll("svg.product-image image")].map(async (node) => {
-            const image = new Image();
-            image.src = node.getAttribute("href");
-            await image.decode();
-          }));
-        });
+        await prepareReviewPage(page);
+        if (route === "/") await reviewFamilySelector(page, await response.text(), width);
         const layout = await page.evaluate(() => ({
           width: document.documentElement.clientWidth,
           scrollWidth: document.documentElement.scrollWidth,
-          broken: [...document.images].filter((image) => !image.naturalWidth).map((image) => image.src),
+          broken: [...document.images].filter((image) => image.getClientRects().length > 0 && getComputedStyle(image).visibility !== "hidden" && !image.naturalWidth).map((image) => image.src),
         }));
         assert.ok(layout.scrollWidth <= layout.width + 1, `${route}@${width}: document overflows`);
         assert.deepEqual(layout.broken, [], `${route}@${width}: broken photographs or branding`);
@@ -232,6 +302,9 @@ try {
         }
 
         await page.screenshot({ path: path.join(output, `${name}-${width}.png`), fullPage: true, animations: "disabled" });
+        if (["/cbc/bha5000", "/poct/fs-205"].includes(route) && [390, 1440].includes(width)) {
+          await captureReviewPreview(page, `after-${name}-${width}-top`);
+        }
         if (route === "/cbc/bha3000") {
           await page.locator("#specs").screenshot({ path: path.join(output, `specifications-${width}.png`), animations: "disabled" });
         }
