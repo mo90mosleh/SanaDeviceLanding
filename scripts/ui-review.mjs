@@ -83,6 +83,71 @@ try {
         }
 
         if (route !== "/") {
+          const navigation = page.locator(".section-nav");
+          const links = navigation.locator("a");
+          assert.equal(await links.count(), 6, `${route}: all device sections must be reachable`);
+          const navLayout = await navigation.evaluate((node) => ({
+            width: node.clientWidth,
+            scrollWidth: node.scrollWidth,
+            buttons: [...node.querySelectorAll("a")].map((link) => {
+              const rect = link.getBoundingClientRect();
+              const style = getComputedStyle(link);
+              const target = document.querySelector(link.getAttribute("href"));
+              return {
+                top: rect.top,
+                height: rect.height,
+                borderWidth: parseFloat(style.borderTopWidth),
+                borderStyle: style.borderTopStyle,
+                borderColor: style.borderTopColor,
+                targetExists: !!target,
+              };
+            }),
+          }));
+          for (const button of navLayout.buttons) {
+            assert.ok(Math.abs(button.top - navLayout.buttons[0].top) <= 1, `${route}@${width}: section links wrap to another row`);
+            assert.ok(button.height >= 44, `${route}@${width}: section link is difficult to tap`);
+            assert.ok(button.borderWidth >= 1 && button.borderStyle !== "none", `${route}: section link lacks a visible boundary`);
+            assert.doesNotMatch(button.borderColor, /(?:transparent|rgba\([^)]*,\s*0\))/u, `${route}: section link boundary is transparent`);
+            assert.equal(button.targetExists, true, `${route}: section link points to a missing destination`);
+          }
+
+          // Reach the last section through the same clipped horizontal menu used on phones.
+          const lastLink = links.last();
+          assert.equal(await lastLink.getAttribute("href"), "#faq");
+          await lastLink.scrollIntoViewIfNeeded();
+          const lastVisible = await lastLink.evaluate((link) => {
+            const rect = link.getBoundingClientRect();
+            const nav = link.closest("nav").getBoundingClientRect();
+            return rect.left >= nav.left - 1 && rect.right <= nav.right + 1;
+          });
+          assert.equal(lastVisible, true, `${route}@${width}: final section link cannot be revealed`);
+          await lastLink.click();
+          await page.waitForFunction(() => {
+            const heading = document.querySelector("#faq h2").getBoundingClientRect();
+            return location.hash === "#faq" && heading.top >= 0 && heading.bottom < window.innerHeight;
+          });
+          assert.ok(
+            await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1),
+            `${route}@${width}: scrolling section navigation overflows the document`,
+          );
+
+          const numbers = await page.locator(".key-features li > span, .advantage-number").evaluateAll((nodes) =>
+            nodes.map((node) => ({
+              text: node.textContent.trim(),
+              size: parseFloat(getComputedStyle(node).fontSize),
+              font: getComputedStyle(node).fontFamily,
+            })),
+          );
+          assert.ok(numbers.length >= 6, `${route}: feature and advantage markers are missing`);
+          for (const number of numbers) {
+            assert.ok(number.size >= 16, `${route}@${width}: Persian number ${number.text} is too small`);
+            assert.match(number.font, /Vazirmatn/u, `${route}: Persian numerals must use the page typeface`);
+            assert.doesNotMatch(number.font, /^\s*Arial(?:,|$)/iu, `${route}: numeral font differs from the page`);
+          }
+          await navigation.evaluate((node) => { node.scrollLeft = 0; });
+          await page.evaluate(() => window.scrollTo(0, 0));
+          await page.waitForFunction(() => window.scrollY <= 1);
+
           const table = await page.locator(".spec-table").evaluate((node) => {
             const cells = [...node.querySelectorAll("tbody tr")].map((row) => {
               const heading = row.querySelector("th");
@@ -138,7 +203,7 @@ try {
 
         assert.deepEqual(errors, [], `${route}@${width}: browser runtime errors`);
         result.status = "passed";
-        console.log(`PASS ${route} at ${width}px: layout, images, CTA icons${route === "/" ? "" : ", table and three-field consultation"}`);
+        console.log(`PASS ${route} at ${width}px: layout, images, CTA icons${route === "/" ? "" : ", section navigation, Persian numerals, table and three-field consultation"}`);
       } catch (error) {
         result.error = error.message;
         await page.screenshot({ path: path.join(output, `failure-${name}-${width}.png`), fullPage: true }).catch(() => {});
