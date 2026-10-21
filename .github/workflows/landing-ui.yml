@@ -48,6 +48,8 @@ jobs:
           done
           curl --fail --silent "$SANA_QA_URL" > /dev/null
           node scripts/ui-review.mjs
+      - name: Check the live preview menu and mobile hydration
+        run: node scripts/check-live-preview.mjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
