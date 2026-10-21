@@ -1,4 +1,4 @@
-import { ArrowDown, ArrowLeft, Download, Phone, Plus } from "lucide-react";
+import { ArrowDown, ArrowLeft, ArrowRight, Download, Phone, Plus } from "lucide-react";
 import type { Product } from "./products";
 import { Header, Footer } from "./SiteChrome";
 import { Consultation } from "./Consultation";
@@ -15,6 +15,7 @@ export function ProductPage({ product: p }: { product: Product }) {
         data-family={p.category.toLowerCase()}
         data-product={p.id}
       >
+        <div className="product-topbar">
         <nav className="breadcrumbs" aria-label="مسیر صفحه">
           <a href="/">همه دستگاه‌ها</a>
           <span aria-hidden="true">/</span>
@@ -22,6 +23,11 @@ export function ProductPage({ product: p }: { product: Product }) {
           <span aria-hidden="true">/</span>
           <bdi aria-current="page">{p.model}</bdi>
         </nav>
+          <a href="/" className="button light change-product">
+            <span>تغییر محصول</span>
+            <ArrowRight className="cta-icon" size={20} aria-hidden="true" />
+          </a>
+        </div>
         <section className="device-hero">
           <div className="device-copy">
             <div className="device-meta">

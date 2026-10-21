@@ -3,13 +3,12 @@ import type { KeyboardEvent } from "react";
 import { ArrowDown, ArrowLeft, Phone } from "lucide-react";
 import { Header, Footer } from "./SiteChrome";
 import { ProductImage } from "./ProductImage";
+import { ProductSlideshow } from "./ProductSlideshow";
 import { products } from "./products";
 import type { Product } from "./products";
 
 type Family = Product["category"];
 const families: readonly Family[] = ["CBC", "POCT"];
-const heroCbc = products.find((product) => product.id === "bha5100")!;
-const heroPoct = products.find((product) => product.id === "fs-205")!;
 
 function ProductCard({ product }: { product: Product }) {
   return (
@@ -189,9 +188,6 @@ export function Home() {
       <main id="main" className="home-page">
         <section className="home-hero" aria-labelledby="home-heading">
           <div className="hero-copy">
-            <span className="eyebrow exhibition-note">
-              <i aria-hidden="true" /> ویژه معرفی در نمایشگاه آزمایشگاهی
-            </span>
             <h1 id="home-heading">
               نسل جدید راهکارهای <span>تشخیص آزمایشگاهی</span>
             </h1>
@@ -210,22 +206,7 @@ export function Home() {
               </a>
             </div>
           </div>
-          <div className="hero-composition" aria-label="دستگاه‌های CBC و POCT سانا">
-            <div className="hero-device hero-device-cbc">
-              <span className="hero-family-label">
-                <bdi>CBC</bdi>
-                <span>هماتولوژی</span>
-              </span>
-              <ProductImage product={heroCbc} width={360} height={320} fetchPriority="high" />
-            </div>
-            <div className="hero-device hero-device-poct">
-              <span className="hero-family-label">
-                <bdi>POCT</bdi>
-                <span>ایمونوفلورسانس</span>
-              </span>
-              <ProductImage product={heroPoct} width={320} height={300} fetchPriority="high" />
-            </div>
-          </div>
+          <ProductSlideshow />
         </section>
         <ProductBrowser />
         <section className="help-banner home-consultation">

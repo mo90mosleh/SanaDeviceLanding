@@ -44,7 +44,7 @@ export function Consultation({
       });
       setMessage(
         result.status === "not-connected"
-          ? "اطلاعات از نظر ساختار بررسی شد، اما ثبت آنلاین هنوز متصل نیست و درخواستی ارسال نشده است. برای مشاوره با ۰۲۶ ۳۳۱۰۷ تماس بگیرید."
+          ? "اطلاعات از نظر ساختار بررسی شد و درخواستی ارسال نشده است. برای مشاوره با ۰۲۶ ۳۳۱۰۷ تماس بگیرید."
           : "درخواست شما توسط سامانه دریافت شد.",
       );
     } catch {
@@ -73,9 +73,6 @@ export function Consultation({
             <Phone className="cta-icon" size={20} strokeWidth={2} aria-hidden="true" />
           </span>
         </a>
-        <p className="small">
-          ثبت آنلاین هنوز متصل نیست. در حال حاضر، برای دریافت مشاوره تماس بگیرید.
-        </p>
       </div>
       <form
         ref={form}

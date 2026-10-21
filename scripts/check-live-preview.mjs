@@ -52,6 +52,7 @@ try {
       const response = await page.goto(origin + route, { waitUntil: "networkidle" });
       assert.equal(response?.status(), 200, `${route}@${width}: live browser response`);
       await prepareReviewPage(page);
+      assert.doesNotMatch(await page.locator("body").innerText(), /نمایشگاه|ثبت آنلاین هنوز متصل نیست/u);
       const layout = await page.evaluate(() => ({
         width: document.documentElement.clientWidth,
         scrollWidth: document.documentElement.scrollWidth,
@@ -116,6 +117,7 @@ try {
           });
         }
       } else {
+        assert.equal(await page.locator(".change-product").getAttribute("href"), "/");
         const nav = page.locator(".section-nav");
         assert.deepEqual(
           await nav
@@ -132,6 +134,11 @@ try {
           fullPage: true,
           animations: "disabled",
         });
+      }
+      if (route === "/cbc/bha5000" && width === 390) {
+        await page.locator(".change-product").click();
+        await page.waitForURL(origin + "/");
+        assert.equal(await page.locator(".hero-showcase .showcase-slide").count(), 5);
       }
       assert.deepEqual(errors, [], `${route}@${width}: live browser errors`);
       report.browser.push({ route, width, status: "passed", ...layout });

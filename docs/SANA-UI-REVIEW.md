@@ -8,7 +8,7 @@ The existing application uses React, TanStack Start, Vite and a shared custom st
 
 The mobile homepage repeated five tall product cards beneath a large hero. Repeated descriptions, image panels and section gaps made discovery require substantial scrolling. The burgundy palette dominated the interface despite the three-color SANA asset. Transparent space inside that logo weakened its apparent size. Product details had opportunities for more consistent section headings, lighter surfaces, smaller feature panels and clearer FAQ affordances.
 
-The revised homepage presents a short exhibition introduction, two authentic device photographs and a keyboard-accessible CBC/POCT selector. The active family uses compact horizontal cards on mobile and a grid on larger screens. Both families and all five routes remain in server-rendered HTML. Direct family links select the correct panel. Arrow keys, Home/End and Tab support keyboard exploration; switching preserves query parameters and attribution.
+The revised homepage presents a concise introduction, an authentic five-device hero slideshow with two-second rotation and a keyboard-accessible CBC/POCT selector. The active family uses compact horizontal cards on mobile and a grid on larger screens. Both families and all five routes remain in server-rendered HTML. Direct family links select the correct panel. Arrow keys, Home/End and Tab support keyboard exploration; switching preserves query parameters and attribution.
 
 Detail pages retain every specification, advantage, application, workflow step, catalog link and FAQ from the existing content. Their shared presentation now has clear category/model hierarchy, consistent section headings, restrained informational blue accents and a neutral two-column technical table with explicit right alignment. Independent highlights retain descriptive symbols. The four outlined section links fit without horizontal scrolling; catalog and FAQ content remain below. The existing mobile consultation bar is retained with compact spacing. No new sticky overlays were introduced.
 
@@ -22,7 +22,7 @@ The authentic SANA PNG remains unchanged. Its transparent margins are removed on
 | Primary interaction | `#02753b` | Darker green for legible white CTA text |
 | Primary hover | `#045c32` | Button feedback |
 | Blue | `#0047bf` | Information, POCT identifiers and keyboard focus |
-| Red | `#bf0115` | Limited exhibition highlight |
+| Red | `#bf0115` | Limited brand accent |
 | Main text | `#142c35` | Headings and primary text |
 | Secondary text | `#61747c` | Supporting copy |
 | Border | `#dfe7eb` | Subtle separation |
@@ -32,14 +32,17 @@ Spacing, corner radii, shadows and colors share CSS variables. Interactive targe
 
 ## Scope protection
 
-The redesign does not edit `Consultation.tsx`, `products.ts`, `src/lib/consultation.ts` or `src/lib/attribution.ts`. CI compares all four files against the immutable baseline. Form fields, validation, payload structure, existing submission behavior and attribution are preserved. No API, webhook, Sheets, Telegram or backend integration was added or changed. Existing route files and SEO content remain; the shared browser theme color follows the new palette.
+Product data, `src/lib/consultation.ts` and `src/lib/attribution.ts` remain unchanged against the immutable baseline. `Consultation.tsx` changes only the owner-requested notice and explanatory copy; a canonical source comparison verifies that its fields and submission logic are preserved. Form fields, validation, payload structure, existing submission behavior and attribution are preserved. Every product page has a “تغییر محصول” link back to the homepage hero. The hero slider has pause and manual controls and respects reduced-motion preferences. Exhibition wording is absent from the interface. No API, webhook, Sheets, Telegram or backend integration was added or changed. Existing route files and SEO content remain; the shared browser theme color follows the new palette.
 
 ## Modified files
 
 - `src/components/landing/BrandLogo.tsx`: shared authentic logo viewport.
 - `src/components/landing/SiteChrome.tsx`: header and footer.
 - `src/components/landing/HomePage.tsx`: hero, family selector and reusable compact product cards.
-- `src/components/landing/ProductDetail.tsx`: shared product presentation.
+- `src/components/landing/ProductDetail.tsx`: shared product presentation and return-to-home action.
+- `src/components/landing/ProductSlideshow.tsx`: five-device hero slideshow with two-second rotation.
+- `src/components/landing/Consultation.tsx`: requested notice removal only; form behavior is preserved.
+- `scripts/check-consultation-copy.mjs`: canonical comparison protecting all form code except approved copy.
 - `src/components/landing/Site.tsx`: compatibility exports for existing route imports.
 - `src/styles.css`: responsive brand and component system.
 - `src/routes/__root.tsx`, `public/site.webmanifest`: browser theme colors.
@@ -57,15 +60,6 @@ The first redesigned build passed production build, TypeScript, six unit tests, 
 
 Full repository lint is run and its JSON report retained. The baseline itself has formatting errors and existing Fast Refresh warnings. The regression check compares finding signatures and multiplicities against the immutable baseline, fails for any additional finding and reports remaining baseline errors explicitly. It does not edit protected form or catalog files to silence their existing formatting findings.
 
-| Width | Before: all five | After: CBC | After: POCT | CBC reduction |
-| --- | ---: | ---: | ---: | ---: |
-| 360px | 5411px | 2108px | 1887px | 61.0% |
-| 390px | 5436px | 2108px | 1880px | 61.2% |
-| 430px | 5284px | 2036px | 1836px | 61.5% |
-| 768px | 3544px | 2050px | 1626px | 42.2% |
-| 1024px | 2917px | 1656px | 1656px | 43.2% |
-| 1440px | 2902px | 1683px | 1683px | 42.0% |
-
-Measurements explicitly compare the original all-five-device homepage with each selected family in the new design; all five devices remain accessible through the selector. At 390px, the first device starts at 767px instead of 1188px. No document overflow was detected in either selected family.
+Final before/after homepage heights are recorded in `home-comparison.json` in the latest workflow artifact. Measurements compare the original all-five-device homepage with each selected family in the current design; all five devices remain accessible through the selector and the hero slideshow. The browser review checks the two-second slide interval, pause, all five manual choices and return-to-home links.
 
 [Before/after measurements and full PNG screenshots](https://github.com/mo90mosleh/ortanes-leb-gift/actions/runs/39681761176/artifacts/12384577593) are available in the initial review artifact. Each final workflow run saves updated screenshots, console checks, lint JSON, measurements and live-preview results as `landing-ui-review` (seven-day retention). See the latest run for the PR branch in [GitHub Actions](https://github.com/mo90mosleh/ortanes-leb-gift/actions/workflows/landing-ui.yml).

@@ -5,12 +5,20 @@ import { ProductImage } from "./ProductImage";
 
 export function ProductSlideshow() {
   const [index, setIndex] = useState(0);
-  const [paused, setPaused] = useState(false);
+  const [paused, setPaused] = useState(true);
   const [hovered, setHovered] = useState(false);
   const [focused, setFocused] = useState(false);
   const product = products[index]!;
   const move = (step: number) =>
     setIndex((previous) => (previous + step + products.length) % products.length);
+
+  useEffect(() => {
+    const preference = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const update = () => setPaused(preference.matches);
+    update();
+    preference.addEventListener("change", update);
+    return () => preference.removeEventListener("change", update);
+  }, []);
 
   useEffect(() => {
     if (paused || hovered || focused) return;
@@ -26,6 +34,7 @@ export function ProductSlideshow() {
       className="hero-showcase"
       aria-label="نمایش دستگاه‌های SANA"
       aria-roledescription="اسلایدر"
+      data-slide-index={index}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       onFocusCapture={() => setFocused(true)}
@@ -34,7 +43,7 @@ export function ProductSlideshow() {
       }}
     >
       <div className="showcase-tag">
-        <span className="status-dot" /> SANA DEVICE COLLECTION <span>{product.category}</span>
+        <span>دستگاه‌های سانا</span><bdi>{product.category}</bdi>
       </div>
       <div className="showcase-slides" aria-live="off">
         {products.map((item, slideIndex) => (
@@ -42,6 +51,8 @@ export function ProductSlideshow() {
             key={item.id}
             className={`showcase-slide ${slideIndex === index ? "is-active" : ""}`}
             aria-hidden={slideIndex !== index}
+            role="group"
+            aria-label={`${slideIndex + 1} از ${products.length}: ${item.name}`}
           >
             <ProductImage
               product={item}
@@ -70,7 +81,7 @@ export function ProductSlideshow() {
       </div>
       <div className="slideshow-controls">
         <button type="button" onClick={() => move(-1)} aria-label="دستگاه قبلی">
-          <ChevronLeft size={20} strokeWidth={2} aria-hidden="true" />
+          <ChevronRight size={20} strokeWidth={2} aria-hidden="true" />
         </button>
         <div className="slideshow-dots">
           {products.map((item, slideIndex) => (
@@ -87,7 +98,7 @@ export function ProductSlideshow() {
           ))}
         </div>
         <button type="button" onClick={() => move(1)} aria-label="دستگاه بعدی">
-          <ChevronRight size={20} strokeWidth={2} aria-hidden="true" />
+          <ChevronLeft size={20} strokeWidth={2} aria-hidden="true" />
         </button>
         <button
           className="slideshow-toggle"
@@ -97,9 +108,9 @@ export function ProductSlideshow() {
           aria-pressed={paused}
         >
           {paused ? (
-            <Play size={16} strokeWidth={2} aria-hidden="true" />
+            <Play size={20} strokeWidth={2} aria-hidden="true" />
           ) : (
-            <Pause size={16} strokeWidth={2} aria-hidden="true" />
+            <Pause size={20} strokeWidth={2} aria-hidden="true" />
           )}
         </button>
       </div>
