@@ -542,10 +542,10 @@ try {
           );
           // Validation schedules focus for the next frame. Let it settle before filling
           // controlled inputs so browser automation does not race the focus change.
-          await page.evaluate(
-            () =>
-              new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))),
-          );
+          await page.evaluate(async () => {
+            await new Promise(requestAnimationFrame);
+            await new Promise(requestAnimationFrame);
+          });
           const mutations = [];
           await page.route("**/*", async (request) => {
             if (["POST", "PUT", "PATCH", "DELETE"].includes(request.request().method())) {
@@ -561,10 +561,10 @@ try {
             ["mobile", "۰۹۱۲۳۴۵۶۷۸۹"],
           ]) {
             await form.locator(`#lead-${field}`).fill(value);
-            await page.evaluate(
-              () =>
-                new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))),
-            );
+            await page.evaluate(async () => {
+              await new Promise(requestAnimationFrame);
+              await new Promise(requestAnimationFrame);
+            });
           }
           await form.getByRole("button", { name: "بررسی اطلاعات درخواست" }).click();
           await page.waitForFunction(() =>
