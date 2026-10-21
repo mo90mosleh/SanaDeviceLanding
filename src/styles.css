@@ -177,9 +177,11 @@ footer { border-top: 1px solid var(--line); padding: 48px var(--gutter) 0; backg
 .device-photo { border: 1px solid var(--line); background: white; border-radius: 20px; padding: 28px; }
 .device-photo .product-image { width: 100%; height: 350px; object-fit: contain; }
 .device-photo > span { display: block; direction: ltr; color: var(--muted); font: 11px/1.5 Arial; letter-spacing: 0.6px; padding-top: 20px; border-top: 1px solid var(--line); margin-top: 16px; }
-.key-features { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 22px; border-block: 1px solid var(--line); padding: 24px 0; margin: 0 var(--gutter); }
-.key-features li { display: flex; align-items: center; gap: 12px; font-size: 14px; line-height: 1.9; min-width: 0; }
-.key-features li > span { display: inline-grid; place-items: center; width: 34px; height: 34px; flex: 0 0 34px; border: 1px solid var(--line); border-radius: 8px; background: white; color: var(--brand); font-family: inherit; font-size: 16px; font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
+.key-features { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; padding: 0; margin: 0 var(--gutter) 20px; }
+.key-features li { display: flex; align-items: center; gap: 14px; min-width: 0; padding: 18px; border: 1px solid #e4d7dd; border-radius: 14px; background: white; box-shadow: 0 3px 12px #641b2a05; }
+.key-feature-icon { display: grid; place-items: center; width: 44px; height: 44px; flex: 0 0 44px; border-radius: 12px; background: var(--brand-soft); color: var(--brand); }
+.key-feature-icon svg { width: 22px; height: 22px; }
+.key-feature-text { min-width: 0; font-size: 15px; font-weight: 600; line-height: 1.9; color: var(--ink); overflow-wrap: anywhere; }
 .section-nav { padding: 16px var(--gutter); gap: 10px; flex-wrap: nowrap; overflow-x: auto; overscroll-behavior-x: contain; scrollbar-width: thin; scrollbar-color: #cbb5be transparent; border-bottom: 1px solid var(--line); font-size: 14px; }
 .section-nav a { flex: 0 0 auto; justify-content: center; min-height: 44px; padding: 9px 16px; border: 1px solid #c5adb7; border-radius: 10px; background: white; color: var(--ink); white-space: nowrap; font-weight: 500; line-height: 1.8; transition: color 0.2s, background 0.2s, border-color 0.2s; }
 .section-nav a:hover, .section-nav a:active { border-color: var(--brand); color: var(--brand); background: var(--brand-soft); }
@@ -288,8 +290,7 @@ footer { border-top: 1px solid var(--line); padding: 48px var(--gutter) 0; backg
   .device-copy h1 { font-size: 31px; }
   .device-photo { padding: 20px; }
   .device-photo .product-image { height: 290px; }
-  .key-features { gap: 18px; }
-  .key-features li { font-size: 13px; }
+  .key-features { grid-template-columns: 1fr; gap: 12px; }
   .advantages-grid { grid-template-columns: 1fr; gap: 16px; }
   .advantages-grid article { padding: 22px; }
   .advantage-number { margin-bottom: 12px; }
@@ -362,8 +363,9 @@ footer { border-top: 1px solid var(--line); padding: 48px var(--gutter) 0; backg
   .hero-actions .text-link { font-size: 13px; }
   .device-photo { padding: 22px; border-radius: 16px; }
   .device-photo .product-image { height: 270px; }
-  .key-features { grid-template-columns: 1fr; padding-block: 20px; gap: 14px; }
-  .key-features li { font-size: 14px; }
+  .key-features { gap: 12px; margin-bottom: 16px; }
+  .key-features li { padding: 16px; gap: 12px; border-radius: 12px; }
+  .key-feature-text { font-size: 15px; }
   .section-nav { padding-block: 14px; gap: 8px; font-size: 13px; }
   .section-nav a { padding-inline: 14px; }
   .detail-section, .spec-section { padding-block: 36px; }

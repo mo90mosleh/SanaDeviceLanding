@@ -131,14 +131,55 @@ try {
             `${route}@${width}: scrolling section navigation overflows the document`,
           );
 
-          const numbers = await page.locator(".key-features li > span, .advantage-number").evaluateAll((nodes) =>
+          const highlights = await page.locator(".key-features li").evaluateAll((nodes) =>
+            nodes.map((node) => {
+              const badge = node.querySelector(".key-feature-icon");
+              const text = node.querySelector(".key-feature-text");
+              const cardRect = node.getBoundingClientRect();
+              const badgeRect = badge?.getBoundingClientRect();
+              const range = document.createRange();
+              if (text) range.selectNodeContents(text);
+              const textRect = text ? range.getBoundingClientRect() : null;
+              const contains = (rect) => !!rect && rect.width > 0 && rect.height > 0 &&
+                rect.left >= cardRect.left - 1 && rect.right <= cardRect.right + 1 &&
+                rect.top >= cardRect.top - 1 && rect.bottom <= cardRect.bottom + 1;
+              const overlaps = !!badgeRect && !!textRect &&
+                badgeRect.left < textRect.right - 1 && badgeRect.right > textRect.left + 1 &&
+                badgeRect.top < textRect.bottom - 1 && badgeRect.bottom > textRect.top + 1;
+              return {
+                text: text?.textContent.trim(),
+                visible: !!text && getComputedStyle(text).visibility === "visible",
+                badgeText: badge?.textContent.trim(),
+                decorative: badge?.getAttribute("aria-hidden"),
+                icons: badge?.querySelectorAll("svg").length,
+                contained: contains(badgeRect) && contains(textRect),
+                overlaps,
+                clipped: !!text && ((text.clientWidth > 0 && text.scrollWidth > text.clientWidth + 1) ||
+                  (text.clientHeight > 0 && text.scrollHeight > text.clientHeight + 1)),
+                interactive: node.querySelectorAll("a, button, [role=button]").length,
+              };
+            }),
+          );
+          assert.equal(highlights.length, 3, `${route}: three independent product highlights must be present`);
+          for (const highlight of highlights) {
+            assert.ok(highlight.text && highlight.visible, `${route}@${width}: product highlight text is missing or hidden`);
+            assert.equal(highlight.icons, 1, `${route}: product highlight needs one symbol`);
+            assert.equal(highlight.decorative, "true", `${route}: highlight symbol must remain decorative`);
+            assert.doesNotMatch(highlight.badgeText, /[0-9۰-۹٠-٩]/u, `${route}: highlights should use symbols rather than numbered steps`);
+            assert.equal(highlight.contained, true, `${route}@${width}: highlight content escapes its card`);
+            assert.equal(highlight.overlaps, false, `${route}@${width}: highlight symbol overlaps its text`);
+            assert.equal(highlight.clipped, false, `${route}@${width}: highlight text is clipped`);
+            assert.equal(highlight.interactive, 0, `${route}: product highlights should not imply a separate action`);
+          }
+
+          const numbers = await page.locator(".advantage-number").evaluateAll((nodes) =>
             nodes.map((node) => ({
               text: node.textContent.trim(),
               size: parseFloat(getComputedStyle(node).fontSize),
               font: getComputedStyle(node).fontFamily,
             })),
           );
-          assert.ok(numbers.length >= 6, `${route}: feature and advantage markers are missing`);
+          assert.ok(numbers.length >= 3, `${route}: advantage markers are missing`);
           for (const number of numbers) {
             assert.ok(number.size >= 16, `${route}@${width}: Persian number ${number.text} is too small`);
             assert.match(number.font, /Vazirmatn/u, `${route}: Persian numerals must use the page typeface`);
@@ -203,7 +244,7 @@ try {
 
         assert.deepEqual(errors, [], `${route}@${width}: browser runtime errors`);
         result.status = "passed";
-        console.log(`PASS ${route} at ${width}px: layout, images, CTA icons${route === "/" ? "" : ", section navigation, Persian numerals, table and three-field consultation"}`);
+        console.log(`PASS ${route} at ${width}px: layout, images, CTA icons${route === "/" ? "" : ", section navigation, symbolic highlights, advantage numerals, table and three-field consultation"}`);
       } catch (error) {
         result.error = error.message;
         await page.screenshot({ path: path.join(output, `failure-${name}-${width}.png`), fullPage: true }).catch(() => {});

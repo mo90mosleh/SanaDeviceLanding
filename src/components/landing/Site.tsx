@@ -6,6 +6,7 @@ import type { Product } from "./products";
 import { Consultation } from "./Consultation";
 import { ProductSlideshow } from "./ProductSlideshow";
 import { ProductImage } from "./ProductImage";
+import { ProductHighlights } from "./ProductHighlights";
 const assets = "/product-assets";
 export function Header() {
   useEffect(() => {
@@ -257,17 +258,7 @@ export function ProductPage({ product: p }: { product: Product }) {
             </span>
           </div>
         </section>
-        <ul className="key-features">
-          {p.highlights.map((f, i) => (
-            <li key={f}>
-              <span>
-                {String(i + 1)
-                  .replace(/\d/g, (d) => "۰۱۲۳۴۵۶۷۸۹"[Number(d)]!)}
-              </span>
-              {f}
-            </li>
-          ))}
-        </ul>
+        <ProductHighlights product={p} />
         <nav className="section-nav" aria-label="بخش‌های صفحه دستگاه">
           <a href="#advantages">مزیت‌ها</a>
           <a href="#specs">مشخصات فنی</a>
