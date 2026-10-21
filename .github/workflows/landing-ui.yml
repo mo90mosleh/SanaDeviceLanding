@@ -1,0 +1,56 @@
+name: Landing UI review
+
+on:
+  push:
+    branches: [feature/sana-medical-landing]
+
+permissions:
+  contents: read
+
+jobs:
+  ui:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      NITRO_PRESET: node-server
+      SANA_QA_DIR: ${{ runner.temp }}/sana-ui-qa
+      SANA_QA_URL: http://127.0.0.1:4173
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - run: pnpm typecheck
+      - run: pnpm test
+      - name: Install isolated browser tooling
+        run: |
+          npm install --prefix "$SANA_QA_DIR" --no-save playwright@1.56.1
+          "$SANA_QA_DIR/node_modules/.bin/playwright" install --with-deps chromium
+      - name: Review routes, mobile layouts, tables and consultation
+        env:
+          HOST: 0.0.0.0
+          PORT: 4173
+        run: |
+          mkdir -p artifacts/ui-review
+          node .output/server/index.mjs > artifacts/ui-review/server.log 2>&1 &
+          SANA_SERVER_PID=$!
+          trap 'kill "$SANA_SERVER_PID" 2>/dev/null || true' EXIT
+          for attempt in {1..60}; do
+            if curl --fail --silent "$SANA_QA_URL" > /dev/null; then break; fi
+            sleep 1
+          done
+          curl --fail --silent "$SANA_QA_URL" > /dev/null
+          node scripts/ui-review.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: landing-ui-review
+          path: artifacts/ui-review
+          retention-days: 7
+          if-no-files-found: ignore

@@ -1,6 +1,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Outlet, createRootRouteWithContext, HeadContent, Scripts } from "@tanstack/react-router";
 import type { ReactNode } from "react";
+import { ArrowLeft } from "lucide-react";
 import { Header, Footer } from "@/components/landing/Site";
 import appCss from "../styles.css?url";
 function NotFound() {
@@ -12,7 +13,8 @@ function NotFound() {
         <h1>این صفحه پیدا نشد.</h1>
         <p>از میان دستگاه‌های CBC و POCT، محصول مورد نظر خود را انتخاب کنید.</p>
         <a className="button primary" href="/">
-          بازگشت به دستگاه‌ها ←
+          <span className="button-label">بازگشت به دستگاه‌ها</span>
+          <ArrowLeft className="cta-icon" size={20} strokeWidth={2} aria-hidden="true" />
         </a>
       </main>
       <Footer />

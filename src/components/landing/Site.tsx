@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { ArrowDown, ArrowLeft } from "lucide-react";
+import { ArrowDown, ArrowLeft, Download, Phone } from "lucide-react";
 import { readAttribution } from "@/lib/attribution";
 import { products } from "./products";
 import type { Product } from "./products";
@@ -30,7 +30,8 @@ export function Header() {
         </nav>
         <a className="header-contact" href="tel:+982633107">
           <span>مشاوره انتخاب دستگاه</span>
-          <bdi>۰۲۶ ۳۳۱۰۷ ↗</bdi>
+          <bdi>۰۲۶ ۳۳۱۰۷</bdi>
+          <Phone className="cta-icon" size={20} strokeWidth={2} aria-hidden="true" />
         </a>
       </header>
     </>
@@ -150,8 +151,8 @@ function Category({ category }: { category: "CBC" | "POCT" }) {
                   ))}
                 </ul>
                 <a className="card-link" href={p.route}>
-                  <span>مشاهده مشخصات دستگاه</span>
-                  <ArrowLeft className="cta-icon" size={18} strokeWidth={1.8} aria-hidden="true" />
+                  <span className="button-label">مشاهده مشخصات دستگاه</span>
+                  <ArrowLeft className="cta-icon" size={20} strokeWidth={2} aria-hidden="true" />
                 </a>
               </div>
             </article>
@@ -181,7 +182,8 @@ export function Home() {
               دستگاه متناسب با نیاز مرکز خود را در SANA پیدا کنید.
             </p>
             <a className="button primary" href="#cbc">
-              انتخاب و بررسی دستگاه‌ها <span aria-hidden="true">↓</span>
+              <span className="button-label">انتخاب و بررسی دستگاه‌ها</span>
+              <ArrowDown className="cta-icon" size={20} strokeWidth={2} aria-hidden="true" />
             </a>
             <div className="hero-caption">
               <span>۵ دستگاه تخصصی</span>
@@ -200,7 +202,8 @@ export function Home() {
             <p>نوع آزمون، حجم نمونه روزانه و فضای کار را با کارشناسان مطرح کنید.</p>
           </div>
           <a href="tel:+982633107" className="button light">
-            گفت‌وگو با کارشناس <span aria-hidden="true">↗</span>
+            <span className="button-label">گفت‌وگو با کارشناس</span>
+            <Phone className="cta-icon" size={20} strokeWidth={2} aria-hidden="true" />
           </a>
         </section>
       </main>
@@ -232,12 +235,14 @@ export function ProductPage({ product: p }: { product: Product }) {
             <p>{p.description}</p>
             <div className="hero-actions">
               <a className="button primary" href="#consultation">
-                {p.id === "bha3000" ? "دریافت مشاوره و شرایط خرید" : "دریافت مشاوره خرید"}{" "}
-                <span aria-hidden="true">←</span>
+                <span className="button-label">
+                  {p.id === "bha3000" ? "دریافت مشاوره و شرایط خرید" : "دریافت مشاوره خرید"}
+                </span>
+                <ArrowLeft className="cta-icon" size={20} strokeWidth={2} aria-hidden="true" />
               </a>
               <a className="text-link" href="#specs">
-                مشاهده مشخصات فنی
-                <ArrowDown className="cta-icon" size={18} strokeWidth={1.8} aria-hidden="true" />
+                <span className="button-label">مشاهده مشخصات فنی</span>
+                <ArrowDown className="cta-icon" size={20} strokeWidth={2} aria-hidden="true" />
               </a>
             </div>
           </div>
@@ -291,13 +296,11 @@ export function ProductPage({ product: p }: { product: Product }) {
             ))}
           </div>
         </section>
-        <section className="spec-section" id="specs">
-          <div>
+        <section className="spec-section" id="specs" aria-labelledby="specs-heading">
+          <div className="spec-intro">
             <span className="eyebrow">شناخت دقیق‌تر</span>
-            <h2>
-              مشخصات فنی
-              <br />
-              <bdi>{p.model}</bdi>
+            <h2 id="specs-heading">
+              مشخصات فنی <bdi className="spec-model">{p.model}</bdi>
             </h2>
             <p>
               بر اساس کاتالوگ اختصاصی همین مدل.
@@ -305,18 +308,30 @@ export function ProductPage({ product: p }: { product: Product }) {
               پیکربندی نسخه پیشنهادی را هنگام خرید تأیید کنید.
             </p>
             <a href={p.catalog} className="text-link" download>
-              دریافت کاتالوگ اصلی
-              <ArrowDown className="cta-icon" size={18} strokeWidth={1.8} aria-hidden="true" />
+              <span className="button-label">دریافت کاتالوگ اصلی</span>
+              <Download className="cta-icon" size={20} strokeWidth={2} aria-hidden="true" />
             </a>
           </div>
-          <dl>
-            {p.specs.map(([key, value]) => (
-              <div key={key}>
-                <dt>{key}</dt>
-                <dd>{value}</dd>
-              </div>
-            ))}
-          </dl>
+          <div className="spec-table-wrap">
+            <table className="spec-table" aria-labelledby="specs-heading">
+              <thead>
+                <tr>
+                  <th scope="col">مشخصه</th>
+                  <th scope="col">جزئیات فنی</th>
+                </tr>
+              </thead>
+              <tbody>
+                {p.specs.map(([key, value]) => (
+                  <tr key={key}>
+                    <th scope="row">{key}</th>
+                    <td>
+                      <bdi dir="auto">{value}</bdi>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </section>
         <section className="detail-section" id="applications">
           <span className="eyebrow">زمینه‌های کاربرد</span>
@@ -365,7 +380,8 @@ export function ProductPage({ product: p }: { product: Product }) {
             </p>
           </div>
           <a className="button primary" href={p.catalog} download>
-            دانلود کاتالوگ دستگاه ↓
+            <span className="button-label">دانلود کاتالوگ دستگاه</span>
+            <Download className="cta-icon" size={20} strokeWidth={2} aria-hidden="true" />
           </a>
         </section>
         <section className="detail-section faq-section" id="faq">
@@ -393,9 +409,13 @@ export function ProductPage({ product: p }: { product: Product }) {
       <Footer />
       <div className="mobile-cta">
         <a href="#consultation" className="button primary">
-          مشاوره خرید <bdi>{p.model}</bdi>
+          <span className="button-label">مشاوره خرید <bdi>{p.model}</bdi></span>
+          <ArrowLeft className="cta-icon" size={20} strokeWidth={2} aria-hidden="true" />
         </a>
-        <a href="tel:+982633107">تماس ↗</a>
+        <a href="tel:+982633107" className="mobile-phone">
+          <Phone className="cta-icon" size={20} strokeWidth={2} aria-hidden="true" />
+          <span>تماس</span>
+        </a>
       </div>
     </>
   );

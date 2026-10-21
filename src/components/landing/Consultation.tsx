@@ -1,4 +1,5 @@
 import { useRef, useState } from "react";
+import { ArrowLeft, Phone } from "lucide-react";
 import type { FormEvent } from "react";
 import type { Product } from "./products";
 import { readAttribution } from "@/lib/attribution";
@@ -67,7 +68,10 @@ export function Consultation({
         </p>
         <a className="phone-link" href="tel:+982633107">
           <span>تماس با کارشناس</span>
-          <bdi>۰۲۶ ۳۳۱۰۷ ↗</bdi>
+          <span className="phone-number">
+            <bdi>۰۲۶ ۳۳۱۰۷</bdi>
+            <Phone className="cta-icon" size={20} strokeWidth={2} aria-hidden="true" />
+          </span>
         </a>
         <p className="small">
           ثبت آنلاین هنوز متصل نیست. در حال حاضر، برای دریافت مشاوره تماس بگیرید.
@@ -126,7 +130,8 @@ export function Consultation({
         </div>
         <p className="small">اطلاعات واردشده در این نسخه ارسال یا ذخیره نمی‌شوند.</p>
         <button className="button primary full" type="submit" disabled={busy}>
-          {busy ? "در حال بررسی…" : "بررسی اطلاعات درخواست"} <span aria-hidden="true">←</span>
+          <span className="button-label">{busy ? "در حال بررسی…" : "بررسی اطلاعات درخواست"}</span>
+          <ArrowLeft className="cta-icon" size={20} strokeWidth={2} aria-hidden="true" />
         </button>
         <p className="submission-message" role="status" aria-live="polite">
           {message}

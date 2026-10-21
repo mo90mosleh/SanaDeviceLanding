@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, ChevronLeft, ChevronRight, Pause, Play } from "lucide-react";
 import { products } from "./products";
 
 export function ProductSlideshow() {
@@ -59,13 +59,18 @@ export function ProductSlideshow() {
             {product.category === "CBC" ? "آنالایزر هماتولوژی" : "آنالایزر ایمونوفلورسانس"}
           </span>
         </div>
-        <a href={product.route} aria-label={`مشاهده مشخصات ${product.name}`}>
-          <ArrowLeft className="cta-icon" size={18} strokeWidth={1.8} aria-hidden="true" />
+        <a
+          className="showcase-details"
+          href={product.route}
+          aria-label={`مشاهده مشخصات ${product.name}`}
+        >
+          <span className="button-label">مشخصات دستگاه</span>
+          <ArrowLeft className="cta-icon" size={20} strokeWidth={2} aria-hidden="true" />
         </a>
       </div>
       <div className="slideshow-controls">
         <button type="button" onClick={() => move(-1)} aria-label="دستگاه قبلی">
-          ←
+          <ChevronLeft size={20} strokeWidth={2} aria-hidden="true" />
         </button>
         <div className="slideshow-dots">
           {products.map((item, slideIndex) => (
@@ -82,7 +87,7 @@ export function ProductSlideshow() {
           ))}
         </div>
         <button type="button" onClick={() => move(1)} aria-label="دستگاه بعدی">
-          →
+          <ChevronRight size={20} strokeWidth={2} aria-hidden="true" />
         </button>
         <button
           className="slideshow-toggle"
@@ -91,7 +96,11 @@ export function ProductSlideshow() {
           aria-label={paused ? "ادامه نمایش خودکار" : "توقف نمایش خودکار"}
           aria-pressed={paused}
         >
-          {paused ? "▶" : "Ⅱ"}
+          {paused ? (
+            <Play size={16} strokeWidth={2} aria-hidden="true" />
+          ) : (
+            <Pause size={16} strokeWidth={2} aria-hidden="true" />
+          )}
         </button>
       </div>
     </section>
