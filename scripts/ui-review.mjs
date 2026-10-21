@@ -85,7 +85,8 @@ try {
         if (route !== "/") {
           const navigation = page.locator(".section-nav");
           const links = navigation.locator("a");
-          assert.equal(await links.count(), 6, `${route}: all device sections must be reachable`);
+          assert.equal(await links.count(), 4, `${route}: four main section links must fit without scrolling`);
+          assert.equal(await navigation.locator('a[href="#catalog"], a[href="#faq"]').count(), 0, `${route}: catalog and FAQ links should not crowd the section menu`);
           const navLayout = await navigation.evaluate((node) => ({
             width: node.clientWidth,
             scrollWidth: node.scrollWidth,
@@ -93,6 +94,9 @@ try {
               const rect = link.getBoundingClientRect();
               const style = getComputedStyle(link);
               const target = document.querySelector(link.getAttribute("href"));
+              const range = document.createRange();
+              range.selectNodeContents(link);
+              const text = range.getBoundingClientRect();
               return {
                 top: rect.top,
                 height: rect.height,
@@ -100,20 +104,25 @@ try {
                 borderStyle: style.borderTopStyle,
                 borderColor: style.borderTopColor,
                 targetExists: !!target,
+                clipped: link.scrollWidth > link.clientWidth + 1 ||
+                  text.left < rect.left - 1 || text.right > rect.right + 1 ||
+                  text.top < rect.top - 1 || text.bottom > rect.bottom + 1,
               };
             }),
           }));
+          assert.ok(navLayout.scrollWidth <= navLayout.width + 1, `${route}@${width}: section menu still requires horizontal scrolling`);
           for (const button of navLayout.buttons) {
             assert.ok(Math.abs(button.top - navLayout.buttons[0].top) <= 1, `${route}@${width}: section links wrap to another row`);
             assert.ok(button.height >= 44, `${route}@${width}: section link is difficult to tap`);
             assert.ok(button.borderWidth >= 1 && button.borderStyle !== "none", `${route}: section link lacks a visible boundary`);
             assert.doesNotMatch(button.borderColor, /(?:transparent|rgba\([^)]*,\s*0\))/u, `${route}: section link boundary is transparent`);
             assert.equal(button.targetExists, true, `${route}: section link points to a missing destination`);
+            assert.equal(button.clipped, false, `${route}@${width}: section button text is clipped`);
           }
 
-          // Reach the last section through the same clipped horizontal menu used on phones.
+          // The last main section must be reachable through the compact, non-scrolling menu.
           const lastLink = links.last();
-          assert.equal(await lastLink.getAttribute("href"), "#faq");
+          assert.equal(await lastLink.getAttribute("href"), "#workflow");
           await lastLink.scrollIntoViewIfNeeded();
           const lastVisible = await lastLink.evaluate((link) => {
             const rect = link.getBoundingClientRect();
@@ -123,13 +132,21 @@ try {
           assert.equal(lastVisible, true, `${route}@${width}: final section link cannot be revealed`);
           await lastLink.click();
           await page.waitForFunction(() => {
-            const heading = document.querySelector("#faq h2").getBoundingClientRect();
-            return location.hash === "#faq" && heading.top >= 0 && heading.bottom < window.innerHeight;
+            const heading = document.querySelector("#workflow h2").getBoundingClientRect();
+            return location.hash === "#workflow" && heading.top >= 0 && heading.bottom < window.innerHeight;
           });
           assert.ok(
             await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1),
             `${route}@${width}: scrolling section navigation overflows the document`,
           );
+          assert.equal(await page.locator("#catalog h2").isVisible(), true, `${route}: catalog section was removed with its menu link`);
+          assert.ok(await page.locator("#catalog a[download][href]").count() > 0, `${route}: catalog download is no longer available`);
+          assert.equal(await page.locator("#faq h2").isVisible(), true, `${route}: FAQ section was removed with its menu link`);
+          const firstQuestion = page.locator("#faq details").first();
+          await firstQuestion.locator("summary").click();
+          assert.equal(await firstQuestion.getAttribute("open"), "", `${route}: FAQ can no longer be expanded`);
+          assert.equal(await firstQuestion.locator("p").isVisible(), true, `${route}: FAQ answer is inaccessible`);
+          await firstQuestion.locator("summary").click();
 
           const highlights = await page.locator(".key-features li").evaluateAll((nodes) =>
             nodes.map((node) => {

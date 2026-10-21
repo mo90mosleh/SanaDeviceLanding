@@ -264,8 +264,6 @@ export function ProductPage({ product: p }: { product: Product }) {
           <a href="#specs">مشخصات فنی</a>
           <a href="#applications">کاربردها</a>
           <a href="#workflow">روش کار</a>
-          <a href="#catalog">کاتالوگ</a>
-          <a href="#faq">پرسش‌ها</a>
         </nav>
         <section className="detail-section" id="advantages">
           <span className="eyebrow">طراحی برای کار روزانه</span>
