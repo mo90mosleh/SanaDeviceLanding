@@ -13,10 +13,11 @@ jobs:
     timeout-minutes: 12
     env:
       NITRO_PRESET: node-server
-      SANA_QA_DIR: ${{ runner.temp }}/sana-ui-qa
       SANA_QA_URL: http://127.0.0.1:4173
     steps:
       - uses: actions/checkout@v4
+      - name: Set isolated browser tooling directory
+        run: echo "SANA_QA_DIR=$RUNNER_TEMP/sana-ui-qa" >> "$GITHUB_ENV"
       - uses: pnpm/action-setup@v4
         with:
           version: 10
