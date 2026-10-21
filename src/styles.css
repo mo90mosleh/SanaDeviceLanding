@@ -105,7 +105,7 @@ nav { display: flex; gap: 24px; font-size: 14px; }
 .showcase-slides { position: relative; height: 285px; }
 .showcase-slide { position: absolute; inset: 0; opacity: 0; visibility: hidden; transform: translateX(18px); transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s; }
 .showcase-slide.is-active { opacity: 1; visibility: visible; transform: none; }
-.showcase-slide img { width: 100%; height: 100%; object-fit: contain; padding: 25px 12px 12px; filter: drop-shadow(0 16px 16px #29252b14); }
+.showcase-slide .product-image { width: 100%; height: 100%; object-fit: contain; padding: 25px 12px 12px; filter: drop-shadow(0 16px 16px #29252b14); }
 .showcase-bottom { display: flex; justify-content: space-between; align-items: center; gap: 16px; direction: ltr; }
 .showcase-bottom > div { min-width: 0; }
 .showcase-bottom bdi { font: 700 21px Arial, sans-serif; display: block; letter-spacing: -0.5px; }
@@ -140,7 +140,7 @@ nav { display: flex; gap: 24px; font-size: 14px; }
 .product-card:hover { border-color: #d5bbc3; box-shadow: 0 8px 24px #29252b08; }
 .card-top { display: flex; justify-content: space-between; gap: 12px; direction: ltr; padding: 18px 20px; font: 10px Arial, sans-serif; letter-spacing: 0.8px; color: var(--muted); }
 .product-visual { display: block; background: #f7f6f7; margin: 0 14px; border-radius: 10px; height: 230px; padding: 20px; }
-.product-visual img { width: 100%; height: 100%; object-fit: contain; mix-blend-mode: multiply; }
+.product-visual .product-image { width: 100%; height: 100%; object-fit: contain; mix-blend-mode: multiply; }
 .card-content { display: flex; flex: 1; flex-direction: column; padding: 24px 22px 0; }
 .card-type { font-size: 12px; color: var(--muted); }
 .card-content h3 { font: 700 25px/1.4 Arial, sans-serif; text-align: right; margin: 8px 0 12px; letter-spacing: -0.5px; }
@@ -174,7 +174,7 @@ footer { border-top: 1px solid var(--line); padding: 48px var(--gutter) 0; backg
 .text-link { display: inline-flex; align-items: center; justify-content: flex-start; gap: 8px; min-height: 44px; padding-block: 6px; color: var(--brand); font-size: 14px; font-weight: 700; text-decoration: underline; text-decoration-color: #d7b0bb; text-underline-offset: 6px; }
 .text-link:hover { color: var(--brand-hover); text-decoration-color: currentColor; }
 .device-photo { border: 1px solid var(--line); background: white; border-radius: 20px; padding: 28px; }
-.device-photo img { width: 100%; height: 350px; object-fit: contain; }
+.device-photo .product-image { width: 100%; height: 350px; object-fit: contain; }
 .device-photo > span { display: block; direction: ltr; color: var(--muted); font: 11px/1.5 Arial; letter-spacing: 0.6px; padding-top: 20px; border-top: 1px solid var(--line); margin-top: 16px; }
 .key-features { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 22px; border-block: 1px solid var(--line); padding: 24px 0; margin: 0 var(--gutter); }
 .key-features li { display: flex; align-items: center; gap: 12px; font-size: 14px; line-height: 1.9; min-width: 0; }
@@ -283,7 +283,7 @@ footer { border-top: 1px solid var(--line); padding: 48px var(--gutter) 0; backg
   .device-hero { gap: 28px; }
   .device-copy h1 { font-size: 31px; }
   .device-photo { padding: 20px; }
-  .device-photo img { height: 290px; }
+  .device-photo .product-image { height: 290px; }
   .key-features { gap: 18px; }
   .key-features li { font-size: 13px; }
   .advantages-grid { grid-template-columns: 1fr; gap: 16px; }
@@ -316,7 +316,7 @@ footer { border-top: 1px solid var(--line); padding: 48px var(--gutter) 0; backg
   .hero-caption span + span { padding-inline-start: 10px; }
   .hero-showcase { padding: 18px; min-height: 0; border-radius: 16px; }
   .showcase-slides { height: 235px; }
-  .showcase-slide img { padding: 16px 20px; }
+  .showcase-slide .product-image { padding: 16px 20px; }
   .showcase-bottom { flex-direction: row; align-items: center; gap: 12px; }
   .showcase-bottom bdi { font-size: 17px; }
   .showcase-bottom > div > span { font-size: 11px; }
@@ -357,7 +357,7 @@ footer { border-top: 1px solid var(--line); padding: 48px var(--gutter) 0; backg
   .hero-actions .button { flex: 1 0 auto; }
   .hero-actions .text-link { font-size: 13px; }
   .device-photo { padding: 22px; border-radius: 16px; }
-  .device-photo img { height: 270px; }
+  .device-photo .product-image { height: 270px; }
   .key-features { grid-template-columns: 1fr; padding-block: 20px; gap: 14px; }
   .key-features li { font-size: 14px; }
   .section-nav { padding-block: 8px; gap: 0 20px; font-size: 12px; }

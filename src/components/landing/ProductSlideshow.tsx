@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { ArrowLeft, ChevronLeft, ChevronRight, Pause, Play } from "lucide-react";
 import { products } from "./products";
+import { ProductImage } from "./ProductImage";
 
 export function ProductSlideshow() {
   const [index, setIndex] = useState(0);
@@ -42,9 +43,8 @@ export function ProductSlideshow() {
             className={`showcase-slide ${slideIndex === index ? "is-active" : ""}`}
             aria-hidden={slideIndex !== index}
           >
-            <img
-              src={item.image}
-              alt={`دستگاه ${item.name}`}
+            <ProductImage
+              product={item}
               width="620"
               height="440"
               fetchPriority={slideIndex === 0 ? "high" : "auto"}

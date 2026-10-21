@@ -5,6 +5,7 @@ import { products } from "./products";
 import type { Product } from "./products";
 import { Consultation } from "./Consultation";
 import { ProductSlideshow } from "./ProductSlideshow";
+import { ProductImage } from "./ProductImage";
 const assets = "/product-assets";
 export function Header() {
   useEffect(() => {
@@ -127,9 +128,8 @@ function Category({ category }: { category: "CBC" | "POCT" }) {
                 </span>
               </div>
               <a className="product-visual" href={p.route} aria-label={`مشاهده ${p.name}`}>
-                <img
-                  src={p.image}
-                  alt={`دستگاه ${p.name}`}
+                <ProductImage
+                  product={p}
                   width="440"
                   height="340"
                   loading="lazy"
@@ -247,9 +247,8 @@ export function ProductPage({ product: p }: { product: Product }) {
             </div>
           </div>
           <div className="device-photo">
-            <img
-              src={p.image}
-              alt={`دستگاه ${p.name}`}
+            <ProductImage
+              product={p}
               width="650"
               height="490"
               fetchPriority="high"

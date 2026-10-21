@@ -44,6 +44,15 @@ try {
           window.scrollTo(0, 0);
         });
         await page.waitForFunction(() => [...document.images].every((image) => image.complete));
+        // Inline SVG viewports crop photo margins without changing the original device image.
+        // Decode their source images too; document.images covers only HTML image elements.
+        await page.evaluate(async () => {
+          await Promise.all([...document.querySelectorAll("svg.product-image image")].map(async (node) => {
+            const image = new Image();
+            image.src = node.getAttribute("href");
+            await image.decode();
+          }));
+        });
         const layout = await page.evaluate(() => ({
           width: document.documentElement.clientWidth,
           scrollWidth: document.documentElement.scrollWidth,

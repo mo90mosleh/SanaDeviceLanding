@@ -1,0 +1,58 @@
+import type { ImgHTMLAttributes } from "react";
+import type { Product } from "./products";
+
+type ProductImageProps = {
+  product: Product;
+  width: number | string;
+  height: number | string;
+} & Pick<ImgHTMLAttributes<HTMLImageElement>, "loading" | "fetchPriority" | "className">;
+
+export function ProductImage({
+  product,
+  width,
+  height,
+  loading,
+  fetchPriority,
+  className,
+}: ProductImageProps) {
+  const imageClass = ["product-image", className].filter(Boolean).join(" ");
+  const label = `دستگاه ${product.name}`;
+
+  if (product.id === "bha5000") {
+    return (
+      <svg
+        className={imageClass}
+        role="img"
+        aria-label={label}
+        focusable="false"
+        width={width}
+        height={height}
+        viewBox="164 0 370 345"
+        preserveAspectRatio="xMidYMid meet"
+        overflow="hidden"
+      >
+        <image
+          className="original-product-image"
+          href={product.image}
+          x="0"
+          y="0"
+          width="698"
+          height="424"
+          aria-hidden="true"
+        />
+      </svg>
+    );
+  }
+
+  return (
+    <img
+      className={imageClass}
+      src={product.image}
+      alt={label}
+      width={width}
+      height={height}
+      loading={loading}
+      fetchPriority={fetchPriority}
+    />
+  );
+}
