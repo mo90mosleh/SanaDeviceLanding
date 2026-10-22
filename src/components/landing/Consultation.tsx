@@ -32,15 +32,14 @@ export function Consultation({
     const dialog = successDialog.current;
     if (!successOpen || !dialog) return;
     const previousOverflow = document.body.style.overflow;
+    const returnFocus = form.current?.querySelector<HTMLButtonElement>('button[type="submit"]');
     document.body.style.overflow = "hidden";
     dialog.showModal();
     dialog.querySelector<HTMLButtonElement>(".success-confirm")?.focus();
     return () => {
       dialog.close();
       document.body.style.overflow = previousOverflow;
-      form.current
-        ?.querySelector<HTMLButtonElement>('button[type="submit"]')
-        ?.focus({ preventScroll: true });
+      returnFocus?.focus({ preventScroll: true });
     };
   }, [successOpen]);
 
