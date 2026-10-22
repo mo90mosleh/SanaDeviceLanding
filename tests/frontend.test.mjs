@@ -40,23 +40,27 @@ test("Invalid mobile and missing fields produce field errors", () => {
     3,
   );
 });
-test("Default boundary never transmits personal information or reports success", async () => {
+test("Submission posts to the same-origin API and requires acknowledgement", async () => {
   const originalFetch = globalThis.fetch;
-  globalThis.fetch = () => {
-    throw Error("Network access forbidden");
+  const payload = { ...valid, mobile: "09123456789", productModel: "FS-114", manufacturer: "Wondfo", productCategory: "POCT", landingPage: "/poct/fs-114", utm: {} };
+  const calls = [];
+  globalThis.fetch = async (url, options) => {
+    calls.push({ url, options });
+    return Response.json({ status: "submitted" });
   };
   try {
-    assert.deepEqual(
-      await submitConsultation({
-        ...valid,
-        productModel: "FS-114",
-        manufacturer: "Wondfo",
-        productCategory: "POCT",
-        landingPage: "/poct/fs-114",
-        utm: {},
-      }),
-      { status: "not-connected" },
-    );
+    assert.deepEqual(await submitConsultation(payload), { status: "submitted" });
+    assert.equal(calls.length, 1);
+    assert.equal(calls[0].url, "/api/consultation");
+    assert.equal(calls[0].options.method, "POST");
+    assert.deepEqual(JSON.parse(calls[0].options.body), payload);
+    assert.ok(calls[0].options.signal instanceof AbortSignal);
+    for (const response of [Response.json({ status: "submitted" }, { status: 502 }), Response.json({ status: "unknown" }), new Response("not JSON")]) {
+      globalThis.fetch = async () => response;
+      await assert.rejects(submitConsultation(payload));
+    }
+    globalThis.fetch = async () => { throw new Error("offline"); };
+    await assert.rejects(submitConsultation(payload));
   } finally {
     globalThis.fetch = originalFetch;
   }

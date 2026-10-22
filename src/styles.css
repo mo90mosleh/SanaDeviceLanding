@@ -1211,6 +1211,27 @@ main > *,
 .submission-message:empty {
   display: none;
 }
+.submission-message[data-state="error"] {
+  color: #a92432;
+  background: #fff2f3;
+}
+.browser-consultation {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-top: 22px;
+  padding-top: 20px;
+  border-top: 1px solid var(--line);
+}
+.browser-consultation p {
+  margin: 0;
+  font-size: 14px;
+}
+.hero-consultation {
+  border-color: #c8dfd1;
+}
 .mobile-cta {
   display: none;
 }

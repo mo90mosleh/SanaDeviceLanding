@@ -30,9 +30,13 @@ The authentic SANA PNG remains unchanged. Its transparent margins are removed on
 
 Spacing, corner radii, shadows and colors share CSS variables. Interactive targets, visible focus states and reduced-motion preferences are preserved. Persian/Latin models and values use directional isolation.
 
-## Scope protection
+## Content and integration scope
 
-Product data, `src/lib/consultation.ts` and `src/lib/attribution.ts` remain unchanged against the immutable baseline. `Consultation.tsx` changes only the owner-requested notice and explanatory copy; a canonical source comparison verifies that its fields and submission logic are preserved. Form fields, validation, payload structure, existing submission behavior and attribution are preserved. Every product page has a “تغییر محصول” link back to the homepage hero. The hero slider has pause and manual controls and respects reduced-motion preferences. Exhibition wording is absent from the interface. No API, webhook, Sheets, Telegram or backend integration was added or changed. Existing route files and SEO content remain; the shared browser theme color follows the new palette.
+Product data, specifications, authentic assets, existing routes and attribution remain preserved. Homepage forms offer a required five-device dropdown; product-page forms retain the current device. Three homepage CTA locations lead to the shared consultation section. Contact fields and Iranian mobile validation remain the same.
+
+Consultation requests now use the same-origin server endpoint and the owner's configured webhook. Acknowledgement, failure and pending states reflect actual delivery results. Server configuration and payload details are documented in [FRONTEND-INTEGRATION.md](FRONTEND-INTEGRATION.md). The integration tests use local/mock receivers; the separate live smoke check sends a single explicitly labelled test record only when requested.
+
+Every product page has a “تغییر محصول” link back to the homepage hero. The five-device hero slider uses two-second rotation with pause and manual controls and respects reduced-motion preferences. Exhibition wording is absent from the interface.
 
 ## Modified files
 
@@ -41,8 +45,12 @@ Product data, `src/lib/consultation.ts` and `src/lib/attribution.ts` remain unch
 - `src/components/landing/HomePage.tsx`: hero, family selector and reusable compact product cards.
 - `src/components/landing/ProductDetail.tsx`: shared product presentation and return-to-home action.
 - `src/components/landing/ProductSlideshow.tsx`: five-device hero slideshow with two-second rotation.
-- `src/components/landing/Consultation.tsx`: requested notice removal only; form behavior is preserved.
-- `scripts/check-consultation-copy.mjs`: canonical comparison protecting all form code except approved copy.
+- `src/components/landing/Consultation.tsx`: shared homepage/product consultation, dropdown and acknowledged delivery states.
+- `src/lib/consultation.ts`: same-origin delivery client.
+- `src/server/consultation.ts`, `src/routes/api.consultation.ts`: validated server-side forwarding.
+- `tests/consultation-api.test.mjs`: isolated webhook integration checks.
+- `scripts/check-lead-contract.mjs`: preserves the existing contact payload and validation contract.
+- `scripts/live-lead-smoke.mjs`, `.github/workflows/lead-webhook-smoke.yml`: explicit one-record live acknowledgement check.
 - `src/components/landing/Site.tsx`: compatibility exports for existing route imports.
 - `src/styles.css`: responsive brand and component system.
 - `src/routes/__root.tsx`, `public/site.webmanifest`: browser theme colors.
@@ -56,9 +64,9 @@ Product data, `src/lib/consultation.ts` and `src/lib/attribution.ts` remain unch
 
 ## Validation and comparison
 
-The first redesigned build passed production build, TypeScript, six unit tests, route checks and Chromium review of all six routes at 360, 390, 430, 768, 1024 and 1440px. These checks cover family switching, keyboard focus, direct family links, attribution, image decoding, section navigation, technical-table alignment, number/icon legibility and preserved three-field consultation behavior. Manual visual inspection covered the home, BHA5000 and FS-205 at mobile and desktop widths. Final runs additionally collect console errors and verify the deployed preview.
+The first redesigned build passed production build, TypeScript, six unit tests, route checks and Chromium review of all six routes at 360, 390, 430, 768, 1024 and 1440px. These checks cover family switching, keyboard focus, direct family links, attribution, image decoding, section navigation, technical-table alignment, number/icon legibility and three-field product forms and a four-field homepage form. Manual visual inspection covered the home, BHA5000 and FS-205 at mobile and desktop widths. Final runs additionally collect console errors and verify the deployed preview.
 
-Full repository lint is run and its JSON report retained. The baseline itself has formatting errors and existing Fast Refresh warnings. The regression check compares finding signatures and multiplicities against the immutable baseline, fails for any additional finding and reports remaining baseline errors explicitly. It does not edit protected form or catalog files to silence their existing formatting findings.
+Full repository lint is run and its JSON report retained. The baseline itself has formatting errors and existing Fast Refresh warnings. The regression check compares finding signatures and multiplicities against the immutable baseline, fails for any additional finding and reports remaining baseline errors explicitly. It preserves product content while reporting remaining pre-existing formatting findings.
 
 Final before/after homepage heights are recorded in `home-comparison.json` in the latest workflow artifact. Measurements compare the original all-five-device homepage with each selected family in the current design; all five devices remain accessible through the selector and the hero slideshow. The browser review checks the two-second slide interval, pause, all five manual choices and return-to-home links.
 

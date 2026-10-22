@@ -1,0 +1,33 @@
+name: Verify live consultation delivery
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [feature/sana-medical-landing]
+
+permissions:
+  contents: read
+
+jobs:
+  deliver-one-test-lead:
+    if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[verify-webhook]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install isolated browser tooling
+        run: |
+          echo "SANA_QA_DIR=$RUNNER_TEMP/sana-lead-smoke" >> "$GITHUB_ENV"
+          npm install --prefix "$RUNNER_TEMP/sana-lead-smoke" --no-save playwright@1.56.1
+          "$RUNNER_TEMP/sana-lead-smoke/node_modules/.bin/playwright" install --with-deps chromium
+      - name: Send one clearly labelled synthetic lead through the live homepage form
+        run: node scripts/live-lead-smoke.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: live-lead-delivery
+          path: artifacts/live-lead
+          retention-days: 7

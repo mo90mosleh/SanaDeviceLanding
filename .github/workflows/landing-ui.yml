@@ -3,6 +3,7 @@ name: Landing UI review
 on:
   push:
     branches: [feature/sana-medical-landing]
+    paths-ignore: ["docs/**"]
 
 permissions:
   contents: read
@@ -16,6 +17,7 @@ jobs:
       SANA_QA_URL: http://127.0.0.1:4173
       SANA_BASELINE_URL: http://127.0.0.1:4174
       SANA_BASELINE_SHA: f56c922c5792988143e50ccefcc036d894eccf5a
+      SANA_LEAD_WEBHOOK_URL: http://127.0.0.1:4180/webhook
     steps:
       - uses: actions/checkout@v4
         with:
@@ -35,8 +37,8 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - name: Preserve product content, consultation and attribution
         run: |
-          git diff --exit-code "$SANA_BASELINE_SHA" -- src/lib/consultation.ts src/lib/attribution.ts src/components/landing/products.ts
-          node scripts/check-consultation-copy.mjs
+          git diff --exit-code "$SANA_BASELINE_SHA" -- src/lib/attribution.ts src/components/landing/products.ts
+          node scripts/check-lead-contract.mjs
       - name: Full lint report
         id: lint
         continue-on-error: true
@@ -78,6 +80,7 @@ jobs:
           curl --fail --silent "$SANA_QA_URL" > /dev/null
           SANA_METRICS_PHASE=before node scripts/measure-home-baseline.mjs
           pnpm test:routes
+          node --test tests/consultation-api.test.mjs
           node scripts/ui-review.mjs
           SANA_METRICS_PHASE=after node scripts/measure-home-baseline.mjs
       - name: Verify the deployed preview
@@ -89,3 +92,21 @@ jobs:
           path: artifacts/ui-review
           retention-days: 7
           if-no-files-found: ignore
+  format-review:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    env:
+      NITRO_PRESET: node-server
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+        continue-on-error: true
+      - run: node scripts/print-format-review.mjs

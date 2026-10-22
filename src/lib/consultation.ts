@@ -32,10 +32,20 @@ export function validateLead(fields: LeadFields): LeadErrors {
     errors.organization = "نام آزمایشگاه را وارد کنید.";
   return errors;
 }
-export type SubmissionResult = { status: "not-connected" } | { status: "submitted" };
+export type SubmissionResult = { status: "submitted" };
 export type SubmissionHandler = (payload: LeadPayload) => Promise<SubmissionResult>;
-// Sole integration boundary. No endpoint, persistence, logging, or network request.
-export const submitConsultation: SubmissionHandler = async (_payload) => ({
-  status: "not-connected",
-});
+export const submitConsultation: SubmissionHandler = async (payload) => {
+  const response = await fetch("/api/consultation", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+    cache: "no-store",
+    signal: AbortSignal.timeout(15_000),
+  });
+  const result: unknown = await response.json().catch(() => null);
+  if (!response.ok || !result || typeof result !== "object" || !("status" in result) || result.status !== "submitted") {
+    throw new Error("Consultation submission was not acknowledged");
+  }
+  return { status: "submitted" };
+};
 
