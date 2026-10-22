@@ -120,7 +120,7 @@ async function reviewConsultation(page, route, width) {
       () => document.querySelector("#consultation form").getAttribute("aria-busy") === "true",
     );
     assert.equal(await form.locator('button[type="submit"]').isDisabled(), true);
-    assert.doesNotMatch(await form.getByRole("status").innerText(), /موفق/u);
+    assert.doesNotMatch(await form.locator("[role=status]").textContent(), /موفق/u);
     await form.evaluate((node) => node.requestSubmit());
     assert.equal(
       calls.length,
