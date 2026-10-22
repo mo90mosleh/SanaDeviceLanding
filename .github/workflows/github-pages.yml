@@ -13,7 +13,7 @@ permissions:
 
 concurrency:
   group: sana-github-pages-${{ github.ref }}
-  cancel-in-progress: false
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
   build:
@@ -39,6 +39,7 @@ jobs:
       - name: Check webhook browser preflight without submitting a lead
         run: node scripts/check-webhook-cors.mjs
       - name: Install isolated browser tooling
+        timeout-minutes: 3
         run: |
           echo "SANA_QA_DIR=$RUNNER_TEMP/sana-pages-qa" >> "$GITHUB_ENV"
           npm install --prefix "$RUNNER_TEMP/sana-pages-qa" --no-save playwright@1.56.1
