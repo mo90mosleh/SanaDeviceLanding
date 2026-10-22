@@ -133,6 +133,11 @@ try {
           const payload = request.postDataJSON();
           assert.equal(payload.landingPage, route);
           assert.equal(payload.fullName, "کاربر آزمایشی");
+          assert.equal(payload.labName, "آزمایشگاه آزمایشی");
+          assert.equal(payload.product, payload.productModel);
+          assert.equal(payload.company, payload.manufacturer);
+          assert.equal(payload.pageUrl, url);
+          assert.ok(Number.isFinite(Date.parse(payload.time)));
           assert.equal(
             payload.productModel,
             route === "/" ? "FS-205" : route.split("/").at(-1).toUpperCase(),
@@ -158,15 +163,15 @@ try {
         });
       }
       await form.getByRole("button", { name: "ثبت درخواست مشاوره", exact: true }).click();
-      await page.waitForFunction(() =>
-        document
-          .querySelector("#consultation [role=status]")
-          .textContent.includes("اطلاعات با موفقیت ثبت شد"),
-      );
+      const success = page.getByRole("dialog", { name: "اطلاعات با موفقیت ثبت شد." });
+      await success.waitFor({ state: "visible" });
       assert.equal(calls, 1);
       for (const input of await form.locator("input").all())
         assert.equal(await input.inputValue(), "");
       if (route === "/") assert.equal(await form.locator("select").inputValue(), "");
+      if (route === "/") await captureReviewPreview(page, `pages-success-popup-${width}`);
+      await success.getByRole("button", { name: "متوجه شدم" }).click();
+      await success.waitFor({ state: "hidden" });
       if (["/", "/cbc/bha5000", "/poct/fs-205"].includes(route)) {
         const name = route === "/" ? "home" : route.slice(1).replaceAll("/", "-");
         await page.evaluate(() => window.scrollTo(0, 0));

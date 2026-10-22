@@ -1,5 +1,5 @@
-import { useRef, useState } from "react";
-import { ArrowLeft, Phone } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { ArrowLeft, Check, Phone, X } from "lucide-react";
 import type { FormEvent } from "react";
 import { products } from "./products";
 import type { Product } from "./products";
@@ -22,10 +22,24 @@ export function Consultation({
   const [errors, setErrors] = useState<FormErrors>({});
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
-  const [failed, setFailed] = useState(false);
+  const [successOpen, setSuccessOpen] = useState(false);
+  const successDialog = useRef<HTMLDialogElement>(null);
   const form = useRef<HTMLFormElement>(null);
   const pending = useRef(false);
   const selectedProduct = product || products.find((item) => item.id === selectedId);
+
+  useEffect(() => {
+    const dialog = successDialog.current;
+    if (!successOpen || !dialog) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    dialog.showModal();
+    dialog.querySelector<HTMLButtonElement>(".success-confirm")?.focus();
+    return () => {
+      dialog.close();
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [successOpen]);
 
   async function submit(event: FormEvent) {
     event.preventDefault();
@@ -34,7 +48,6 @@ export function Consultation({
     if (!selectedProduct) next.product = "دستگاه موردنظر را انتخاب کنید.";
     setErrors(next);
     setMessage("");
-    setFailed(false);
     if (Object.keys(next).length || !selectedProduct) {
       requestAnimationFrame(() =>
         form.current
@@ -59,9 +72,8 @@ export function Consultation({
       if (result.status !== "submitted") throw new Error("Submission was not acknowledged");
       setFields(empty);
       if (!product) setSelectedId("");
-      setMessage("اطلاعات با موفقیت ثبت شد.");
+      setSuccessOpen(true);
     } catch {
-      setFailed(true);
       setMessage("ارسال درخواست تأیید نشد. لطفاً دوباره تلاش کنید یا با کارشناسان تماس بگیرید.");
     } finally {
       pending.current = false;
@@ -200,13 +212,43 @@ export function Consultation({
         </button>
         <p
           className="submission-message"
-          data-state={message ? (failed ? "error" : "success") : undefined}
+          data-state={message ? "error" : undefined}
           role="status"
           aria-live="polite"
         >
           {message}
         </p>
       </form>
+      <dialog
+        ref={successDialog}
+        className="success-dialog"
+        aria-labelledby="consultation-success-title"
+        aria-describedby="consultation-success-description"
+        onClose={() => setSuccessOpen(false)}
+      >
+        <button
+          type="button"
+          className="success-close"
+          aria-label="بستن پیام موفقیت"
+          onClick={() => setSuccessOpen(false)}
+        >
+          <X size={22} aria-hidden="true" />
+        </button>
+        <span className="success-symbol" aria-hidden="true">
+          <Check size={36} strokeWidth={2.4} />
+        </span>
+        <h2 id="consultation-success-title">اطلاعات با موفقیت ثبت شد.</h2>
+        <p id="consultation-success-description">
+          درخواست شما برای پیگیری به سانا ارسال شد.
+        </p>
+        <button
+          type="button"
+          className="button primary success-confirm"
+          onClick={() => setSuccessOpen(false)}
+        >
+          متوجه شدم
+        </button>
+      </dialog>
     </section>
   );
 }

@@ -121,6 +121,7 @@ async function reviewConsultation(page, route, width) {
     );
     assert.equal(await form.locator('button[type="submit"]').isDisabled(), true);
     assert.doesNotMatch(await form.locator("[role=status]").textContent(), /موفق/u);
+    assert.equal(await page.locator("dialog[open]").count(), 0);
     await form.evaluate((node) => node.requestSubmit());
     assert.equal(
       calls.length,
@@ -141,12 +142,19 @@ async function reviewConsultation(page, route, width) {
     reject = false;
     await submit.click();
   }
-  await page.waitForFunction(() =>
-    document.querySelector("#consultation [role=status]").textContent.includes("با موفقیت ثبت شد"),
-  );
+  const success = page.getByRole("dialog", { name: "اطلاعات با موفقیت ثبت شد." });
+  await success.waitFor({ state: "visible" });
   const item = calls.at(-1);
   assert.equal(item.name, "کاربر آزمایشی");
   assert.equal(item.fullName, item.name);
+  assert.equal(item.labName, item.organization);
+  assert.equal(item.product, item.productModel);
+  assert.equal(item.company, item.manufacturer);
+  assert.equal(item.pageUrl, new URL(page.url()).origin + new URL(page.url()).pathname);
+  for (const key of ["source", "medium", "campaign", "content", "term"]) {
+    assert.equal(item[key], item.utm[`utm_${key}`] || "");
+  }
+  assert.ok(Number.isFinite(Date.parse(item.time)));
   assert.equal(item.organization, "آزمایشگاه آزمایشی");
   assert.equal(item.mobile, "09123456789");
   const model = home ? "FS-205" : route.split("/").at(-1).toUpperCase();
@@ -166,6 +174,18 @@ async function reviewConsultation(page, route, width) {
   assert.deepEqual(unexpected, [], "The browser must only post to the configured webhook");
   if (home) assert.equal(await form.locator("select").inputValue(), "");
   assert.equal(calls.length, home && width === 390 ? 2 : 1);
+  assert.equal(await form.locator("[role=status]").textContent(), "");
+  assert.equal(await success.getByRole("button", { name: "متوجه شدم" }).evaluate((node) => node === document.activeElement), true);
+  await page.keyboard.press("Tab");
+  assert.equal(await page.evaluate(() => !!document.activeElement.closest("dialog")), true);
+  if (home && [390, 1440].includes(width)) {
+    await captureReviewPreview(page, `success-popup-${width}`);
+  }
+  if (route === "/poct/fs-114" && width === 390) await page.keyboard.press("Escape");
+  else await success.getByRole("button", { name: "متوجه شدم" }).click();
+  await success.waitFor({ state: "hidden" });
+  assert.equal(await page.evaluate(() => document.body.style.overflow), "");
+  assert.equal(await form.locator('button[type="submit"]').evaluate((node) => node === document.activeElement), true);
 }
 
 async function reviewFamilySelector(page, html, width) {

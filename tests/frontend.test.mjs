@@ -44,7 +44,13 @@ test("Submission posts JSON to the configured webhook and requires HTTP acknowle
     manufacturer: "Wondfo",
     productCategory: "POCT",
     landingPage: "/poct/fs-114",
-    utm: {},
+    utm: {
+      utm_source: "integration-test",
+      utm_medium: "qa",
+      utm_campaign: "sana-webhook-check",
+      utm_content: "popup-verification",
+      utm_term: "fs-114",
+    },
   };
   const calls = [];
   globalThis.fetch = async (url, options) => {
@@ -58,7 +64,22 @@ test("Submission posts JSON to the configured webhook and requires HTTP acknowle
     assert.equal(calls[0].options.mode, "cors");
     assert.equal(calls[0].options.credentials, "omit");
     assert.equal(calls[0].options.method, "POST");
-    assert.deepEqual(JSON.parse(calls[0].options.body), { ...payload, fullName: payload.name });
+    const body = JSON.parse(calls[0].options.body);
+    assert.deepEqual(body, {
+      ...payload,
+      fullName: payload.name,
+      labName: payload.organization,
+      product: "FS-114",
+      company: "Wondfo",
+      pageUrl: "/poct/fs-114",
+      campaign: "sana-webhook-check",
+      source: "integration-test",
+      medium: "qa",
+      content: "popup-verification",
+      term: "fs-114",
+      time: body.time,
+    });
+    assert.ok(Number.isFinite(Date.parse(body.time)));
     assert.ok(calls[0].options.signal instanceof AbortSignal);
     for (const response of [
       new Response("failed", { status: 502 }),

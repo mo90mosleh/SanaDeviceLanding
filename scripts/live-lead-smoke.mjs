@@ -21,14 +21,20 @@ page.on("request", (request) => {
 });
 try {
   await page.goto(
-    origin + "/?utm_source=integration-test&utm_medium=qa&utm_campaign=sana-webhook-check",
+    origin + "/?utm_source=integration-test&utm_medium=qa&utm_campaign=sana-webhook-check&utm_content=popup-verification&utm_term=fs-205",
     { waitUntil: "networkidle" },
   );
+  // Never submit a synthetic record until the newly published dialog is present.
+  for (let attempt = 0; !(await page.locator("dialog.success-dialog").count()); attempt++) {
+    if (attempt >= 18) throw new Error("The updated frontend has not been published yet; no lead was sent");
+    await page.waitForTimeout(5000);
+    await page.reload({ waitUntil: "networkidle" });
+  }
   const form = page.locator("#consultation form");
   await form.getByLabel("دستگاه موردنظر").selectOption("fs-205");
   for (const [field, value] of [
-    ["name", "تست فنی سانا — نادیده بگیرید"],
-    ["organization", "تست اتصال وب‌هوک — مشتری واقعی نیست"],
+    ["name", "تست فنی سانا — ستون‌ها و پاپ‌آپ 2210B"],
+    ["organization", "تست فنی — آزمایشگاه واقعی نیست"],
     ["mobile", "09000000000"],
   ]) {
     await form.locator(`#lead-${field}`).fill(value);
@@ -51,13 +57,15 @@ try {
   await writeFile(path.join(output, "result.json"), JSON.stringify(result, null, 2));
   console.log("LIVE LEAD RESULT " + JSON.stringify(result));
   assert.equal(response.ok(), true);
-  await page.waitForFunction(() =>
-    document.querySelector("#consultation [role=status]").textContent.includes("با موفقیت ثبت شد"),
-  );
+  const success = page.getByRole("dialog", { name: "اطلاعات با موفقیت ثبت شد." });
+  await success.waitFor({ state: "visible" });
   for (const input of await form.locator("input").all()) assert.equal(await input.inputValue(), "");
   assert.equal(await form.locator("select").inputValue(), "");
   assert.equal(requests, 1, "The smoke check must send exactly one synthetic lead");
-  await form.screenshot({ path: path.join(output, "acknowledged-home-form-390.png") });
+  await page.screenshot({ path: path.join(output, "acknowledged-popup-390.png") });
+  await success.getByRole("button", { name: "متوجه شدم" }).click();
+  await success.waitFor({ state: "hidden" });
+  await form.screenshot({ path: path.join(output, "cleared-home-form-390.png") });
   console.log("LIVE LEAD PASS: one synthetic homepage lead accepted by the configured webhook");
 } finally {
   await browser.close();
