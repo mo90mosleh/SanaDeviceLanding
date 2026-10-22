@@ -42,7 +42,12 @@ try {
   );
   await form.getByRole("button", { name: "ثبت درخواست مشاوره", exact: true }).click();
   const response = await responsePromise;
-  const result = { status: response.status(), acknowledged: response.ok(), requests };
+  const result = {
+    status: response.status(),
+    acknowledged: response.ok(),
+    requests,
+    response: response.ok() ? "acknowledged" : (await response.text()).slice(0, 1000),
+  };
   await writeFile(path.join(output, "result.json"), JSON.stringify(result, null, 2));
   console.log("LIVE LEAD RESULT " + JSON.stringify(result));
   assert.equal(response.ok(), true);
