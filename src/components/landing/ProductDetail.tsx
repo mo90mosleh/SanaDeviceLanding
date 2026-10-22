@@ -1,3 +1,4 @@
+import { assetPath, pagePath } from "@/lib/site-path";
 import { ArrowDown, ArrowLeft, ArrowRight, Download, Phone, Plus } from "lucide-react";
 import type { Product } from "./products";
 import { Header, Footer } from "./SiteChrome";
@@ -17,13 +18,13 @@ export function ProductPage({ product: p }: { product: Product }) {
       >
         <div className="product-topbar">
           <nav className="breadcrumbs" aria-label="مسیر صفحه">
-            <a href="/">همه دستگاه‌ها</a>
+            <a href={pagePath("/")}>همه دستگاه‌ها</a>
             <span aria-hidden="true">/</span>
-            <a href={`/#${p.category.toLowerCase()}`}>{p.category}</a>
+            <a href={pagePath(`/#${p.category.toLowerCase()}`)}>{p.category}</a>
             <span aria-hidden="true">/</span>
             <bdi aria-current="page">{p.model}</bdi>
           </nav>
-          <a href="/" className="button light change-product">
+          <a href={pagePath("/")} className="button light change-product">
             <span>تغییر محصول</span>
             <ArrowRight className="cta-icon" size={20} aria-hidden="true" />
           </a>
@@ -100,7 +101,7 @@ export function ProductPage({ product: p }: { product: Product }) {
                 پیکربندی نسخه پیشنهادی را هنگام خرید تأیید کنید.
               </p>
             </div>
-            <a href={p.catalog} className="text-link" download>
+            <a href={assetPath(p.catalog)} className="text-link" download>
               <span className="button-label">دریافت کاتالوگ اصلی</span>
               <Download className="cta-icon" size={20} strokeWidth={2} aria-hidden="true" />
             </a>
@@ -142,9 +143,6 @@ export function ProductPage({ product: p }: { product: Product }) {
           <div className="applications-grid">
             {p.applications.map((a) => (
               <article key={a.title}>
-                <span className="application-icon" aria-hidden="true">
-                  <Plus size={20} strokeWidth={1.8} focusable="false" />
-                </span>
                 <h3>{a.title}</h3>
                 <p>{a.text}</p>
               </article>
@@ -182,7 +180,7 @@ export function ProductPage({ product: p }: { product: Product }) {
               کاتالوگ اختصاصی <bdi>{p.name}</bdi> · PDF
             </p>
           </div>
-          <a className="button primary" href={p.catalog} download>
+          <a className="button primary" href={assetPath(p.catalog)} download>
             <span className="button-label">دانلود کاتالوگ دستگاه</span>
             <Download className="cta-icon" size={20} strokeWidth={2} aria-hidden="true" />
           </a>

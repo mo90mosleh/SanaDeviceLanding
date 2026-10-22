@@ -2,7 +2,7 @@ name: Landing UI review
 
 on:
   push:
-    branches: [feature/sana-medical-landing]
+    branches: [feature/sana-github-pages, main]
     paths-ignore: ["docs/**"]
 
 permissions:
@@ -17,7 +17,7 @@ jobs:
       SANA_QA_URL: http://127.0.0.1:4173
       SANA_BASELINE_URL: http://127.0.0.1:4174
       SANA_BASELINE_SHA: f56c922c5792988143e50ccefcc036d894eccf5a
-      SANA_LEAD_WEBHOOK_URL: http://127.0.0.1:4180/webhook
+      VITE_CONSULTATION_API_URL: https://forms.example.test/webhook
     steps:
       - uses: actions/checkout@v4
         with:
@@ -80,11 +80,8 @@ jobs:
           curl --fail --silent "$SANA_QA_URL" > /dev/null
           SANA_METRICS_PHASE=before node scripts/measure-home-baseline.mjs
           pnpm test:routes
-          node --test tests/consultation-api.test.mjs
           node scripts/ui-review.mjs
           SANA_METRICS_PHASE=after node scripts/measure-home-baseline.mjs
-      - name: Verify the deployed preview
-        run: node scripts/check-live-preview.mjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:

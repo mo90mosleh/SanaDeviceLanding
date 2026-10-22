@@ -1,3 +1,4 @@
+import { assetPath, pagePath } from "@/lib/site-path";
 import { useEffect, useRef, useState } from "react";
 import type { KeyboardEvent } from "react";
 import { ArrowDown, ArrowLeft } from "lucide-react";
@@ -14,7 +15,7 @@ const families: readonly Family[] = ["CBC", "POCT"];
 function ProductCard({ product }: { product: Product }) {
   return (
     <article className="product-card" data-family={product.category.toLowerCase()}>
-      <a className="product-visual" href={product.route} aria-label={`مشاهده ${product.name}`}>
+      <a className="product-visual" href={pagePath(product.route)} aria-label={`مشاهده ${product.name}`}>
         <ProductImage product={product} width={360} height={280} loading="lazy" />
       </a>
       <div className="card-content">
@@ -31,7 +32,7 @@ function ProductCard({ product }: { product: Product }) {
             <li key={feature}>{feature}</li>
           ))}
         </ul>
-        <a className="card-link" href={product.route}>
+        <a className="card-link" href={pagePath(product.route)}>
           <span className="button-label">مشخصات و بررسی دستگاه</span>
           <ArrowLeft className="cta-icon" size={20} strokeWidth={2} aria-hidden="true" />
         </a>
@@ -150,7 +151,7 @@ function ProductBrowser() {
                 {isCbc ? (
                   <span className="manufacturer-logo getein-mark">
                     <img
-                      src="/product-assets/getein/branding/getein-logo.png"
+                      src={assetPath("/product-assets/getein/branding/getein-logo.png")}
                       alt="Getein"
                       width={400}
                       height={59}
@@ -160,7 +161,7 @@ function ProductBrowser() {
                 ) : (
                   <img
                     className="manufacturer-logo"
-                    src="/product-assets/wondfo/branding/wondfo-logo.png"
+                    src={assetPath("/product-assets/wondfo/branding/wondfo-logo.png")}
                     alt="Wondfo"
                     width={160}
                     height={55}

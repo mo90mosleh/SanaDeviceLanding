@@ -9,7 +9,7 @@ async function moduleFrom(path) {
   }).outputText;
   return import("data:text/javascript;base64," + Buffer.from(js).toString("base64"));
 }
-const { validateLead, normalizeMobile, submitConsultation } = await moduleFrom(
+const { validateLead, normalizeMobile, submitConsultation, consultationEndpoint } = await moduleFrom(
   "../src/lib/consultation.ts",
 );
 const { captureAttribution } = await moduleFrom("../src/lib/attribution.ts");
@@ -34,15 +34,19 @@ test("Iranian mobiles accept Persian, Arabic and international digits", () => {
 test("Invalid mobile and missing fields produce field errors", () => {
   for (const mobile of ["02112345678", "091234", "091234567890", "+971912345678", "abc"])
     assert.ok(validateLead({ ...valid, mobile }).mobile);
-  assert.equal(
-    Object.keys(validateLead({ name: "", mobile: "", organization: "" }))
-      .length,
-    3,
-  );
+  assert.equal(Object.keys(validateLead({ name: "", mobile: "", organization: "" })).length, 3);
 });
-test("Submission posts to the same-origin API and requires acknowledgement", async () => {
+test("Submission posts JSON to the configured webhook and requires HTTP acknowledgement", async () => {
   const originalFetch = globalThis.fetch;
-  const payload = { ...valid, mobile: "09123456789", productModel: "FS-114", manufacturer: "Wondfo", productCategory: "POCT", landingPage: "/poct/fs-114", utm: {} };
+  const payload = {
+    ...valid,
+    mobile: "09123456789",
+    productModel: "FS-114",
+    manufacturer: "Wondfo",
+    productCategory: "POCT",
+    landingPage: "/poct/fs-114",
+    utm: {},
+  };
   const calls = [];
   globalThis.fetch = async (url, options) => {
     calls.push({ url, options });
@@ -51,15 +55,21 @@ test("Submission posts to the same-origin API and requires acknowledgement", asy
   try {
     assert.deepEqual(await submitConsultation(payload), { status: "submitted" });
     assert.equal(calls.length, 1);
-    assert.equal(calls[0].url, "/api/consultation");
+    assert.equal(calls[0].url, consultationEndpoint);
+    assert.equal(calls[0].options.mode, "cors");
+    assert.equal(calls[0].options.credentials, "omit");
     assert.equal(calls[0].options.method, "POST");
     assert.deepEqual(JSON.parse(calls[0].options.body), payload);
     assert.ok(calls[0].options.signal instanceof AbortSignal);
-    for (const response of [Response.json({ status: "submitted" }, { status: 502 }), Response.json({ status: "unknown" }), new Response("not JSON")]) {
+    for (const response of [new Response("failed", { status: 502 }), new Response(null, { status: 400 })]) {
       globalThis.fetch = async () => response;
       await assert.rejects(submitConsultation(payload));
     }
-    globalThis.fetch = async () => { throw new Error("offline"); };
+    globalThis.fetch = async () => new Response("Workflow was started", { status: 200 });
+    assert.deepEqual(await submitConsultation(payload), { status: "submitted" });
+    globalThis.fetch = async () => {
+      throw new Error("offline");
+    };
     await assert.rejects(submitConsultation(payload));
   } finally {
     globalThis.fetch = originalFetch;
@@ -108,4 +118,3 @@ test("Five products have unique routes and real images and model-specific catalo
   }
   assert.doesNotMatch(JSON.stringify(products), /FS[- ]?301|واگذاری|رایگان|هدیه دستگاه/i);
 });
-

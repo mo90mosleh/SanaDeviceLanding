@@ -3,7 +3,7 @@ name: Verify live consultation delivery
 on:
   workflow_dispatch:
   push:
-    branches: [feature/sana-medical-landing]
+    branches: [main]
 
 permissions:
   contents: read

@@ -1,3 +1,4 @@
+import { pagePath } from "@/lib/site-path";
 import { useEffect, useState } from "react";
 import { ArrowLeft, ChevronLeft, ChevronRight, Pause, Play } from "lucide-react";
 import { products } from "./products";
@@ -73,7 +74,7 @@ export function ProductSlideshow() {
         </div>
         <a
           className="showcase-details"
-          href={product.route}
+          href={pagePath(product.route)}
           aria-label={`مشاهده مشخصات ${product.name}`}
         >
           <span className="button-label">مشخصات دستگاه</span>

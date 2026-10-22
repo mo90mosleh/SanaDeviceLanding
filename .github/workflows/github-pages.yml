@@ -1,0 +1,71 @@
+name: Publish SANA to GitHub Pages
+
+on:
+  push:
+    branches: [main, feature/sana-github-pages]
+    paths-ignore: ["docs/**"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: sana-github-pages-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      NITRO_PRESET: node-server
+      SANA_BASE_PATH: /ortanes-leb-gift/
+      VITE_STATIC_SITE: "true"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - run: pnpm typecheck
+      - run: node scripts/export-github-pages.mjs
+      - name: Check webhook browser preflight without submitting a lead
+        run: node scripts/check-webhook-cors.mjs
+      - name: Install isolated browser tooling
+        run: |
+          echo "SANA_QA_DIR=$RUNNER_TEMP/sana-pages-qa" >> "$GITHUB_ENV"
+          npm install --prefix "$RUNNER_TEMP/sana-pages-qa" --no-save playwright@1.56.1
+          "$RUNNER_TEMP/sana-pages-qa/node_modules/.bin/playwright" install --with-deps chromium
+      - name: Review all exported static routes and mocked form submissions
+        run: node scripts/review-github-pages.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: github-pages-review
+          path: artifacts/ui-review
+          retention-days: 7
+          if-no-files-found: ignore
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: artifacts/github-pages
+  deploy:
+    if: github.ref == 'refs/heads/main'
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/configure-pages@v5
+        with:
+          enablement: true
+      - name: Deploy GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

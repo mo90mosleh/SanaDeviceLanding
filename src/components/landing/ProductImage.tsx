@@ -1,3 +1,4 @@
+import { assetPath } from "@/lib/site-path";
 import type { ImgHTMLAttributes } from "react";
 import type { Product } from "./products";
 
@@ -33,7 +34,7 @@ export function ProductImage({
       >
         <image
           className="original-product-image"
-          href={product.image}
+          href={assetPath(product.image)}
           x="0"
           y="0"
           width="698"
@@ -47,7 +48,7 @@ export function ProductImage({
   return (
     <img
       className={imageClass}
-      src={product.image}
+      src={assetPath(product.image)}
       alt={label}
       width={width}
       height={height}

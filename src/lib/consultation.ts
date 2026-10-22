@@ -34,18 +34,19 @@ export function validateLead(fields: LeadFields): LeadErrors {
 }
 export type SubmissionResult = { status: "submitted" };
 export type SubmissionHandler = (payload: LeadPayload) => Promise<SubmissionResult>;
+// Public by design: the owner approved direct n8n submission from GitHub Pages.
+export const consultationEndpoint = import.meta.env?.["VITE_CONSULTATION_API_URL"] ||
+  "https://n8n.alecasgari.com/webhook/83591aad-47e3-475b-99a9-2f3d6d408e00";
 export const submitConsultation: SubmissionHandler = async (payload) => {
-  const response = await fetch("/api/consultation", {
+  const response = await fetch(consultationEndpoint, {
     method: "POST",
+    mode: "cors",
+    credentials: "omit",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
-    cache: "no-store",
-    signal: AbortSignal.timeout(15_000),
+    signal: AbortSignal.timeout(20_000),
   });
-  const result: unknown = await response.json().catch(() => null);
-  if (!response.ok || !result || typeof result !== "object" || !("status" in result) || result.status !== "submitted") {
-    throw new Error("Consultation submission was not acknowledged");
-  }
+  if (!response.ok) throw new Error("The webhook did not acknowledge the request");
+  await response.body?.cancel();
   return { status: "submitted" };
 };
-

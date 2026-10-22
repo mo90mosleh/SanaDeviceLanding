@@ -963,18 +963,10 @@ main > *,
   border-radius: 12px;
   background: white;
 }
-.application-icon {
-  display: grid;
-  place-items: center;
-  width: 34px;
-  height: 34px;
-  color: var(--blue);
-  background: var(--blue-soft);
-  border-radius: 9px;
-}
+
 .applications-grid h3 {
   font-size: 18px;
-  margin-top: 16px;
+  margin-top: 0;
 }
 .source-note {
   font-size: 12px;

@@ -1,3 +1,4 @@
+import { assetPath } from "@/lib/site-path";
 export function BrandLogo({ className = "" }: { className?: string }) {
   return (
     <svg
@@ -12,7 +13,7 @@ export function BrandLogo({ className = "" }: { className?: string }) {
       focusable="false"
     >
       <image
-        href="/product-assets/branding/sana-logo.png"
+        href={assetPath("/product-assets/branding/sana-logo.png")}
         x="0"
         y="0"
         width="900"

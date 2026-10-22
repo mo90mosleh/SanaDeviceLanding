@@ -10,6 +10,8 @@ const { chromium } = await import(
 );
 const base = process.env.SANA_QA_URL || "http://127.0.0.1:4173";
 const output = path.resolve("artifacts/ui-review");
+const endpoint = process.env.VITE_CONSULTATION_API_URL;
+assert.ok(endpoint && endpoint.includes("forms.example.test"), "Regular browser QA must use the isolated test endpoint");
 await mkdir(output, { recursive: true });
 const routes = [
   "/",
@@ -25,9 +27,12 @@ const report = [];
 async function reviewConsultation(page, route, width) {
   const home = route === "/";
   const form = page.locator("#consultation form");
-  assert.equal(await form.locator("input:not([type=hidden]), select, textarea").count(), home ? 4 : 3);
+  assert.equal(
+    await form.locator("input:not([type=hidden]), select, textarea").count(),
+    home ? 4 : 3,
+  );
   if (home) {
-    assert.ok(await page.locator('main a[href="#consultation"]').count() >= 3);
+    assert.ok((await page.locator('main a[href="#consultation"]').count()) >= 3);
     assert.equal(await form.locator("select optgroup").count(), 2);
     assert.equal(await form.locator('select option:not([value=""])').count(), 5);
     await page.locator(".hero-consultation").click();
@@ -36,23 +41,38 @@ async function reviewConsultation(page, route, width) {
     assert.equal(await form.locator("select").count(), 0);
   }
   if ([390, 1440].includes(width) && ["/", "/cbc/bha5000"].includes(route)) {
-    await captureReviewPreview(page, `consultation-${home ? "home" : "product"}-${width}`, { locator: page.locator("#consultation") });
+    await captureReviewPreview(page, `consultation-${home ? "home" : "product"}-${width}`, {
+      locator: page.locator("#consultation"),
+    });
   }
   const calls = [];
   const unexpected = [];
   let acknowledgeRequest;
-  const firstRequest = new Promise((resolve) => { acknowledgeRequest = resolve; });
+  const firstRequest = new Promise((resolve) => {
+    acknowledgeRequest = resolve;
+  });
   let reject = home && width === 390;
   let release;
   const pending = route === "/cbc/bha5000" && width === 390;
-  const gate = pending ? new Promise((resolve) => { release = resolve; }) : Promise.resolve();
+  const gate = pending
+    ? new Promise((resolve) => {
+        release = resolve;
+      })
+    : Promise.resolve();
   await page.route("**/*", async (intercept) => {
     const request = intercept.request();
-    if (request.method() === "POST" && new URL(request.url()).pathname === "/api/consultation") {
+    if (request.method() === "POST" && request.url() === endpoint) {
       calls.push(request.postDataJSON());
       acknowledgeRequest();
       await gate;
-      await intercept.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ status: reject ? "rejected" : "submitted" }) });
+      await intercept.fulfill({
+        status: reject ? 502 : 200,
+        headers: { "Access-Control-Allow-Origin": new URL(base).origin },
+        contentType: "text/plain",
+        body: reject ? "failed" : "Workflow was started",
+      });
+    } else if (request.method() === "OPTIONS" && request.url() === endpoint) {
+      await intercept.fulfill({ status: 204, headers: { "Access-Control-Allow-Origin": new URL(base).origin, "Access-Control-Allow-Methods": "POST, OPTIONS", "Access-Control-Allow-Headers": "Content-Type" } });
     } else if (["POST", "PUT", "PATCH", "DELETE"].includes(request.method())) {
       unexpected.push(request.url());
       await intercept.abort();
@@ -62,14 +82,21 @@ async function reviewConsultation(page, route, width) {
   });
   const submit = form.getByRole("button", { name: "ثبت درخواست مشاوره", exact: true });
   await submit.click();
-  await page.waitForFunction((count) => document.querySelectorAll("#consultation [aria-invalid=true]").length === count, home ? 4 : 3);
+  await page.waitForFunction(
+    (count) => document.querySelectorAll("#consultation [aria-invalid=true]").length === count,
+    home ? 4 : 3,
+  );
   assert.equal(calls.length, 0, "Invalid forms must never send a request");
   await page.evaluate(async () => {
     await new Promise(requestAnimationFrame);
     await new Promise(requestAnimationFrame);
   });
   if (home) await form.getByLabel("دستگاه موردنظر").selectOption("fs-205");
-  for (const [field, value] of [["name", "کاربر آزمایشی"], ["organization", "آزمایشگاه آزمایشی"], ["mobile", "۰۹۱۲۳۴۵۶۷۸۹"]]) {
+  for (const [field, value] of [
+    ["name", "کاربر آزمایشی"],
+    ["organization", "آزمایشگاه آزمایشی"],
+    ["mobile", "۰۹۱۲۳۴۵۶۷۸۹"],
+  ]) {
     await form.locator(`#lead-${field}`).fill(value);
     await page.evaluate(async () => {
       await new Promise(requestAnimationFrame);
@@ -79,20 +106,34 @@ async function reviewConsultation(page, route, width) {
   await submit.click();
   await firstRequest;
   if (pending) {
-    await page.waitForFunction(() => document.querySelector("#consultation form").getAttribute("aria-busy") === "true");
+    await page.waitForFunction(
+      () => document.querySelector("#consultation form").getAttribute("aria-busy") === "true",
+    );
     assert.equal(await form.locator('button[type="submit"]').isDisabled(), true);
     assert.doesNotMatch(await form.getByRole("status").innerText(), /موفق/u);
     await form.evaluate((node) => node.requestSubmit());
-    assert.equal(calls.length, 1, "Repeated submit during a pending request must not duplicate a lead");
+    assert.equal(
+      calls.length,
+      1,
+      "Repeated submit during a pending request must not duplicate a lead",
+    );
     release();
   }
   if (reject) {
-    await page.waitForFunction(() => document.querySelector("#consultation [role=status]").textContent.includes("تأیید نشد"));
-    assert.equal(await form.locator("#lead-name").inputValue(), "کاربر آزمایشی", "A failed submission must retain input for retry");
+    await page.waitForFunction(() =>
+      document.querySelector("#consultation [role=status]").textContent.includes("تأیید نشد"),
+    );
+    assert.equal(
+      await form.locator("#lead-name").inputValue(),
+      "کاربر آزمایشی",
+      "A failed submission must retain input for retry",
+    );
     reject = false;
     await submit.click();
   }
-  await page.waitForFunction(() => document.querySelector("#consultation [role=status]").textContent.includes("با موفقیت ثبت شد"));
+  await page.waitForFunction(() =>
+    document.querySelector("#consultation [role=status]").textContent.includes("با موفقیت ثبت شد"),
+  );
   const item = calls.at(-1);
   assert.equal(item.name, "کاربر آزمایشی");
   assert.equal(item.organization, "آزمایشگاه آزمایشی");
@@ -101,11 +142,18 @@ async function reviewConsultation(page, route, width) {
   assert.equal(item.productModel, model);
   assert.equal(item.productCategory, home ? "POCT" : route.split("/")[1].toUpperCase());
   assert.equal(item.landingPage, route);
-  const saved = await page.evaluate(() => JSON.parse(sessionStorage.getItem("sana:attribution:v1") || "{}"));
+  const saved = await page.evaluate(() =>
+    JSON.parse(sessionStorage.getItem("sana:attribution:v1") || "{}"),
+  );
   assert.deepEqual(item.utm, saved);
-  assert.equal(await form.locator("#lead-name").inputValue(), "", "Contact fields clear only after acknowledgement");
+  assert.equal(
+    await form.locator("#lead-name").inputValue(),
+    "",
+    "Contact fields clear only after acknowledgement",
+  );
   assert.equal(await form.locator('[aria-invalid="true"]').count(), 0);
-  assert.deepEqual(unexpected, [], "The browser must only post to its own consultation API");
+  assert.deepEqual(unexpected, [], "The browser must only post to the configured webhook");
+  if (home) assert.equal(await form.locator("select").inputValue(), "");
   assert.equal(calls.length, home && width === 390 ? 2 : 1);
 }
 
@@ -323,7 +371,7 @@ try {
       const errors = [];
       page.on("pageerror", (error) => errors.push(error.message));
       page.on("console", (message) => {
-        if (message.type() === "error") errors.push(message.text());
+        if (message.type() === "error" && !message.text().includes("502")) errors.push(message.text());
       });
       const name = route === "/" ? "home" : route.replaceAll("/", "-").slice(1);
       const result = { route, width, status: "failed" };
@@ -378,6 +426,7 @@ try {
         }
 
         if (route !== "/") {
+          assert.equal(await page.locator(".applications-grid .application-icon").count(), 0);
           assert.equal(await page.locator(".change-product").getAttribute("href"), "/");
           assert.equal(await page.locator(".change-product").innerText(), "تغییر محصول");
           const navigation = page.locator(".section-nav");

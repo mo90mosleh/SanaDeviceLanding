@@ -1,3 +1,4 @@
+import { assetPath, pagePath } from "@/lib/site-path";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Outlet, createRootRouteWithContext, HeadContent, Scripts } from "@tanstack/react-router";
 import type { ReactNode } from "react";
@@ -12,7 +13,7 @@ function NotFound() {
         <span className="eyebrow">۴۰۴</span>
         <h1>این صفحه پیدا نشد.</h1>
         <p>از میان دستگاه‌های CBC و POCT، محصول مورد نظر خود را انتخاب کنید.</p>
-        <a className="button primary" href="/">
+        <a className="button primary" href={pagePath("/")}>
           <span className="button-label">بازگشت به دستگاه‌ها</span>
           <ArrowLeft className="cta-icon" size={20} strokeWidth={2} aria-hidden="true" />
         </a>
@@ -26,7 +27,7 @@ function ErrorPage() {
     <main className="fallback">
       <h1>بارگذاری صفحه انجام نشد.</h1>
       <p>لطفاً صفحه را دوباره بارگذاری کنید یا به صفحه اصلی برگردید.</p>
-      <a className="button primary" href="/">
+      <a className="button primary" href={pagePath("/")}>
         صفحه اصلی
       </a>
     </main>
@@ -50,10 +51,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     ],
     links: [
       { rel: "stylesheet", href: appCss },
-      { rel: "icon", href: "/favicon.ico", sizes: "any" },
-      { rel: "icon", href: "/favicon.png", type: "image/png" },
-      { rel: "apple-touch-icon", href: "/apple-touch-icon.png" },
-      { rel: "manifest", href: "/site.webmanifest" },
+      { rel: "icon", href: assetPath("/favicon.ico"), sizes: "any" },
+      { rel: "icon", href: assetPath("/favicon.png"), type: "image/png" },
+      { rel: "apple-touch-icon", href: assetPath("/apple-touch-icon.png") },
+      { rel: "manifest", href: assetPath("/site.webmanifest") },
     ],
   }),
   shellComponent: Shell,

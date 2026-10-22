@@ -1,3 +1,4 @@
+import { pagePath } from "@/lib/site-path";
 import { useEffect } from "react";
 import { Phone } from "lucide-react";
 import { readAttribution } from "@/lib/attribution";
@@ -15,16 +16,16 @@ export function Header() {
         رفتن به محتوای اصلی
       </a>
       <header className="site-header">
-        <a href="/" className="brand" aria-label="SANA، صفحه اصلی">
+        <a href={pagePath("/")} className="brand" aria-label="SANA، صفحه اصلی">
           <BrandLogo />
           <span className="brand-name">سانا شفابخش راسپینا</span>
         </a>
         <nav className="header-families" aria-label="خانواده‌های محصول">
-          <a href="/#cbc" aria-label="دستگاه‌های هماتولوژی CBC">
+          <a href={pagePath("/#cbc")} aria-label="دستگاه‌های هماتولوژی CBC">
             <span>هماتولوژی</span>
             <bdi>CBC</bdi>
           </a>
-          <a href="/#poct" aria-label="دستگاه‌های تشخیص سریع POCT">
+          <a href={pagePath("/#poct")} aria-label="دستگاه‌های تشخیص سریع POCT">
             <span>تشخیص سریع</span>
             <bdi>POCT</bdi>
           </a>
@@ -47,7 +48,7 @@ export function Footer() {
     <footer className="site-footer">
       <div className="footer-grid">
         <div className="footer-brand">
-          <a href="/" aria-label="SANA، صفحه اصلی">
+          <a href={pagePath("/")} aria-label="SANA، صفحه اصلی">
             <BrandLogo />
           </a>
           <p>راهکارهای تشخیص آزمایشگاهی، برای انتخابی آگاهانه.</p>
@@ -56,7 +57,7 @@ export function Footer() {
           <h2>دستگاه‌های سانا</h2>
           <div className="footer-product-links">
             {products.map((product) => (
-              <a key={product.id} href={product.route}>
+              <a key={product.id} href={pagePath(product.route)}>
                 <bdi>{product.model}</bdi>
               </a>
             ))}

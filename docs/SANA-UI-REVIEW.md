@@ -1,6 +1,6 @@
 # SANA interface refinement
 
-Preview: https://sana-pr-preview.onrender.com/
+Publication target: https://mo90mosleh.github.io/ortanes-leb-gift/
 
 ## Audit and implementation
 
@@ -16,17 +16,17 @@ Detail pages retain every specification, advantage, application, workflow step, 
 
 The authentic SANA PNG remains unchanged. Its transparent margins are removed only by its SVG display viewport. Device photographs and their proportions remain authentic, including the existing BHA5000 display crop of surplus white space.
 
-| Token | Value | Use |
-| --- | --- | --- |
-| Logo green | `#028a3f` | Color sampled from the logo |
-| Primary interaction | `#02753b` | Darker green for legible white CTA text |
-| Primary hover | `#045c32` | Button feedback |
-| Blue | `#0047bf` | Information, POCT identifiers and keyboard focus |
-| Red | `#bf0115` | Limited brand accent |
-| Main text | `#142c35` | Headings and primary text |
-| Secondary text | `#61747c` | Supporting copy |
-| Border | `#dfe7eb` | Subtle separation |
-| Neutral surface | `#f5f8fa` | Product images and section backgrounds |
+| Token               | Value     | Use                                              |
+| ------------------- | --------- | ------------------------------------------------ |
+| Logo green          | `#028a3f` | Color sampled from the logo                      |
+| Primary interaction | `#02753b` | Darker green for legible white CTA text          |
+| Primary hover       | `#045c32` | Button feedback                                  |
+| Blue                | `#0047bf` | Information, POCT identifiers and keyboard focus |
+| Red                 | `#bf0115` | Limited brand accent                             |
+| Main text           | `#142c35` | Headings and primary text                        |
+| Secondary text      | `#61747c` | Supporting copy                                  |
+| Border              | `#dfe7eb` | Subtle separation                                |
+| Neutral surface     | `#f5f8fa` | Product images and section backgrounds           |
 
 Spacing, corner radii, shadows and colors share CSS variables. Interactive targets, visible focus states and reduced-motion preferences are preserved. Persian/Latin models and values use directional isolation.
 
@@ -34,7 +34,7 @@ Spacing, corner radii, shadows and colors share CSS variables. Interactive targe
 
 Product data, specifications, authentic assets, existing routes and attribution remain preserved. Homepage forms offer a required five-device dropdown; product-page forms retain the current device. Three homepage CTA locations lead to the shared consultation section. Contact fields and Iranian mobile validation remain the same.
 
-Consultation requests now use the same-origin server endpoint and the owner's configured webhook. Acknowledgement, failure and pending states reflect actual delivery results. Server configuration and payload details are documented in [FRONTEND-INTEGRATION.md](FRONTEND-INTEGRATION.md). The integration tests use local/mock receivers; the separate live smoke check sends a single explicitly labelled test record only when requested.
+Consultation requests now go directly from the browser to n8n, as explicitly selected by the owner; the public endpoint is intentionally visible. Acknowledgement, failure and pending states reflect actual delivery results. Direct submission, CORS and static publication details are documented in [FRONTEND-INTEGRATION.md](FRONTEND-INTEGRATION.md). The automated form tests use intercepted/mock receivers; the separate live smoke check sends a single explicitly labelled test record only when requested.
 
 Every product page has a “تغییر محصول” link back to the homepage hero. The five-device hero slider uses two-second rotation with pause and manual controls and respects reduced-motion preferences. Exhibition wording is absent from the interface.
 
@@ -46,9 +46,7 @@ Every product page has a “تغییر محصول” link back to the homepage h
 - `src/components/landing/ProductDetail.tsx`: shared product presentation and return-to-home action.
 - `src/components/landing/ProductSlideshow.tsx`: five-device hero slideshow with two-second rotation.
 - `src/components/landing/Consultation.tsx`: shared homepage/product consultation, dropdown and acknowledged delivery states.
-- `src/lib/consultation.ts`: same-origin delivery client.
-- `src/server/consultation.ts`, `src/routes/api.consultation.ts`: validated server-side forwarding.
-- `tests/consultation-api.test.mjs`: isolated webhook integration checks.
+- `src/lib/consultation.ts`: direct webhook delivery client.
 - `scripts/check-lead-contract.mjs`: preserves the existing contact payload and validation contract.
 - `scripts/live-lead-smoke.mjs`, `.github/workflows/lead-webhook-smoke.yml`: explicit one-record live acknowledgement check.
 - `src/components/landing/Site.tsx`: compatibility exports for existing route imports.
@@ -58,16 +56,20 @@ Every product page has a “تغییر محصول” link back to the homepage h
 - `scripts/ui-review.mjs`: all-route browser review at six widths.
 - `scripts/measure-home-baseline.mjs`: reproducible before/after homepage measurements.
 - `scripts/capture-review-previews.mjs`: bounded visual-review previews and full PNG captures.
-- `scripts/check-live-preview.mjs`: deployed-preview checks.
+- `src/lib/site-path.ts`, `src/router.tsx`, `vite.config.ts`: repository base paths for routes and assets.
+- `.github/workflows/github-pages.yml`, `scripts/export-github-pages.mjs`, `scripts/review-github-pages.mjs`: static export, browser review and publication.
+- `scripts/check-webhook-cors.mjs`: read-only production webhook CORS probe.
 - `scripts/check-lint-regressions.mjs`: compare lint findings with the unchanged baseline.
 - `docs/SANA-UI-REVIEW.md`: this review record.
 
 ## Validation and comparison
 
-The first redesigned build passed production build, TypeScript, six unit tests, route checks and Chromium review of all six routes at 360, 390, 430, 768, 1024 and 1440px. These checks cover family switching, keyboard focus, direct family links, attribution, image decoding, section navigation, technical-table alignment, number/icon legibility and three-field product forms and a four-field homepage form. Manual visual inspection covered the home, BHA5000 and FS-205 at mobile and desktop widths. Final runs additionally collect console errors and verify the deployed preview.
+The first redesigned build passed production build, TypeScript, six unit tests, route checks and Chromium review of all six routes at 360, 390, 430, 768, 1024 and 1440px. These checks cover family switching, keyboard focus, direct family links, attribution, image decoding, section navigation, technical-table alignment, number/icon legibility and three-field product forms and a four-field homepage form. Manual visual inspection covered the home, BHA5000 and FS-205 at mobile and desktop widths. Final runs additionally collect console errors and verify the static export.
 
 Full repository lint is run and its JSON report retained. The baseline itself has formatting errors and existing Fast Refresh warnings. The regression check compares finding signatures and multiplicities against the immutable baseline, fails for any additional finding and reports remaining baseline errors explicitly. It preserves product content while reporting remaining pre-existing formatting findings.
 
 Final before/after homepage heights are recorded in `home-comparison.json` in the latest workflow artifact. Measurements compare the original all-five-device homepage with each selected family in the current design; all five devices remain accessible through the selector and the hero slideshow. The browser review checks the two-second slide interval, pause, all five manual choices and return-to-home links.
 
-[Before/after measurements and full PNG screenshots](https://github.com/mo90mosleh/ortanes-leb-gift/actions/runs/39681761176/artifacts/12384577593) are available in the initial review artifact. Each final workflow run saves updated screenshots, console checks, lint JSON, measurements and live-preview results as `landing-ui-review` (seven-day retention). See the latest run for the PR branch in [GitHub Actions](https://github.com/mo90mosleh/ortanes-leb-gift/actions/workflows/landing-ui.yml).
+[Before/after measurements and full PNG screenshots](https://github.com/mo90mosleh/ortanes-leb-gift/actions/runs/39681761176/artifacts/12384577593) are available in the initial review artifact. Each final workflow run saves updated screenshots, console checks, lint JSON, measurements and static-export results as `landing-ui-review` (seven-day retention). See the latest run for the PR branch in [GitHub Actions](https://github.com/mo90mosleh/ortanes-leb-gift/actions/workflows/landing-ui.yml).
+
+The latest form refinement clears the entire form only after HTTP acknowledgement and displays the requested Persian success message. Decorative plus signs have been removed from product application/benefit cards; the genuine expandable FAQ controls retain their affordance. Static-only tests check all six exported pages at mobile and desktop widths, image loading, base-prefixed navigation, 404 behavior, console errors and intercepted successful submissions.
