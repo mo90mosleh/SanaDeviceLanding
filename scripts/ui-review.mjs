@@ -189,6 +189,10 @@ async function reviewConsultation(page, route, width) {
   if (route === "/poct/fs-114" && width === 390) await page.keyboard.press("Escape");
   else await success.getByRole("button", { name: "متوجه شدم" }).click();
   await success.waitFor({ state: "hidden" });
+  await page.waitForFunction(() => {
+    const button = document.querySelector('#consultation form button[type="submit"]');
+    return document.body.style.overflow === "" && document.activeElement === button;
+  });
   assert.equal(await page.evaluate(() => document.body.style.overflow), "");
   assert.equal(
     await form.locator('button[type="submit"]').evaluate((node) => node === document.activeElement),
