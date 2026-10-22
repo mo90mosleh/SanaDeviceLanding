@@ -89,21 +89,3 @@ jobs:
           path: artifacts/ui-review
           retention-days: 7
           if-no-files-found: ignore
-  format-review:
-    runs-on: ubuntu-latest
-    timeout-minutes: 6
-    env:
-      NITRO_PRESET: node-server
-    steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 10
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm build
-        continue-on-error: true
-      - run: node scripts/print-format-review.mjs

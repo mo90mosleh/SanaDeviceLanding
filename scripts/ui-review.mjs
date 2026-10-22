@@ -11,7 +11,10 @@ const { chromium } = await import(
 const base = process.env.SANA_QA_URL || "http://127.0.0.1:4173";
 const output = path.resolve("artifacts/ui-review");
 const endpoint = process.env.VITE_CONSULTATION_API_URL;
-assert.ok(endpoint && endpoint.includes("forms.example.test"), "Regular browser QA must use the isolated test endpoint");
+assert.ok(
+  endpoint && endpoint.includes("forms.example.test"),
+  "Regular browser QA must use the isolated test endpoint",
+);
 await mkdir(output, { recursive: true });
 const routes = [
   "/",
@@ -72,7 +75,14 @@ async function reviewConsultation(page, route, width) {
         body: reject ? "failed" : "Workflow was started",
       });
     } else if (request.method() === "OPTIONS" && request.url() === endpoint) {
-      await intercept.fulfill({ status: 204, headers: { "Access-Control-Allow-Origin": new URL(base).origin, "Access-Control-Allow-Methods": "POST, OPTIONS", "Access-Control-Allow-Headers": "Content-Type" } });
+      await intercept.fulfill({
+        status: 204,
+        headers: {
+          "Access-Control-Allow-Origin": new URL(base).origin,
+          "Access-Control-Allow-Methods": "POST, OPTIONS",
+          "Access-Control-Allow-Headers": "Content-Type",
+        },
+      });
     } else if (["POST", "PUT", "PATCH", "DELETE"].includes(request.method())) {
       unexpected.push(request.url());
       await intercept.abort();
@@ -371,7 +381,8 @@ try {
       const errors = [];
       page.on("pageerror", (error) => errors.push(error.message));
       page.on("console", (message) => {
-        if (message.type() === "error" && !message.text().includes("502")) errors.push(message.text());
+        if (message.type() === "error" && !message.text().includes("502"))
+          errors.push(message.text());
       });
       const name = route === "/" ? "home" : route.replaceAll("/", "-").slice(1);
       const result = { route, width, status: "failed" };

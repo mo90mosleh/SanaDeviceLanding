@@ -15,7 +15,11 @@ const families: readonly Family[] = ["CBC", "POCT"];
 function ProductCard({ product }: { product: Product }) {
   return (
     <article className="product-card" data-family={product.category.toLowerCase()}>
-      <a className="product-visual" href={pagePath(product.route)} aria-label={`مشاهده ${product.name}`}>
+      <a
+        className="product-visual"
+        href={pagePath(product.route)}
+        aria-label={`مشاهده ${product.name}`}
+      >
         <ProductImage product={product} width={360} height={280} loading="lazy" />
       </a>
       <div className="card-content">

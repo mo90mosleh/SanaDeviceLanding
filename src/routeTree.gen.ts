@@ -10,7 +10,6 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as ApiConsultationRouteImport } from './routes/api.consultation'
 import { Route as CbcBha3000RouteImport } from './routes/cbc.bha3000'
 import { Route as CbcBha5000RouteImport } from './routes/cbc.bha5000'
 import { Route as CbcBha5100RouteImport } from './routes/cbc.bha5100'
@@ -20,11 +19,6 @@ import { Route as PoctFs205RouteImport } from './routes/poct.fs-205'
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiConsultationRoute = ApiConsultationRouteImport.update({
-  id: '/api/consultation',
-  path: '/api/consultation',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CbcBha3000Route = CbcBha3000RouteImport.update({
@@ -55,7 +49,6 @@ const PoctFs205Route = PoctFs205RouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/api/consultation': typeof ApiConsultationRoute
   '/cbc/bha3000': typeof CbcBha3000Route
   '/cbc/bha5000': typeof CbcBha5000Route
   '/cbc/bha5100': typeof CbcBha5100Route
@@ -64,7 +57,6 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/api/consultation': typeof ApiConsultationRoute
   '/cbc/bha3000': typeof CbcBha3000Route
   '/cbc/bha5000': typeof CbcBha5000Route
   '/cbc/bha5100': typeof CbcBha5100Route
@@ -74,7 +66,6 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/api/consultation': typeof ApiConsultationRoute
   '/cbc/bha3000': typeof CbcBha3000Route
   '/cbc/bha5000': typeof CbcBha5000Route
   '/cbc/bha5100': typeof CbcBha5100Route
@@ -85,7 +76,6 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/api/consultation'
     | '/cbc/bha3000'
     | '/cbc/bha5000'
     | '/cbc/bha5100'
@@ -94,7 +84,6 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/api/consultation'
     | '/cbc/bha3000'
     | '/cbc/bha5000'
     | '/cbc/bha5100'
@@ -103,7 +92,6 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
-    | '/api/consultation'
     | '/cbc/bha3000'
     | '/cbc/bha5000'
     | '/cbc/bha5100'
@@ -113,7 +101,6 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  ApiConsultationRoute: typeof ApiConsultationRoute
   CbcBha3000Route: typeof CbcBha3000Route
   CbcBha5000Route: typeof CbcBha5000Route
   CbcBha5100Route: typeof CbcBha5100Route
@@ -128,13 +115,6 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/consultation': {
-      id: '/api/consultation'
-      path: '/api/consultation'
-      fullPath: '/api/consultation'
-      preLoaderRoute: typeof ApiConsultationRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/cbc/bha3000': {
@@ -177,7 +157,6 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  ApiConsultationRoute: ApiConsultationRoute,
   CbcBha3000Route: CbcBha3000Route,
   CbcBha5000Route: CbcBha5000Route,
   CbcBha5100Route: CbcBha5100Route,

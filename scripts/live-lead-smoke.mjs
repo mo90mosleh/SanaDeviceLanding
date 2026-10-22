@@ -17,8 +17,7 @@ const page = await browser.newPage({
 });
 let requests = 0;
 page.on("request", (request) => {
-  if (request.method() === "POST" && request.url() === endpoint)
-    requests++;
+  if (request.method() === "POST" && request.url() === endpoint) requests++;
 });
 try {
   await page.goto(
@@ -39,9 +38,7 @@ try {
     });
   }
   const responsePromise = page.waitForResponse(
-    (response) =>
-      response.url() === endpoint &&
-      response.request().method() === "POST",
+    (response) => response.url() === endpoint && response.request().method() === "POST",
   );
   await form.getByRole("button", { name: "ثبت درخواست مشاوره", exact: true }).click();
   const response = await responsePromise;

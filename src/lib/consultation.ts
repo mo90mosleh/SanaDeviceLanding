@@ -35,7 +35,8 @@ export function validateLead(fields: LeadFields): LeadErrors {
 export type SubmissionResult = { status: "submitted" };
 export type SubmissionHandler = (payload: LeadPayload) => Promise<SubmissionResult>;
 // Public by design: the owner approved direct n8n submission from GitHub Pages.
-export const consultationEndpoint = import.meta.env?.["VITE_CONSULTATION_API_URL"] ||
+export const consultationEndpoint =
+  import.meta.env?.["VITE_CONSULTATION_API_URL"] ||
   "https://n8n.alecasgari.com/webhook/83591aad-47e3-475b-99a9-2f3d6d408e00";
 export const submitConsultation: SubmissionHandler = async (payload) => {
   const response = await fetch(consultationEndpoint, {

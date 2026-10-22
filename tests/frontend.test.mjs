@@ -9,9 +9,8 @@ async function moduleFrom(path) {
   }).outputText;
   return import("data:text/javascript;base64," + Buffer.from(js).toString("base64"));
 }
-const { validateLead, normalizeMobile, submitConsultation, consultationEndpoint } = await moduleFrom(
-  "../src/lib/consultation.ts",
-);
+const { validateLead, normalizeMobile, submitConsultation, consultationEndpoint } =
+  await moduleFrom("../src/lib/consultation.ts");
 const { captureAttribution } = await moduleFrom("../src/lib/attribution.ts");
 const { products } = await moduleFrom("../src/components/landing/products.ts");
 const valid = {
@@ -61,7 +60,10 @@ test("Submission posts JSON to the configured webhook and requires HTTP acknowle
     assert.equal(calls[0].options.method, "POST");
     assert.deepEqual(JSON.parse(calls[0].options.body), payload);
     assert.ok(calls[0].options.signal instanceof AbortSignal);
-    for (const response of [new Response("failed", { status: 502 }), new Response(null, { status: 400 })]) {
+    for (const response of [
+      new Response("failed", { status: 502 }),
+      new Response(null, { status: 400 }),
+    ]) {
       globalThis.fetch = async () => response;
       await assert.rejects(submitConsultation(payload));
     }

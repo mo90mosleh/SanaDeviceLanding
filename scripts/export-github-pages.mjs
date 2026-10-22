@@ -7,7 +7,14 @@ const base = process.env.SANA_BASE_PATH || "/ortanes-leb-gift/";
 assert.ok(base.startsWith("/") && base.endsWith("/"));
 const output = path.resolve("artifacts/github-pages");
 const origin = "http://127.0.0.1:4175";
-const routes = ["/", "/cbc/bha3000", "/cbc/bha5000", "/cbc/bha5100", "/poct/fs-114", "/poct/fs-205"];
+const routes = [
+  "/",
+  "/cbc/bha3000",
+  "/cbc/bha5000",
+  "/cbc/bha5100",
+  "/poct/fs-114",
+  "/poct/fs-205",
+];
 await rm(output, { recursive: true, force: true });
 await mkdir(output, { recursive: true });
 await cp(".output/public", output, { recursive: true });
@@ -22,7 +29,9 @@ try {
     try {
       ready = (await fetch(origin + base)).ok;
       if (ready) break;
-    } catch { /* Wait for the existing server build to start. */ }
+    } catch {
+      /* Wait for the existing server build to start. */
+    }
     await new Promise((resolve) => setTimeout(resolve, 500));
   }
   assert.ok(ready, "The server-rendered export did not start");
