@@ -238,9 +238,7 @@ export function Consultation({
           <Check size={36} strokeWidth={2.4} />
         </span>
         <h2 id="consultation-success-title">اطلاعات با موفقیت ثبت شد.</h2>
-        <p id="consultation-success-description">
-          درخواست شما برای پیگیری به سانا ارسال شد.
-        </p>
+        <p id="consultation-success-description">درخواست شما برای پیگیری به سانا ارسال شد.</p>
         <button
           type="button"
           className="button primary success-confirm"

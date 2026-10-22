@@ -21,12 +21,14 @@ page.on("request", (request) => {
 });
 try {
   await page.goto(
-    origin + "/?utm_source=integration-test&utm_medium=qa&utm_campaign=sana-webhook-check&utm_content=popup-verification&utm_term=fs-205",
+    origin +
+      "/?utm_source=integration-test&utm_medium=qa&utm_campaign=sana-webhook-check&utm_content=popup-verification&utm_term=fs-205",
     { waitUntil: "networkidle" },
   );
   // Never submit a synthetic record until the newly published dialog is present.
   for (let attempt = 0; !(await page.locator("dialog.success-dialog").count()); attempt++) {
-    if (attempt >= 18) throw new Error("The updated frontend has not been published yet; no lead was sent");
+    if (attempt >= 18)
+      throw new Error("The updated frontend has not been published yet; no lead was sent");
     await page.waitForTimeout(5000);
     await page.reload({ waitUntil: "networkidle" });
   }

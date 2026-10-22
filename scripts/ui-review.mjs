@@ -175,7 +175,12 @@ async function reviewConsultation(page, route, width) {
   if (home) assert.equal(await form.locator("select").inputValue(), "");
   assert.equal(calls.length, home && width === 390 ? 2 : 1);
   assert.equal(await form.locator("[role=status]").textContent(), "");
-  assert.equal(await success.getByRole("button", { name: "متوجه شدم" }).evaluate((node) => node === document.activeElement), true);
+  assert.equal(
+    await success
+      .getByRole("button", { name: "متوجه شدم" })
+      .evaluate((node) => node === document.activeElement),
+    true,
+  );
   await page.keyboard.press("Tab");
   assert.equal(await page.evaluate(() => !!document.activeElement.closest("dialog")), true);
   if (home && [390, 1440].includes(width)) {
@@ -185,7 +190,10 @@ async function reviewConsultation(page, route, width) {
   else await success.getByRole("button", { name: "متوجه شدم" }).click();
   await success.waitFor({ state: "hidden" });
   assert.equal(await page.evaluate(() => document.body.style.overflow), "");
-  assert.equal(await form.locator('button[type="submit"]').evaluate((node) => node === document.activeElement), true);
+  assert.equal(
+    await form.locator('button[type="submit"]').evaluate((node) => node === document.activeElement),
+    true,
+  );
 }
 
 async function reviewFamilySelector(page, html, width) {
