@@ -38,6 +38,9 @@ export function Consultation({
     return () => {
       dialog.close();
       document.body.style.overflow = previousOverflow;
+      form.current
+        ?.querySelector<HTMLButtonElement>('button[type="submit"]')
+        ?.focus({ preventScroll: true });
     };
   }, [successOpen]);
 
@@ -225,6 +228,16 @@ export function Consultation({
         aria-labelledby="consultation-success-title"
         aria-describedby="consultation-success-description"
         onClose={() => setSuccessOpen(false)}
+        onKeyDown={(event) => {
+          if (event.key !== "Tab") return;
+          const buttons = event.currentTarget.querySelectorAll<HTMLButtonElement>("button");
+          const first = buttons.item(0);
+          const last = buttons.item(buttons.length - 1);
+          if (document.activeElement === (event.shiftKey ? first : last)) {
+            event.preventDefault();
+            (event.shiftKey ? last : first)?.focus();
+          }
+        }}
       >
         <button
           type="button"
