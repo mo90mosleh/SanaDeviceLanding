@@ -58,7 +58,7 @@ test("Submission posts JSON to the configured webhook and requires HTTP acknowle
     assert.equal(calls[0].options.mode, "cors");
     assert.equal(calls[0].options.credentials, "omit");
     assert.equal(calls[0].options.method, "POST");
-    assert.deepEqual(JSON.parse(calls[0].options.body), payload);
+    assert.deepEqual(JSON.parse(calls[0].options.body), { ...payload, fullName: payload.name });
     assert.ok(calls[0].options.signal instanceof AbortSignal);
     for (const response of [
       new Response("failed", { status: 502 }),

@@ -146,6 +146,7 @@ async function reviewConsultation(page, route, width) {
   );
   const item = calls.at(-1);
   assert.equal(item.name, "کاربر آزمایشی");
+  assert.equal(item.fullName, item.name);
   assert.equal(item.organization, "آزمایشگاه آزمایشی");
   assert.equal(item.mobile, "09123456789");
   const model = home ? "FS-205" : route.split("/").at(-1).toUpperCase();

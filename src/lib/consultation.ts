@@ -44,7 +44,7 @@ export const submitConsultation: SubmissionHandler = async (payload) => {
     mode: "cors",
     credentials: "omit",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
+    body: JSON.stringify({ ...payload, fullName: payload.name }),
     signal: AbortSignal.timeout(20_000),
   });
   if (!response.ok) throw new Error("The webhook did not acknowledge the request");

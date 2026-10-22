@@ -132,6 +132,7 @@ try {
           calls++;
           const payload = request.postDataJSON();
           assert.equal(payload.landingPage, route);
+          assert.equal(payload.fullName, "کاربر آزمایشی");
           assert.equal(
             payload.productModel,
             route === "/" ? "FS-205" : route.split("/").at(-1).toUpperCase(),

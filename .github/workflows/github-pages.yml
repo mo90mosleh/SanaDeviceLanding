@@ -43,7 +43,7 @@ jobs:
         run: |
           echo "SANA_QA_DIR=$RUNNER_TEMP/sana-pages-qa" >> "$GITHUB_ENV"
           npm install --prefix "$RUNNER_TEMP/sana-pages-qa" --no-save playwright@1.56.1
-          "$RUNNER_TEMP/sana-pages-qa/node_modules/.bin/playwright" install --with-deps chromium
+          "$RUNNER_TEMP/sana-pages-qa/node_modules/.bin/playwright" install chromium
       - name: Review all exported static routes and mocked form submissions
         run: node scripts/review-github-pages.mjs
       - uses: actions/upload-artifact@v4
