@@ -98,3 +98,23 @@ export async function reviewPhoneInput(page, form) {
   await alert.getByRole("button", { name: "متوجه شدم" }).click();
   assert.equal(await phone.inputValue(), "");
 }
+
+export async function reviewFamilyTheme(page, route) {
+  const blue = "rgb(0, 71, 191)";
+  const green = "rgb(2, 117, 59)";
+  if (route === "/") {
+    for (const [index, expected] of [[3, blue], [4, blue], [0, green]]) {
+      await page.locator(".slideshow-dots button").nth(index).click();
+      await page.waitForFunction(({ index, expected }) => {
+        const showcase = document.querySelector(".hero-showcase");
+        return Number(showcase.dataset.slideIndex) === index &&
+          getComputedStyle(showcase.querySelector(".showcase-details")).color === expected;
+      }, { index, expected });
+      assert.equal(await page.locator(".hero-showcase").getAttribute("data-family"), index >= 3 ? "poct" : "cbc");
+    }
+  } else {
+    const expected = route.startsWith("/poct") ? blue : green;
+    assert.equal(await page.locator(".device-hero .button.primary").evaluate(node => getComputedStyle(node).backgroundColor), expected);
+    assert.equal(await page.locator(".mobile-cta .button").evaluate(node => getComputedStyle(node).backgroundColor), expected);
+  }
+}

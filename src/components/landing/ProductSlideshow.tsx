@@ -36,6 +36,7 @@ export function ProductSlideshow() {
       aria-label="نمایش دستگاه‌های SANA"
       aria-roledescription="اسلایدر"
       data-slide-index={index}
+      data-family={product.category.toLowerCase()}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       onFocusCapture={() => setFocused(true)}

@@ -2,6 +2,7 @@ import {
   openMobileConsultation,
   selectConsultationProduct,
   reviewPhoneInput,
+  reviewFamilyTheme,
 } from "./review-mobile-consultation.mjs";
 import assert from "node:assert/strict";
 import { createServer } from "node:http";
@@ -110,6 +111,7 @@ try {
           nodes.map((node) => node.getAttribute("href") || node.getAttribute("src")),
         ))
         assert.ok(target.startsWith(base), `Unprefixed GitHub Pages URL: ${target}`);
+      await reviewFamilyTheme(page, route);
       await openMobileConsultation(page, route, width);
       const form = page.locator("#consultation form");
       await reviewPhoneInput(page, form);

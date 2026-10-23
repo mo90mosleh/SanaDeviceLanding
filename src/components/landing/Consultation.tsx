@@ -211,7 +211,7 @@ export function Consultation({
           {products
             .filter((item) => !product || item.category === product.category)
             .map((item) => (
-              <label className="consult-product-option" key={item.id}>
+              <label className="consult-product-option" key={item.id} data-family={item.category.toLowerCase()}>
                 <input
                   type="radio"
                   name="product"
@@ -443,7 +443,9 @@ export function Consultation({
           className="consult-dialog"
           aria-labelledby="consult-dialog-title"
           aria-describedby="consult-dialog-description"
-          onClose={() => setFormOpen(false)}
+          onClose={(event) => {
+          if (!event.currentTarget.open) setFormOpen(false);
+        }}
           onKeyDown={containFocus}
           onClick={(event) => {
             if (event.target === event.currentTarget) setFormOpen(false);
@@ -491,7 +493,9 @@ export function Consultation({
         className="success-dialog"
         aria-labelledby="consultation-success-title"
         aria-describedby="consultation-success-description"
-        onClose={() => setSuccessOpen(false)}
+        onClose={(event) => {
+          if (!event.currentTarget.open) setSuccessOpen(false);
+        }}
         onKeyDown={(event) => {
           if (event.key !== "Tab") return;
           const buttons = event.currentTarget.querySelectorAll<HTMLButtonElement>("button");
@@ -530,7 +534,9 @@ export function Consultation({
         role="alertdialog"
         aria-labelledby="digits-dialog-title"
         aria-describedby="digits-dialog-description"
-        onClose={() => setDigitsOpen(false)}
+        onClose={(event) => {
+          if (!event.currentTarget.open) setDigitsOpen(false);
+        }}
         onKeyDown={containFocus}
       >
         <span className="digits-symbol" aria-hidden="true" dir="ltr">

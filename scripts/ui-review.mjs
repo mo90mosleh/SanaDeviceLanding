@@ -2,6 +2,7 @@ import {
   openMobileConsultation,
   selectConsultationProduct,
   reviewPhoneInput,
+  reviewFamilyTheme,
 } from "./review-mobile-consultation.mjs";
 import assert from "node:assert/strict";
 import { mkdir, writeFile } from "node:fs/promises";
@@ -34,6 +35,7 @@ const report = [];
 
 async function reviewConsultation(page, route, width) {
   const home = route === "/";
+  await reviewFamilyTheme(page, route);
   const mobile = width <= 640;
   await openMobileConsultation(page, route, width);
   const form = page.locator("#consultation form");
