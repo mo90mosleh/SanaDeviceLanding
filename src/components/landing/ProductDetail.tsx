@@ -4,6 +4,7 @@ import type { Product } from "./products";
 import { Header, Footer } from "./SiteChrome";
 import { Consultation, ConsultationLink } from "./Consultation";
 import { ProductImage } from "./ProductImage";
+import { ManufacturerLogo } from "./ManufacturerLogo";
 import { ProductHighlights } from "./ProductHighlights";
 
 export function ProductPage({ product: p }: { product: Product }) {
@@ -37,9 +38,12 @@ export function ProductPage({ product: p }: { product: Product }) {
                 {p.manufacturer.toUpperCase()}
               </span>
             </div>
-            <p className="model-name" dir="ltr">
-              {p.name}
-            </p>
+            <div className="device-title">
+              <p className="model-name" dir="ltr">
+                {p.name}
+              </p>
+              <ManufacturerLogo manufacturer={p.manufacturer} eager />
+            </div>
             <h1>{p.headline}</h1>
             <p>{p.description}</p>
             <div className="hero-actions">
