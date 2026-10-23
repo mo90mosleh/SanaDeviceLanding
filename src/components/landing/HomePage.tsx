@@ -5,7 +5,7 @@ import { ArrowDown, ArrowLeft } from "lucide-react";
 import { Header, Footer } from "./SiteChrome";
 import { ProductImage } from "./ProductImage";
 import { ProductSlideshow } from "./ProductSlideshow";
-import { Consultation } from "./Consultation";
+import { Consultation, ConsultationLink } from "./Consultation";
 import { products } from "./products";
 import type { Product } from "./products";
 
@@ -185,10 +185,10 @@ function ProductBrowser() {
       })}
       <div className="browser-consultation">
         <p>برای بررسی شرایط خرید دستگاه موردنظر، درخواست مشاوره ثبت کنید.</p>
-        <a className="button light" href="#consultation">
+        <ConsultationLink className="button light">
           <span>دریافت مشاوره خرید</span>
           <ArrowLeft className="cta-icon" size={20} aria-hidden="true" />
-        </a>
+        </ConsultationLink>
       </div>
     </section>
   );
@@ -213,10 +213,10 @@ export function Home() {
                 <span className="button-label">انتخاب و بررسی دستگاه‌ها</span>
                 <ArrowDown className="cta-icon" size={20} strokeWidth={2} aria-hidden="true" />
               </a>
-              <a className="button light hero-consultation" href="#consultation">
+              <ConsultationLink className="button light hero-consultation">
                 <span>درخواست مشاوره خرید</span>
                 <ArrowLeft className="cta-icon" size={20} strokeWidth={2} aria-hidden="true" />
-              </a>
+              </ConsultationLink>
             </div>
           </div>
           <ProductSlideshow />
@@ -228,10 +228,10 @@ export function Home() {
             <h2>برای انتخاب دستگاه همراهتان هستیم.</h2>
             <p>نیاز آزمایشگاه خود را با کارشناسان سانا مطرح کنید.</p>
           </div>
-          <a href="#consultation" className="button primary">
+          <ConsultationLink className="button primary">
             <span className="button-label">ثبت درخواست مشاوره</span>
             <ArrowLeft className="cta-icon" size={20} strokeWidth={2} aria-hidden="true" />
-          </a>
+          </ConsultationLink>
         </section>
         <Consultation />
       </main>

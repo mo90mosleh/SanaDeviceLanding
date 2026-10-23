@@ -1,3 +1,4 @@
+import { openMobileConsultation, selectConsultationProduct } from "./review-mobile-consultation.mjs";
 import assert from "node:assert/strict";
 import { createServer } from "node:http";
 import { readFile, stat, mkdir, writeFile } from "node:fs/promises";
@@ -105,17 +106,24 @@ try {
           nodes.map((node) => node.getAttribute("href") || node.getAttribute("src")),
         ))
         assert.ok(target.startsWith(base), `Unprefixed GitHub Pages URL: ${target}`);
+      await openMobileConsultation(page, route, width);
       const form = page.locator("#consultation form");
-      assert.equal(await form.locator("input, select").count(), route === "/" ? 4 : 3);
+      assert.equal(await form.locator("input:not([type=radio]), select").count(), route === "/" && width > 640 ? 4 : 3);
       if (route === "/") {
         assert.ok((await page.locator('main a[href="#consultation"]').count()) >= 3);
-        assert.equal(await form.locator('select option:not([value=""])').count(), 5);
-        await form.getByLabel("دستگاه موردنظر").selectOption("fs-205");
-        await page.getByRole("tab", { name: /POCT/u }).click();
-        assert.equal(await page.locator("#poct").isVisible(), true);
+        if (width > 640) {
+          assert.equal(await form.locator('select option:not([value=""])').count(), 5);
+          await page.getByRole("tab", { name: /POCT/u }).click();
+          assert.equal(await page.locator("#poct").isVisible(), true);
+        }
+        await selectConsultationProduct(form, width, "fs-205");
       } else {
         assert.equal(await page.locator(".change-product").getAttribute("href"), base);
         assert.equal(await page.locator(".applications-grid .application-icon").count(), 0);
+      }
+      if (width <= 640 && ["/", "/cbc/bha5000", "/poct/fs-205"].includes(route)) {
+        await page.locator(".consult-dialog-body").evaluate(node => { node.scrollTop = 0; });
+        await captureReviewPreview(page, `mobile-form-${route === "/" ? "home" : route.split("/").at(-1)}-${width}`);
       }
       let calls = 0;
       await page.route("**/*", async (intercept) => {
@@ -167,9 +175,12 @@ try {
       const success = page.getByRole("dialog", { name: "اطلاعات با موفقیت ثبت شد." });
       await success.waitFor({ state: "visible" });
       assert.equal(calls, 1);
-      for (const input of await form.locator("input").all())
+      for (const input of await form.locator("input:not([type=radio])").all())
         assert.equal(await input.inputValue(), "");
-      if (route === "/") assert.equal(await form.locator("select").inputValue(), "");
+      if (route === "/") {
+        if (width > 640) assert.equal(await form.locator("select").inputValue(), "");
+        else assert.equal(await form.locator("input[type=radio]:checked").count(), 0);
+      }
       if (route === "/") await captureReviewPreview(page, `pages-success-popup-${width}`);
       await success.getByRole("button", { name: "متوجه شدم" }).click();
       await success.waitFor({ state: "hidden" });

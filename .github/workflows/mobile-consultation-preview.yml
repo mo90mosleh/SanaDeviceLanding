@@ -1,0 +1,45 @@
+name: Review mobile consultation popup
+on:
+  push:
+    branches: [feature/sana-mobile-consultation]
+permissions:
+  contents: read
+jobs:
+  review:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    env:
+      NITRO_PRESET: node-server
+      SANA_BASE_PATH: /SanaDeviceLanding/
+      VITE_STATIC_SITE: "true"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Format and report changed files
+        run: |
+          pnpm exec prettier --write src/components/landing/Consultation.tsx src/components/landing/HomePage.tsx src/components/landing/ProductDetail.tsx src/styles.css scripts/review-github-pages.mjs scripts/ui-review.mjs scripts/review-mobile-consultation.mjs
+          node -e 'const fs=require("node:fs"); for(const f of ["src/components/landing/Consultation.tsx","src/components/landing/HomePage.tsx","src/components/landing/ProductDetail.tsx","src/styles.css","scripts/review-github-pages.mjs","scripts/ui-review.mjs","scripts/review-mobile-consultation.mjs"]) console.log("SANA_FORMAT_FILE "+f+" "+fs.readFileSync(f).toString("base64"));'
+      - run: pnpm exec eslint src/components/landing/Consultation.tsx src/components/landing/HomePage.tsx src/components/landing/ProductDetail.tsx
+      - run: pnpm build
+      - run: pnpm typecheck
+      - run: pnpm test
+      - run: node scripts/export-github-pages.mjs
+      - name: Review mobile popup and static routes
+        run: |
+          export SANA_QA_DIR="$RUNNER_TEMP/sana-popup-qa"
+          npm install --prefix "$SANA_QA_DIR" --no-save playwright@1.56.1
+          "$SANA_QA_DIR/node_modules/.bin/playwright" install chromium
+          node scripts/review-github-pages.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mobile-consultation-review
+          path: artifacts/ui-review
+          retention-days: 7
