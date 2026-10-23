@@ -11,9 +11,4 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: python -m pip install pillow pymupdf
-      - run: python scripts/find-getein-image.py
-      - uses: actions/upload-artifact@v4
-        with:
-          name: sana-brand-sources
-          path: artifacts/brand-audit
-          retention-days: 7
+      - run: python scripts/fetch-getein-image.py
