@@ -2,7 +2,7 @@ name: Publish SANA to GitHub Pages
 
 on:
   push:
-    branches: [main, feature/sana-github-pages]
+    branches: [main, feature/sana-github-pages, feature/sana-repository-rename]
     paths-ignore: ["docs/**"]
   workflow_dispatch:
 
@@ -21,7 +21,7 @@ jobs:
     timeout-minutes: 12
     env:
       NITRO_PRESET: node-server
-      SANA_BASE_PATH: /ortanes-leb-gift/
+      SANA_BASE_PATH: ${{ github.ref == 'refs/heads/feature/sana-repository-rename' && '/SanaDeviceLanding/' || format('/{0}/', github.event.repository.name) }}
       VITE_STATIC_SITE: "true"
     steps:
       - uses: actions/checkout@v4

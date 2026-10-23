@@ -2,8 +2,9 @@ import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
 import { cp, mkdir, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
+import { pagesBase } from "./github-pages-config.mjs";
 
-const base = process.env.SANA_BASE_PATH || "/ortanes-leb-gift/";
+const base = pagesBase;
 assert.ok(base.startsWith("/") && base.endsWith("/"));
 const output = path.resolve("artifacts/github-pages");
 const origin = "http://127.0.0.1:4175";

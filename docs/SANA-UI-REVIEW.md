@@ -1,6 +1,6 @@
 # SANA interface refinement
 
-Publication target: https://mo90mosleh.github.io/ortanes-leb-gift/
+Publication target: https://mo90mosleh.github.io/SanaDeviceLanding/
 
 ## Audit and implementation
 
@@ -70,6 +70,6 @@ Full repository lint is run and its JSON report retained. The baseline itself ha
 
 Final before/after homepage heights are recorded in `home-comparison.json` in the latest workflow artifact. Measurements compare the original all-five-device homepage with each selected family in the current design; all five devices remain accessible through the selector and the hero slideshow. The browser review checks the two-second slide interval, pause, all five manual choices and return-to-home links.
 
-[Before/after measurements and full PNG screenshots](https://github.com/mo90mosleh/ortanes-leb-gift/actions/runs/39681761176/artifacts/12384577593) are available in the initial review artifact. Each final workflow run saves updated screenshots, console checks, lint JSON, measurements and static-export results as `landing-ui-review` (seven-day retention). See the latest run for the PR branch in [GitHub Actions](https://github.com/mo90mosleh/ortanes-leb-gift/actions/workflows/landing-ui.yml).
+[Before/after measurements and full PNG screenshots](https://github.com/mo90mosleh/SanaDeviceLanding/actions/runs/39681761176/artifacts/12384577593) are available in the initial review artifact. Each final workflow run saves updated screenshots, console checks, lint JSON, measurements and static-export results as `landing-ui-review` (seven-day retention). See the latest run for the PR branch in [GitHub Actions](https://github.com/mo90mosleh/SanaDeviceLanding/actions/workflows/landing-ui.yml).
 
 The latest form refinement clears the entire form only after HTTP acknowledgement and displays the requested Persian success message. Decorative plus signs have been removed from product application/benefit cards; the genuine expandable FAQ controls retain their affordance. Static-only tests check all six exported pages at mobile and desktop widths, image loading, base-prefixed navigation, 404 behavior, console errors and intercepted successful submissions.

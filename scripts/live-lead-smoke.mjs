@@ -2,8 +2,9 @@ import assert from "node:assert/strict";
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
+import { pagesUrl } from "./github-pages-config.mjs";
 
-const origin = "https://mo90mosleh.github.io/ortanes-leb-gift";
+const origin = pagesUrl.replace(/\/$/u, "");
 const endpoint = "https://n8n.alecasgari.com/webhook/83591aad-47e3-475b-99a9-2f3d6d408e00";
 const output = "artifacts/live-lead";
 await mkdir(output, { recursive: true });

@@ -3,10 +3,11 @@ import { createServer } from "node:http";
 import { readFile, stat, mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
+import { pagesBase } from "./github-pages-config.mjs";
 import { captureReviewPreview, prepareReviewPage } from "./capture-review-previews.mjs";
 
 const root = path.resolve("artifacts/github-pages");
-const base = process.env.SANA_BASE_PATH || "/ortanes-leb-gift/";
+const base = pagesBase;
 const origin = "http://127.0.0.1:4182";
 const endpoint =
   process.env.VITE_CONSULTATION_API_URL ||
