@@ -5,7 +5,7 @@ import { ProductImage } from "./ProductImage";
 import { products } from "./products";
 import type { Product } from "./products";
 import { readAttribution } from "@/lib/attribution";
-import { normalizeMobile, submitConsultation, validateLead } from "@/lib/consultation";
+import { acceptsMobileEdit, submitConsultation, validateLead } from "@/lib/consultation";
 import type { LeadErrors, LeadFields, SubmissionHandler } from "@/lib/consultation";
 
 const empty: LeadFields = { name: "", organization: "", mobile: "" };
@@ -46,6 +46,10 @@ export function Consultation({
   handler?: SubmissionHandler;
 }) {
   const [fields, setFields] = useState<LeadFields>(empty);
+  const [honeypot, setHoneypot] = useState("");
+  const [digitsOpen, setDigitsOpen] = useState(false);
+  const digitsDialog = useRef<HTMLDialogElement>(null);
+  const phoneInput = useRef<HTMLInputElement>(null);
   const [selectedId, setSelectedId] = useState(product?.id || "");
   const [mobile, setMobile] = useState(false);
   const [formOpen, setFormOpen] = useState(false);
@@ -119,6 +123,20 @@ export function Consultation({
     };
   }, [successOpen, mobile]);
 
+  useEffect(() => {
+    const dialog = digitsDialog.current;
+    if (!digitsOpen || !dialog) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    dialog.showModal();
+    dialog.querySelector<HTMLButtonElement>("button")?.focus();
+    return () => {
+      dialog.close();
+      document.body.style.overflow = previousOverflow;
+      phoneInput.current?.focus({ preventScroll: true });
+    };
+  }, [digitsOpen]);
+
   async function submit(event: FormEvent) {
     event.preventDefault();
     if (pending.current) return;
@@ -139,16 +157,18 @@ export function Consultation({
     try {
       const result = await handler({
         name: fields.name.trim(),
-        mobile: normalizeMobile(fields.mobile),
+        mobile: fields.mobile,
         organization: fields.organization.trim(),
         productModel: selectedProduct.model,
         manufacturer: selectedProduct.manufacturer,
         productCategory: selectedProduct.category,
         landingPage: product ? product.route : "/",
         utm: readAttribution(),
+        honeypot,
       });
       if (result.status !== "submitted") throw new Error("Submission was not acknowledged");
       setFields(empty);
+      setHoneypot("");
       setSelectedId(product?.id || "");
       completing.current = true;
       setFormOpen(false);
@@ -169,6 +189,11 @@ export function Consultation({
         aria-label={product ? `فرم مشاوره ${product.model}` : "فرم مشاوره انتخاب دستگاه"}
         aria-busy={busy}
       >
+        <div className="form-honeypot" aria-hidden="true">
+          <label htmlFor="lead-website">Website</label>
+          <input id="lead-website" type="text" name="website" autoComplete="off" tabIndex={-1}
+            value={honeypot} onChange={(event) => setHoneypot(event.target.value)} />
+        </div>
         {mobile && (
           <fieldset className="consult-products" disabled={busy}>
             <legend>دستگاه موردنظر</legend>
@@ -240,21 +265,41 @@ export function Consultation({
                 <span aria-hidden="true">*</span>
               </label>
               <input
+                ref={key === "mobile" ? phoneInput : undefined}
                 id={`lead-${key}`}
                 name={key}
                 value={fields[key]}
                 onChange={(event) => {
                   const value = event.target.value;
+                  if (key === "mobile") {
+                    if (/[۰-۹٠-٩]/u.test(value)) { setDigitsOpen(true); return; }
+                    if (!acceptsMobileEdit(value)) {
+                      setErrors((previous) => ({ ...previous, mobile: "شماره موبایل را با 09 و فقط با ارقام انگلیسی وارد کنید." }));
+                      return;
+                    }
+                    setErrors((previous) => ({ ...previous, mobile: undefined }));
+                  }
                   setFields((previous) => ({ ...previous, [key]: value }));
                   setMessage("");
                 }}
-                placeholder={mobile ? { name: "مثال: دکتر مریم احمدی", organization: "مثال: آزمایشگاه پاتوبیولوژی مهر", mobile: "۰۹۱۲۳۴۵۶۷۸۹" }[key] : undefined}
+                onBeforeInput={key === "mobile" ? (event) => {
+                  if (/[۰-۹٠-٩]/u.test((event.nativeEvent as InputEvent).data || "")) {
+                    event.preventDefault(); setDigitsOpen(true);
+                  }
+                } : undefined}
+                onPaste={key === "mobile" ? (event) => {
+                  if (/[۰-۹٠-٩]/u.test(event.clipboardData.getData("text"))) {
+                    event.preventDefault(); setDigitsOpen(true);
+                  }
+                } : undefined}
+                placeholder={key === "mobile" ? "09123456789" : mobile ? { name: "مثال: دکتر مریم احمدی", organization: "مثال: آزمایشگاه پاتوبیولوژی مهر" }[key] : undefined}
                 disabled={busy}
                 type={key === "mobile" ? "tel" : "text"}
-                inputMode={key === "mobile" ? "tel" : "text"}
+                inputMode={key === "mobile" ? "numeric" : "text"}
+                pattern={key === "mobile" ? "09[0-9]{9}" : undefined}
                 dir={key === "mobile" ? "ltr" : "rtl"}
                 autoComplete={{ name: "name", mobile: "tel", organization: "organization" }[key]}
-                maxLength={key === "mobile" ? 20 : key === "name" ? 100 : 150}
+                maxLength={key === "mobile" ? 11 : 100}
                 required
                 aria-invalid={!!errors[key]}
                 aria-describedby={errors[key] ? `error-${key}` : undefined}
@@ -371,6 +416,14 @@ export function Consultation({
           متوجه شدم
         </button>
       </dialog>
+    <dialog ref={digitsDialog} className="digits-dialog" role="alertdialog"
+      aria-labelledby="digits-dialog-title" aria-describedby="digits-dialog-description"
+      onClose={() => setDigitsOpen(false)} onKeyDown={containFocus}>
+      <span className="digits-symbol" aria-hidden="true" dir="ltr">123</span>
+      <h2 id="digits-dialog-title">کیبورد را به انگلیسی تغییر دهید</h2>
+      <p id="digits-dialog-description">شماره موبایل را فقط با اعداد انگلیسی و با شروع <bdi>09</bdi> وارد کنید.</p>
+      <button className="button primary full" type="button" onClick={() => setDigitsOpen(false)}>متوجه شدم</button>
+    </dialog>
     </>
   );
 }

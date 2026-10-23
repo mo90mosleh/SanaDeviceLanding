@@ -1,4 +1,4 @@
-import { openMobileConsultation, selectConsultationProduct } from "./review-mobile-consultation.mjs";
+import { openMobileConsultation, selectConsultationProduct, reviewPhoneInput } from "./review-mobile-consultation.mjs";
 import assert from "node:assert/strict";
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
@@ -33,8 +33,14 @@ async function reviewConsultation(page, route, width) {
   const mobile = width <= 640;
   await openMobileConsultation(page, route, width);
   const form = page.locator("#consultation form");
+  await reviewPhoneInput(page, form);
+  assert.equal(await form.locator("#lead-name").getAttribute("maxlength"), "100");
+  assert.equal(await form.locator("#lead-organization").getAttribute("maxlength"), "100");
+  assert.equal(await form.locator("#lead-website").getAttribute("tabindex"), "-1");
+  assert.equal(await form.locator(".form-honeypot").getAttribute("aria-hidden"), "true");
+
   assert.equal(
-    await form.locator("input:not([type=hidden]):not([type=radio]), select, textarea").count(),
+    await form.locator("input:not([type=hidden]):not([type=radio]):not([name=website]), select, textarea").count(),
     home && !mobile ? 4 : 3,
   );
   if (home) {
@@ -110,7 +116,7 @@ async function reviewConsultation(page, route, width) {
   for (const [field, value] of [
     ["name", "کاربر آزمایشی"],
     ["organization", "آزمایشگاه آزمایشی"],
-    ["mobile", "۰۹۱۲۳۴۵۶۷۸۹"],
+    ["mobile", "09123456789"],
   ]) {
     await form.locator(`#lead-${field}`).fill(value);
     await page.evaluate(async () => {
@@ -151,6 +157,7 @@ async function reviewConsultation(page, route, width) {
   const success = page.getByRole("dialog", { name: "اطلاعات با موفقیت ثبت شد." });
   await success.waitFor({ state: "visible" });
   const item = calls.at(-1);
+  assert.equal(item.honeypot, "");
   assert.equal(item.name, "کاربر آزمایشی");
   assert.equal(item.fullName, item.name);
   assert.equal(item.labName, item.organization);

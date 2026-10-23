@@ -1150,6 +1150,15 @@ main > *,
 .field {
   min-width: 0;
 }
+.form-honeypot {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  pointer-events: none;
+}
 .field label {
   font-size: 13px;
   display: block;
@@ -1269,6 +1278,45 @@ main > *,
 .success-confirm {
   width: 100%;
   min-height: 50px;
+}
+.digits-dialog {
+  width: min(400px, calc(100% - 40px));
+  max-height: calc(100dvh - 32px);
+  overflow: auto;
+  margin: auto;
+  padding: 28px 24px 24px;
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  background: white;
+  color: var(--ink);
+  text-align: center;
+  box-shadow: 0 24px 80px rgb(12 37 28 / 20%);
+}
+.digits-dialog::backdrop {
+  background: rgb(10 27 22 / 48%);
+  backdrop-filter: blur(3px);
+}
+.digits-symbol {
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 18px;
+  border-radius: 18px;
+  background: var(--blue-soft);
+  color: var(--blue);
+  font: 700 24px/1 Arial, sans-serif;
+}
+.digits-dialog h2 {
+  margin: 0;
+  font-size: 21px;
+  line-height: 1.7;
+}
+.digits-dialog p {
+  margin: 12px 0 24px;
+  color: var(--muted);
+  font-size: 15px;
+  line-height: 1.9;
 }
 .browser-consultation {
   display: flex;

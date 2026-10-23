@@ -1,4 +1,4 @@
-import { openMobileConsultation, selectConsultationProduct } from "./review-mobile-consultation.mjs";
+import { openMobileConsultation, selectConsultationProduct, reviewPhoneInput } from "./review-mobile-consultation.mjs";
 import assert from "node:assert/strict";
 import { createServer } from "node:http";
 import { readFile, stat, mkdir, writeFile } from "node:fs/promises";
@@ -108,7 +108,13 @@ try {
         assert.ok(target.startsWith(base), `Unprefixed GitHub Pages URL: ${target}`);
       await openMobileConsultation(page, route, width);
       const form = page.locator("#consultation form");
-      assert.equal(await form.locator("input:not([type=radio]), select").count(), route === "/" && width > 640 ? 4 : 3);
+  await reviewPhoneInput(page, form);
+  assert.equal(await form.locator("#lead-name").getAttribute("maxlength"), "100");
+  assert.equal(await form.locator("#lead-organization").getAttribute("maxlength"), "100");
+  assert.equal(await form.locator("#lead-website").getAttribute("tabindex"), "-1");
+  assert.equal(await form.locator(".form-honeypot").getAttribute("aria-hidden"), "true");
+
+      assert.equal(await form.locator("input:not([type=radio]):not([name=website]), select").count(), route === "/" && width > 640 ? 4 : 3);
       if (route === "/") {
         assert.ok((await page.locator('main a[href="#consultation"]').count()) >= 3);
         if (width > 640) {
@@ -140,6 +146,7 @@ try {
         } else if (request.url() === endpoint && request.method() === "POST") {
           calls++;
           const payload = request.postDataJSON();
+          assert.equal(payload.honeypot, "");
           assert.equal(payload.landingPage, route);
           assert.equal(payload.fullName, "کاربر آزمایشی");
           assert.equal(payload.labName, "آزمایشگاه آزمایشی");
@@ -163,7 +170,7 @@ try {
       for (const [field, value] of [
         ["name", "کاربر آزمایشی"],
         ["organization", "آزمایشگاه آزمایشی"],
-        ["mobile", "۰۹۱۲۳۴۵۶۷۸۹"],
+        ["mobile", "09123456789"],
       ]) {
         await form.locator(`#lead-${field}`).fill(value);
         await page.evaluate(async () => {
@@ -175,7 +182,7 @@ try {
       const success = page.getByRole("dialog", { name: "اطلاعات با موفقیت ثبت شد." });
       await success.waitFor({ state: "visible" });
       assert.equal(calls, 1);
-      for (const input of await form.locator("input:not([type=radio])").all())
+      for (const input of await form.locator("input:not([type=radio]):not([name=website])").all())
         assert.equal(await input.inputValue(), "");
       if (route === "/") {
         if (width > 640) assert.equal(await form.locator("select").inputValue(), "");

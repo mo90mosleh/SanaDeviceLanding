@@ -10,6 +10,7 @@ export type LeadPayload = LeadFields & {
   productCategory: string;
   landingPage: string;
   utm: Attribution;
+  honeypot?: string;
 };
 export type LeadErrors = Partial<Record<keyof LeadFields, string>>;
 export function normalizeDigits(value: string) {
@@ -22,13 +23,16 @@ export function normalizeMobile(value: string) {
     .replace(/[\s()-]/g, "")
     .replace(/^(?:\+98|0098|98)(9\d{9})$/, "0$1");
 }
+export function acceptsMobileEdit(value: string) {
+  return /^[0-9]{0,11}$/.test(value) && (value === "" || value === "0" || value.startsWith("09"));
+}
 export function validateLead(fields: LeadFields): LeadErrors {
   const errors: LeadErrors = {};
   if (fields.name.trim().length < 3 || fields.name.length > 100)
     errors.name = "نام و نام خانوادگی را کامل وارد کنید.";
-  if (!/^09\d{9}$/.test(normalizeMobile(fields.mobile)))
-    errors.mobile = "شماره موبایل معتبر ایران را وارد کنید؛ مانند ۰۹۱۲۳۴۵۶۷۸۹.";
-  if (fields.organization.trim().length < 2 || fields.organization.length > 150)
+  if (!/^09[0-9]{9}$/.test(fields.mobile))
+    errors.mobile = "شماره موبایل را با 09 و در ۱۱ رقم انگلیسی وارد کنید.";
+  if (fields.organization.trim().length < 2 || fields.organization.length > 100)
     errors.organization = "نام آزمایشگاه را وارد کنید.";
   return errors;
 }
@@ -46,6 +50,7 @@ export const submitConsultation: SubmissionHandler = async (payload) => {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       ...payload,
+      honeypot: payload.honeypot || "",
       fullName: payload.name,
       labName: payload.organization,
       product: payload.productModel,
