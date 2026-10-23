@@ -1,0 +1,19 @@
+name: SANA brand source audit
+on:
+  push:
+    branches: [feature/sana-brand-identity]
+permissions:
+  contents: read
+jobs:
+  sources:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - run: python -m pip install pillow pymupdf
+      - run: python scripts/audit-brand-images.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sana-brand-sources
+          path: artifacts/brand-audit
+          retention-days: 7
