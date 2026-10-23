@@ -126,11 +126,12 @@ export function Consultation({
   useEffect(() => {
     const dialog = digitsDialog.current;
     if (!digitsOpen || !dialog) return;
+    const returnFocus = phoneInput.current;
     dialog.showModal();
     dialog.querySelector<HTMLButtonElement>("button")?.focus();
     return () => {
       dialog.close();
-      phoneInput.current?.focus({ preventScroll: true });
+      returnFocus?.focus({ preventScroll: true });
     };
   }, [digitsOpen]);
 
