@@ -20,6 +20,8 @@ Only a successful HTTP acknowledgement displays “اطلاعات با موفق�
 
 Regular tests intercept the public endpoint and send no customer/test lead to n8n. Browser checks cover homepage/device payloads, ASCII-only input, Persian/Arabic warnings, 09 prefix, 100-character bounds, honeypot forwarding, pending/duplicate handling, errors, retry and acknowledged clearing. A separate read-only OPTIONS probe verifies the real CORS preflight. The `Verify live consultation delivery` workflow sends exactly one clearly labelled synthetic record only on manual dispatch or an explicit `[verify-webhook]` commit. That check verifies the published homepage, HTTP acknowledgement and cleared fields without claiming downstream workflow completion.
 
-## Product family colors
+## Brand and product family colors
 
-Wondfo detail pages use the SANA logo blue token `#0047bf` for primary actions, selected form cards and supporting surfaces. The homepage slideshow switches its local tokens with the active device: blue for Wondfo, green for Getein. POCT product navigation and Wondfo options in the homepage form use the same blue. Genuine manufacturer/device imagery and the SANA logo retain their original colors.
+The homepage uses the SANA logo red token `#bf0115` for its general actions and consultation form. CBC/Getein detail pages, family panels, device options and slideshow states use green `#02753b`; POCT/Wondfo equivalents use SANA logo blue `#0047bf`. The two family selectors in the homepage header retain their green/blue labels. Product-page specification links, model badges, workflow markers and focus states use the page's own color. Authentic manufacturer logos sit beside model titles and retain their original colors.
+
+The consultation transport, validation, honeypot and submission behavior are unchanged by these visual refinements.

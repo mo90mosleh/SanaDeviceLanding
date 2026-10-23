@@ -112,6 +112,9 @@ try {
         ))
         assert.ok(target.startsWith(base), `Unprefixed GitHub Pages URL: ${target}`);
       await reviewFamilyTheme(page, route);
+      if (["/cbc/bha3000", "/cbc/bha5000", "/poct/fs-205"].includes(route) && width === 390) {
+        await captureReviewPreview(page, `brand-hero-${route.split("/").at(-1)}-${width}`, { locator: page.locator(".device-hero") });
+      }
       if (route === "/" && width === 390) {
         await page.locator(".slideshow-dots button").nth(3).click();
         await captureReviewPreview(page, "wondfo-slideshow-390", {
@@ -143,7 +146,7 @@ try {
         assert.equal(await page.locator(".change-product").getAttribute("href"), base);
         assert.equal(await page.locator(".applications-grid .application-icon").count(), 0);
       }
-      if (width <= 640 && ["/", "/cbc/bha5000", "/poct/fs-205"].includes(route)) {
+      if (width <= 640 && ["/", "/cbc/bha3000", "/cbc/bha5000", "/poct/fs-205"].includes(route)) {
         await page.locator(".consult-dialog-body").evaluate((node) => {
           node.scrollTop = 0;
         });

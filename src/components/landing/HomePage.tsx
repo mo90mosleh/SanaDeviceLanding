@@ -1,9 +1,10 @@
-import { assetPath, pagePath } from "@/lib/site-path";
+import { pagePath } from "@/lib/site-path";
 import { useEffect, useRef, useState } from "react";
 import type { KeyboardEvent } from "react";
 import { ArrowDown, ArrowLeft } from "lucide-react";
 import { Header, Footer } from "./SiteChrome";
 import { ProductImage } from "./ProductImage";
+import { ManufacturerLogo } from "./ManufacturerLogo";
 import { ProductSlideshow } from "./ProductSlideshow";
 import { Consultation, ConsultationLink } from "./Consultation";
 import { products } from "./products";
@@ -152,26 +153,7 @@ function ProductBrowser() {
                 </p>
               </div>
               <div className="family-brand">
-                {isCbc ? (
-                  <span className="manufacturer-logo getein-mark">
-                    <img
-                      src={assetPath("/product-assets/getein/branding/getein-logo.png")}
-                      alt="Getein"
-                      width={400}
-                      height={59}
-                      loading="lazy"
-                    />
-                  </span>
-                ) : (
-                  <img
-                    className="manufacturer-logo"
-                    src={assetPath("/product-assets/wondfo/branding/wondfo-logo.png")}
-                    alt="Wondfo"
-                    width={160}
-                    height={55}
-                    loading="lazy"
-                  />
-                )}
+                <ManufacturerLogo manufacturer={isCbc ? "Getein" : "Wondfo"} />
                 <span className="family-count">{isCbc ? "۳ دستگاه" : "۲ دستگاه"}</span>
               </div>
             </div>

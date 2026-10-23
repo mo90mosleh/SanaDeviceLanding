@@ -10,13 +10,14 @@
   font-family: Vazirmatn, Tahoma, sans-serif;
   font-synthesis: weight;
   --logo-green: #028a3f;
-  --brand: #02753b;
-  --brand-hover: #045c32;
-  --brand-soft: #edf7f0;
-  --brand-border: #c8dfd1;
-  --brand-tint: #f6faf7;
-  --brand-ring: #02753b16;
-  --brand-shadow: #02753b14;
+  --green: #02753b;
+  --brand: var(--red);
+  --brand-hover: #990111;
+  --brand-soft: #fff1f3;
+  --brand-border: #efc8cf;
+  --brand-tint: #fff8f9;
+  --brand-ring: #bf01151c;
+  --brand-shadow: #bf011514;
   --blue: #0047bf;
   --blue-soft: #eef4ff;
   --red: #bf0115;
@@ -36,7 +37,20 @@
   background: var(--canvas);
   font-size: 15px;
 }
-/* The blue value is the existing SANA logo token. */
+/* SANA logo red leads the homepage; device families retain their own tokens. */
+body:has(.product-detail[data-family="cbc"]),
+.hero-showcase[data-family="cbc"],
+#cbc,
+#family-tab-cbc,
+.consult-product-option[data-family="cbc"] {
+  --brand: var(--green);
+  --brand-hover: #045c32;
+  --brand-soft: #edf7f0;
+  --brand-border: #c8dfd1;
+  --brand-tint: #f6faf7;
+  --brand-ring: #02753b16;
+  --brand-shadow: #02753b14;
+}
 body:has(.product-detail[data-family="poct"]),
 .hero-showcase[data-family="poct"],
 #poct,
@@ -91,7 +105,7 @@ a:focus-visible,
 button:focus-visible,
 summary:focus-visible,
 [role="tabpanel"]:focus-visible {
-  outline: 3px solid var(--blue);
+  outline: 3px solid var(--brand);
   outline-offset: 4px;
   border-radius: var(--radius-sm);
 }
@@ -215,7 +229,7 @@ main > *,
   gap: 10px;
   min-height: 44px;
   padding: 8px 14px;
-  border: 1px solid #cfe1d6;
+  border: 1px solid var(--brand-border);
   border-radius: 10px;
   color: var(--brand);
   font-size: 14px;
@@ -514,8 +528,8 @@ main > *,
   background: var(--brand-soft);
 }
 [data-family="poct"] .card-type bdi {
-  color: var(--blue);
-  background: var(--blue-soft);
+  color: var(--brand);
+  background: var(--brand-soft);
 }
 .card-model {
   font:
@@ -561,7 +575,7 @@ main > *,
   color: var(--brand-hover);
 }
 [data-family="poct"] .card-link {
-  color: var(--blue);
+  color: var(--brand);
 }
 .help-banner {
   display: flex;
@@ -570,9 +584,9 @@ main > *,
   gap: 24px;
   padding: 26px 30px;
   margin: 0 var(--gutter) 40px;
-  border: 1px solid #d5e6dc;
+  border: 1px solid var(--brand-border);
   border-radius: var(--radius);
-  background: #f5faf7;
+  background: var(--brand-tint);
 }
 .help-banner h2 {
   font-size: 24px;
@@ -703,8 +717,8 @@ main > *,
     sans-serif;
 }
 [data-family="poct"] .device-category {
-  color: var(--blue);
-  background: var(--blue-soft);
+  color: var(--brand);
+  background: var(--brand-soft);
 }
 .device-manufacturer {
   font:
@@ -784,8 +798,8 @@ main > *,
   color: var(--brand);
 }
 [data-family="poct"] .key-feature-icon {
-  color: var(--blue);
-  background: var(--blue-soft);
+  color: var(--brand);
+  background: var(--brand-soft);
 }
 .key-feature-icon svg {
   width: 22px;
@@ -905,10 +919,10 @@ main > *,
   font:
     700 18px/1.4 Arial,
     sans-serif;
-  color: var(--blue);
+  color: var(--brand);
   background: white;
   padding: 5px 9px;
-  border: 1px solid #d3e0f5;
+  border: 1px solid var(--brand-border);
   border-radius: 6px;
   letter-spacing: 0;
 }
@@ -918,8 +932,8 @@ main > *,
 }
 .spec-intro > .text-link {
   flex-shrink: 0;
-  color: var(--blue);
-  text-decoration-color: #b3c9ee;
+  color: var(--brand);
+  text-decoration-color: var(--brand-border);
 }
 .spec-table-wrap {
   overflow: hidden;
@@ -1016,7 +1030,7 @@ main > *,
   border: 1px solid var(--line);
   border-radius: 9px;
   background: white;
-  color: var(--blue);
+  color: var(--brand);
   font-size: 16px;
   line-height: 1;
   font-weight: 700;
@@ -1033,8 +1047,8 @@ main > *,
   gap: 24px;
   padding: 28px;
   margin: 40px var(--gutter) 0;
-  background: #f6f9fe;
-  border: 1px solid #dae4f5;
+  background: var(--brand-tint);
+  border: 1px solid var(--brand-border);
   border-radius: var(--radius);
 }
 .catalog-banner h2 {
@@ -1321,8 +1335,8 @@ main > *,
   height: 64px;
   margin: 0 auto 18px;
   border-radius: 18px;
-  background: var(--blue-soft);
-  color: var(--blue);
+  background: var(--brand-soft);
+  color: var(--brand);
   font:
     700 24px/1 Arial,
     sans-serif;
@@ -1461,7 +1475,7 @@ main > *,
   box-shadow: 0 0 0 3px var(--brand-ring);
 }
 .consult-product-option:has(:focus-visible) {
-  outline: 3px solid var(--blue);
+  outline: 3px solid var(--brand);
   outline-offset: 3px;
 }
 .consult-product-option input {
@@ -2386,5 +2400,50 @@ main > *,
   .showcase-details {
     font-size: 11px;
     gap: 4px;
+  }
+}
+
+body:has(.home-page) .header-families a[href$="#cbc"],
+body:has(.home-page) .header-families a[href$="#cbc"] bdi,
+#family-tab-cbc {
+  color: var(--green);
+}
+body:has(.home-page) .header-families a[href$="#poct"],
+body:has(.home-page) .header-families a[href$="#poct"] bdi,
+#family-tab-poct {
+  color: var(--blue);
+}
+.device-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+.device-title .model-name {
+  min-width: 0;
+  margin: 0;
+}
+.device-title .manufacturer-logo {
+  flex: 0 0 90px;
+  width: 90px;
+}
+.device-title .getein-mark {
+  height: auto;
+}
+.device-title > img.manufacturer-logo {
+  height: 32px;
+}
+@media (max-width: 640px) {
+  .device-title {
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+  .device-title .manufacturer-logo {
+    flex-basis: 76px;
+    width: 76px;
+  }
+  .device-title > img.manufacturer-logo {
+    height: 28px;
   }
 }

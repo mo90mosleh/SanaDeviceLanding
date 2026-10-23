@@ -117,6 +117,11 @@ export async function reviewFamilyTheme(page, route) {
   const blue = "rgb(0, 71, 191)";
   const green = "rgb(2, 117, 59)";
   if (route === "/") {
+    assert.equal(await page.locator(".home-hero .button.primary").evaluate(node => getComputedStyle(node).backgroundColor), "rgb(191, 1, 21)");
+    for (const [family, expected] of [["cbc", green], ["poct", blue]]) {
+      assert.equal(await page.locator(`.header-families a[href$="#${family}"] bdi`).evaluate(node => getComputedStyle(node).color), expected);
+      assert.equal(await page.locator(`#family-tab-${family}`).evaluate(node => getComputedStyle(node).color), expected);
+    }
     for (const [index, expected] of [
       [3, blue],
       [4, blue],
@@ -140,6 +145,21 @@ export async function reviewFamilyTheme(page, route) {
     }
   } else {
     const expected = route.startsWith("/poct") ? blue : green;
+    const manufacturer = route.startsWith("/poct") ? "Wondfo" : "Getein";
+    const logo = page.locator(".device-title img");
+    assert.equal(await logo.getAttribute("alt"), manufacturer);
+    assert.equal(await logo.evaluate(node => node.complete && node.naturalWidth > 0), true);
+    const identity = await page.locator(".device-title").evaluate(node => ({
+      width: node.clientWidth, scrollWidth: node.scrollWidth,
+      image: node.querySelector("img").getBoundingClientRect().width,
+    }));
+    assert.ok(identity.scrollWidth <= identity.width + 1);
+    assert.ok(identity.image >= 70);
+    if (route.startsWith("/cbc")) {
+      for (const selector of [".spec-model", ".spec-intro > .text-link", ".workflow li > span"]) {
+        assert.equal(await page.locator(selector).first().evaluate(node => getComputedStyle(node).color), green);
+      }
+    }
     assert.equal(
       await page
         .locator(".device-hero .button.primary")

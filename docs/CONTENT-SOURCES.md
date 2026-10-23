@@ -31,3 +31,13 @@ The old BHA5000 catalog and live photo visibly show a veterinary model label. Th
 The [current manufacturer listing](https://www.getein.com/products) describes a BHA5000 variant with a 10.1-inch display and 100,000-result memory, differing from the supplied catalog and live specifications. Page copy explicitly follows the supplied catalog (10.4-inch / 10,000) and tells buyers to confirm offered configuration. Confirm the hardware revision before approving publication.
 
 Desktop originals and synced `sources/` archives remain untouched. No unrelated regulatory files were extracted or published.
+
+## BHA3000 photograph replacement — 2026-10-23
+
+The earlier catalogue-cover image displayed a DE-SOL badge. At the owner's request it is replaced across the site with the authentic BHA-3000 product image published on [Getein's manufacturer page](https://www.getein.com/bha-3000-automatic-hematology-analyzer_p172.html).
+
+Source asset: https://www.getein.com/uploadfile/202609/18/1f6730533655b658aa9654bf7f4d5436_medium.png
+
+The 800 × 800 RGBA image is stored locally as lossless WebP at the existing asset path. Its SHA-256 is `f4f5de26b8092bdb92d6407aef7446c7f04d50387fb88fc96963daaa74cc493d`. No device features or branding are painted or generated. `ProductImage` uses an SVG display viewport to omit surplus surrounding space while retaining the entire device, as already done for BHA5000.
+
+This is an image-source correction only. The supplied PDF and every existing technical specification remain unchanged; specifications from a newer manufacturer's webpage are not copied into the landing page.

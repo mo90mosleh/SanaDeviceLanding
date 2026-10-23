@@ -19,7 +19,8 @@ export function ProductImage({
   const imageClass = ["product-image", className].filter(Boolean).join(" ");
   const label = `دستگاه ${product.name}`;
 
-  if (product.id === "bha5000") {
+  if (product.id === "bha5000" || product.id === "bha3000") {
+    const isBha3000 = product.id === "bha3000";
     return (
       <svg
         className={imageClass}
@@ -28,7 +29,7 @@ export function ProductImage({
         focusable="false"
         width={width}
         height={height}
-        viewBox="164 0 370 345"
+        viewBox={isBha3000 ? "220 240 360 365" : "164 0 370 345"}
         preserveAspectRatio="xMidYMid meet"
         overflow="hidden"
       >
@@ -37,8 +38,8 @@ export function ProductImage({
           href={assetPath(product.image)}
           x="0"
           y="0"
-          width="698"
-          height="424"
+          width={isBha3000 ? "800" : "698"}
+          height={isBha3000 ? "800" : "424"}
           aria-hidden="true"
         />
       </svg>
