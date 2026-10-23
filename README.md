@@ -1,6 +1,10 @@
-# SANA diagnostic equipment frontend
+# SANA Device Landing
 
-Persian RTL, mobile-first product selector and five shared product pages built on the repository's existing React / TanStack Start / Vite stack.
+Persian RTL, mobile-first showcase for SANA's CBC and POCT diagnostic equipment, built on the existing React / TanStack Start / Vite application.
+
+Repository: https://github.com/mo90mosleh/SanaDeviceLanding
+
+Website: https://mo90mosleh.github.io/SanaDeviceLanding/
 
 ## Local development
 
@@ -19,21 +23,23 @@ pnpm test
 pnpm test:routes
 ```
 
-The build regenerates `src/routeTree.gen.ts`. Type checking should run after the initial route generation/build. The committed pnpm lockfile records the validated dependency resolution. No hosting or domain migration is included.
+The build regenerates `src/routeTree.gen.ts`. Type checking should run after the initial build. The committed pnpm lockfile records the validated dependency resolution.
 
-Routes: `/`, `/cbc/bha3000`, `/cbc/bha5000`, `/cbc/bha5100`, `/poct/fs-114`, `/poct/fs-205`. Each route renders server-side, including metadata; unknown paths show a Persian fallback.
+Product routes remain `/cbc/bha3000`, `/cbc/bha5000`, `/cbc/bha5100`, `/poct/fs-114` and `/poct/fs-205`. The homepage is `/`. GitHub Pages publishes all six routes beneath the repository base path, with complete static HTML, authentic public assets and a Persian 404 page.
 
 ## Content and assets
 
 Structured product content: `src/components/landing/products.ts`.
 Shared page components: `src/components/landing/Site.tsx`.
-Optimized photographs, original brand marks and model-specific PDFs: `public/product-assets/`.
-Self-hosted Vazirmatn and OFL license: `public/fonts/`.
+Authentic product photographs, brand marks and model-specific PDFs: `public/product-assets/`.
+Self-hosted Vazirmatn and its OFL license: `public/fonts/`.
 
-See [catalog sources and audit](docs/CONTENT-SOURCES.md), [form integration boundary](docs/FRONTEND-INTEGRATION.md) and [verification](docs/VERIFICATION.md).
+See [catalog sources and audit](docs/CONTENT-SOURCES.md), [form integration](docs/FRONTEND-INTEGRATION.md) and [verification](docs/SHEETS-DIALOG-VERIFICATION.md).
 
 ## Consultation
 
-The default handler performs no network request and never reports a submitted request. The form validates Iranian mobile numbers, prepares a typed product-specific payload and shows an accurate not-connected notice. Only UTM campaign data is stored in sessionStorage. Personal form fields are not logged or persisted.
+Forms collect name, laboratory name and Iranian mobile number. The homepage also provides a product selector; product pages retain their current device. Requests go directly to the owner's n8n webhook using the verified Google Sheets field mapping. Acknowledged submissions clear the form and display an accessible success popup; failures preserve the input. Only UTM attribution is persisted in session storage.
 
-Do not merge or deploy without explicit owner approval.
+## Publication
+
+GitHub Actions builds, exports and reviews the existing application before publishing to GitHub Pages. The base path follows the actual repository name, and export/review tools share `scripts/github-pages-config.mjs`. A fresh push after the repository rename supplies the new GitHub context and updates the website path. The webhook endpoint and form data are unchanged by the rename.
