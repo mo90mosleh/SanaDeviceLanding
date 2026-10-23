@@ -13,6 +13,10 @@
   --brand: #02753b;
   --brand-hover: #045c32;
   --brand-soft: #edf7f0;
+  --brand-border: #c8dfd1;
+  --brand-tint: #f6faf7;
+  --brand-ring: #02753b16;
+  --brand-shadow: #02753b14;
   --blue: #0047bf;
   --blue-soft: #eef4ff;
   --red: #bf0115;
@@ -31,6 +35,20 @@
   color: var(--ink);
   background: var(--canvas);
   font-size: 15px;
+}
+/* The blue value is the existing SANA logo token. */
+body:has(.product-detail[data-family="poct"]),
+.hero-showcase[data-family="poct"],
+#poct,
+#family-tab-poct,
+.consult-product-option[data-family="poct"] {
+  --brand: var(--blue);
+  --brand-hover: #003995;
+  --brand-soft: var(--blue-soft);
+  --brand-border: #c9d9f4;
+  --brand-tint: #f6f9ff;
+  --brand-ring: #0047bf1c;
+  --brand-shadow: #0047bf14;
 }
 * {
   box-sizing: border-box;
@@ -251,7 +269,7 @@ main > *,
 }
 .primary:hover {
   background: var(--brand-hover);
-  box-shadow: 0 4px 14px #02753b14;
+  box-shadow: 0 4px 14px var(--brand-shadow);
 }
 .light {
   background: white;
@@ -278,7 +296,7 @@ main > *,
   font-size: 14px;
   font-weight: 700;
   text-decoration: underline;
-  text-decoration-color: #b7d7c5;
+  text-decoration-color: var(--brand-border);
   text-underline-offset: 6px;
 }
 .text-link:hover {
@@ -374,7 +392,7 @@ main > *,
 }
 .family-tabs button[aria-selected="true"] {
   background: white;
-  border-color: #c8dfd1;
+  border-color: var(--brand-border);
   color: var(--brand);
   box-shadow: 0 2px 6px #142c3506;
   font-weight: 700;
@@ -455,7 +473,7 @@ main > *,
     box-shadow 0.18s;
 }
 .product-card:hover {
-  border-color: #b9d5c5;
+  border-color: var(--brand-border);
   box-shadow: var(--shadow);
 }
 .product-visual {
@@ -1084,8 +1102,8 @@ main > *,
   align-items: start;
   padding: 32px;
   margin: 0 var(--gutter) 48px;
-  border: 1px solid #d6e5dc;
-  background: #f6faf7;
+  border: 1px solid var(--brand-border);
+  background: var(--brand-tint);
   border-radius: 18px;
 }
 .consult-intro h2 {
@@ -1101,7 +1119,7 @@ main > *,
   gap: 14px;
   padding: 16px 0;
   margin: 22px 0;
-  border-block: 1px solid #d6e4dc;
+  border-block: 1px solid var(--brand-border);
   font-size: 13px;
 }
 .phone-number {
@@ -1149,6 +1167,15 @@ main > *,
 }
 .field {
   min-width: 0;
+}
+.form-honeypot {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  pointer-events: none;
 }
 .field label {
   font-size: 13px;
@@ -1249,7 +1276,7 @@ main > *,
   width: 76px;
   height: 76px;
   margin: 0 auto 20px;
-  border: 1px solid #c8e4d3;
+  border: 1px solid var(--brand-border);
   border-radius: 50%;
   background: var(--brand-soft);
   color: var(--brand);
@@ -1270,6 +1297,47 @@ main > *,
   width: 100%;
   min-height: 50px;
 }
+.digits-dialog {
+  width: min(400px, calc(100% - 40px));
+  max-height: calc(100dvh - 32px);
+  overflow: auto;
+  margin: auto;
+  padding: 28px 24px 24px;
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  background: white;
+  color: var(--ink);
+  text-align: center;
+  box-shadow: 0 24px 80px rgb(12 37 28 / 20%);
+}
+.digits-dialog::backdrop {
+  background: rgb(10 27 22 / 48%);
+  backdrop-filter: blur(3px);
+}
+.digits-symbol {
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 18px;
+  border-radius: 18px;
+  background: var(--blue-soft);
+  color: var(--blue);
+  font:
+    700 24px/1 Arial,
+    sans-serif;
+}
+.digits-dialog h2 {
+  margin: 0;
+  font-size: 21px;
+  line-height: 1.7;
+}
+.digits-dialog p {
+  margin: 12px 0 24px;
+  color: var(--muted);
+  font-size: 15px;
+  line-height: 1.9;
+}
 .browser-consultation {
   display: flex;
   align-items: center;
@@ -1285,10 +1353,210 @@ main > *,
   font-size: 14px;
 }
 .hero-consultation {
-  border-color: #c8dfd1;
+  border-color: var(--brand-border);
 }
 .mobile-cta {
   display: none;
+}
+.consult-dialog {
+  position: fixed;
+  inset-block-start: calc(var(--consult-offset, 0px) + var(--consult-viewport, 100dvh) / 2);
+  inset-block-end: auto;
+  transform: translateY(-50%);
+  width: min(540px, calc(100% - 28px));
+  max-height: min(940px, calc(var(--consult-viewport, 100dvh) - 28px));
+  padding: 0;
+  margin: 0 auto;
+  border: 1px solid var(--line);
+  border-radius: 26px;
+  background: white;
+  color: var(--ink);
+  box-shadow: 0 24px 80px rgb(12 37 28 / 20%);
+  overflow: hidden;
+}
+.consult-dialog[open] {
+  display: flex;
+  flex-direction: column;
+}
+.consult-dialog::backdrop {
+  background: rgb(10 27 22 / 48%);
+  backdrop-filter: blur(4px);
+}
+.consult-dialog-header {
+  display: flex;
+  align-items: start;
+  gap: 8px;
+  padding: 22px 22px 14px;
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--line);
+}
+.consult-dialog-header > div {
+  min-width: 0;
+  flex: 1;
+}
+.consult-dialog-header h2 {
+  margin: 0 0 6px;
+  font-size: 21px;
+  line-height: 1.6;
+}
+.consult-dialog-header p {
+  margin: 0;
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.9;
+}
+.consult-close {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  color: var(--ink);
+  background: var(--soft);
+  cursor: pointer;
+}
+.consult-dialog-body {
+  padding: 18px 22px 22px;
+  overflow: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+}
+.consult-products {
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  margin: 0 0 24px;
+}
+.consult-products legend {
+  font-size: 14px;
+  font-weight: 700;
+  padding: 0;
+  margin-bottom: 12px;
+}
+.consult-product-option {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 92px;
+  padding: 12px;
+  margin-bottom: 10px;
+  border: 1px solid var(--line);
+  border-radius: 17px;
+  background: var(--brand-tint);
+  cursor: pointer;
+  transition:
+    border-color 0.15s,
+    background-color 0.15s;
+}
+.consult-product-option:last-of-type {
+  margin-bottom: 0;
+}
+.consult-product-option:has(:checked) {
+  border: 2px solid var(--brand);
+  padding: 11px;
+  background: var(--brand-soft);
+  box-shadow: 0 0 0 3px var(--brand-ring);
+}
+.consult-product-option:has(:focus-visible) {
+  outline: 3px solid var(--blue);
+  outline-offset: 3px;
+}
+.consult-product-option input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+.consult-product-photo {
+  display: grid;
+  place-items: center;
+  width: 66px;
+  height: 66px;
+  flex: 0 0 66px;
+  padding: 4px;
+  border-radius: 12px;
+  background: white;
+}
+.consult-product-photo .product-image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.consult-product-copy {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+  flex: 1;
+}
+.consult-product-copy strong {
+  text-align: right;
+  font:
+    700 15px/1.5 Arial,
+    sans-serif;
+}
+.consult-product-copy > span {
+  font-size: 12px;
+  line-height: 1.8;
+  color: var(--muted);
+}
+.consult-product-check {
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  flex: 0 0 20px;
+  align-self: start;
+  margin-top: 2px;
+  border: 1px solid #b8c9c0;
+  border-radius: 50%;
+  color: transparent;
+  background: white;
+}
+:checked ~ .consult-product-check {
+  color: white;
+  background: var(--brand);
+  border-color: var(--brand);
+}
+.consult-dialog .form-grid {
+  grid-template-columns: 1fr;
+  gap: 20px;
+}
+.consult-dialog .field label {
+  font-size: 15px;
+  margin-bottom: 8px;
+}
+.consult-dialog .field input {
+  min-height: 54px;
+  border-radius: 15px;
+  padding-inline: 15px;
+  border-color: var(--line);
+}
+.consult-dialog .field input::placeholder {
+  color: #87918b;
+  opacity: 1;
+  font-size: 14px;
+}
+.consult-dialog .field input:focus {
+  outline: 3px solid var(--brand-ring);
+  border-color: var(--brand);
+}
+.consult-dialog .small {
+  margin: 18px 0 14px;
+  color: var(--muted);
+}
+.consult-dialog button[type="submit"] {
+  min-height: 54px;
+  border-radius: 15px;
+  font-size: 16px;
+}
+.consult-dialog button:disabled,
+.consult-products:disabled .consult-product-option {
+  cursor: wait;
+  opacity: 0.65;
 }
 .fallback {
   min-height: 60vh;
@@ -1415,6 +1683,9 @@ main > *,
   }
 }
 @media (max-width: 640px) {
+  .consult-section {
+    display: none;
+  }
   :root {
     --gutter: 20px;
     --space-section: 36px;

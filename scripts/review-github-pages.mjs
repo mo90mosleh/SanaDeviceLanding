@@ -1,3 +1,9 @@
+import {
+  openMobileConsultation,
+  selectConsultationProduct,
+  reviewPhoneInput,
+  reviewFamilyTheme,
+} from "./review-mobile-consultation.mjs";
 import assert from "node:assert/strict";
 import { createServer } from "node:http";
 import { readFile, stat, mkdir, writeFile } from "node:fs/promises";
@@ -105,17 +111,46 @@ try {
           nodes.map((node) => node.getAttribute("href") || node.getAttribute("src")),
         ))
         assert.ok(target.startsWith(base), `Unprefixed GitHub Pages URL: ${target}`);
+      await reviewFamilyTheme(page, route);
+      if (route === "/" && width === 390) {
+        await page.locator(".slideshow-dots button").nth(3).click();
+        await captureReviewPreview(page, "wondfo-slideshow-390", {
+          locator: page.locator(".hero-showcase"),
+        });
+        await page.locator(".slideshow-dots button").nth(0).click();
+      }
+      await openMobileConsultation(page, route, width);
       const form = page.locator("#consultation form");
-      assert.equal(await form.locator("input, select").count(), route === "/" ? 4 : 3);
+      await reviewPhoneInput(page, form);
+      assert.equal(await form.locator("#lead-name").getAttribute("maxlength"), "100");
+      assert.equal(await form.locator("#lead-organization").getAttribute("maxlength"), "100");
+      assert.equal(await form.locator("#lead-website").getAttribute("tabindex"), "-1");
+      assert.equal(await form.locator(".form-honeypot").getAttribute("aria-hidden"), "true");
+
+      assert.equal(
+        await form.locator("input:not([type=radio]):not([name=website]), select").count(),
+        route === "/" && width > 640 ? 4 : 3,
+      );
       if (route === "/") {
         assert.ok((await page.locator('main a[href="#consultation"]').count()) >= 3);
-        assert.equal(await form.locator('select option:not([value=""])').count(), 5);
-        await form.getByLabel("دستگاه موردنظر").selectOption("fs-205");
-        await page.getByRole("tab", { name: /POCT/u }).click();
-        assert.equal(await page.locator("#poct").isVisible(), true);
+        if (width > 640) {
+          assert.equal(await form.locator('select option:not([value=""])').count(), 5);
+          await page.getByRole("tab", { name: /POCT/u }).click();
+          assert.equal(await page.locator("#poct").isVisible(), true);
+        }
+        await selectConsultationProduct(form, width, "fs-205");
       } else {
         assert.equal(await page.locator(".change-product").getAttribute("href"), base);
         assert.equal(await page.locator(".applications-grid .application-icon").count(), 0);
+      }
+      if (width <= 640 && ["/", "/cbc/bha5000", "/poct/fs-205"].includes(route)) {
+        await page.locator(".consult-dialog-body").evaluate((node) => {
+          node.scrollTop = 0;
+        });
+        await captureReviewPreview(
+          page,
+          `mobile-form-${route === "/" ? "home" : route.split("/").at(-1)}-${width}`,
+        );
       }
       let calls = 0;
       await page.route("**/*", async (intercept) => {
@@ -132,6 +167,7 @@ try {
         } else if (request.url() === endpoint && request.method() === "POST") {
           calls++;
           const payload = request.postDataJSON();
+          assert.equal(payload.honeypot, "");
           assert.equal(payload.landingPage, route);
           assert.equal(payload.fullName, "کاربر آزمایشی");
           assert.equal(payload.labName, "آزمایشگاه آزمایشی");
@@ -155,7 +191,7 @@ try {
       for (const [field, value] of [
         ["name", "کاربر آزمایشی"],
         ["organization", "آزمایشگاه آزمایشی"],
-        ["mobile", "۰۹۱۲۳۴۵۶۷۸۹"],
+        ["mobile", "09123456789"],
       ]) {
         await form.locator(`#lead-${field}`).fill(value);
         await page.evaluate(async () => {
@@ -167,9 +203,12 @@ try {
       const success = page.getByRole("dialog", { name: "اطلاعات با موفقیت ثبت شد." });
       await success.waitFor({ state: "visible" });
       assert.equal(calls, 1);
-      for (const input of await form.locator("input").all())
+      for (const input of await form.locator("input:not([type=radio]):not([name=website])").all())
         assert.equal(await input.inputValue(), "");
-      if (route === "/") assert.equal(await form.locator("select").inputValue(), "");
+      if (route === "/") {
+        if (width > 640) assert.equal(await form.locator("select").inputValue(), "");
+        else assert.equal(await form.locator("input[type=radio]:checked").count(), 0);
+      }
       if (route === "/") await captureReviewPreview(page, `pages-success-popup-${width}`);
       await success.getByRole("button", { name: "متوجه شدم" }).click();
       await success.waitFor({ state: "hidden" });

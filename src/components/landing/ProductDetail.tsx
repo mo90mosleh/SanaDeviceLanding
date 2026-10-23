@@ -1,8 +1,8 @@
 import { assetPath, pagePath } from "@/lib/site-path";
-import { ArrowDown, ArrowLeft, ArrowRight, Download, Phone, Plus } from "lucide-react";
+import { ArrowDown, ArrowLeft, ArrowRight, Download, Plus } from "lucide-react";
 import type { Product } from "./products";
 import { Header, Footer } from "./SiteChrome";
-import { Consultation } from "./Consultation";
+import { Consultation, ConsultationLink } from "./Consultation";
 import { ProductImage } from "./ProductImage";
 import { ProductHighlights } from "./ProductHighlights";
 
@@ -43,12 +43,12 @@ export function ProductPage({ product: p }: { product: Product }) {
             <h1>{p.headline}</h1>
             <p>{p.description}</p>
             <div className="hero-actions">
-              <a className="button primary" href="#consultation">
+              <ConsultationLink className="button primary">
                 <span className="button-label">
                   {p.id === "bha3000" ? "دریافت مشاوره و شرایط خرید" : "دریافت مشاوره خرید"}
                 </span>
                 <ArrowLeft className="cta-icon" size={20} strokeWidth={2} aria-hidden="true" />
-              </a>
+              </ConsultationLink>
               <a className="text-link" href="#specs">
                 <span className="button-label">مشاهده مشخصات فنی</span>
                 <ArrowDown className="cta-icon" size={20} strokeWidth={2} aria-hidden="true" />
@@ -214,18 +214,6 @@ export function ProductPage({ product: p }: { product: Product }) {
         <Consultation key={p.id} product={p} />
       </main>
       <Footer />
-      <div className="mobile-cta">
-        <a href="#consultation" className="button primary">
-          <span className="button-label">
-            مشاوره خرید <bdi>{p.model}</bdi>
-          </span>
-          <ArrowLeft className="cta-icon" size={20} strokeWidth={2} aria-hidden="true" />
-        </a>
-        <a href="tel:+982633107" className="mobile-phone">
-          <Phone className="cta-icon" size={20} strokeWidth={2} aria-hidden="true" />
-          <span>تماس</span>
-        </a>
-      </div>
     </>
   );
 }

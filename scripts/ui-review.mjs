@@ -1,3 +1,9 @@
+import {
+  openMobileConsultation,
+  selectConsultationProduct,
+  reviewPhoneInput,
+  reviewFamilyTheme,
+} from "./review-mobile-consultation.mjs";
 import assert from "node:assert/strict";
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
@@ -29,16 +35,29 @@ const report = [];
 
 async function reviewConsultation(page, route, width) {
   const home = route === "/";
+  await reviewFamilyTheme(page, route);
+  const mobile = width <= 640;
+  await openMobileConsultation(page, route, width);
   const form = page.locator("#consultation form");
+  await reviewPhoneInput(page, form);
+  assert.equal(await form.locator("#lead-name").getAttribute("maxlength"), "100");
+  assert.equal(await form.locator("#lead-organization").getAttribute("maxlength"), "100");
+  assert.equal(await form.locator("#lead-website").getAttribute("tabindex"), "-1");
+  assert.equal(await form.locator(".form-honeypot").getAttribute("aria-hidden"), "true");
+
   assert.equal(
-    await form.locator("input:not([type=hidden]), select, textarea").count(),
-    home ? 4 : 3,
+    await form
+      .locator("input:not([type=hidden]):not([type=radio]):not([name=website]), select, textarea")
+      .count(),
+    home && !mobile ? 4 : 3,
   );
   if (home) {
     assert.ok((await page.locator('main a[href="#consultation"]').count()) >= 3);
-    assert.equal(await form.locator("select optgroup").count(), 2);
-    assert.equal(await form.locator('select option:not([value=""])').count(), 5);
-    await page.locator(".hero-consultation").click();
+    if (!mobile) assert.equal(await form.locator("select optgroup").count(), 2);
+    if (!mobile) {
+      assert.equal(await form.locator('select option:not([value=""])').count(), 5);
+      await page.locator(".hero-consultation").click();
+    }
     assert.equal(await page.locator("#consultation").isVisible(), true);
   } else {
     assert.equal(await form.locator("select").count(), 0);
@@ -94,18 +113,18 @@ async function reviewConsultation(page, route, width) {
   await submit.click();
   await page.waitForFunction(
     (count) => document.querySelectorAll("#consultation [aria-invalid=true]").length === count,
-    home ? 4 : 3,
+    home ? (mobile ? 8 : 4) : 3,
   );
   assert.equal(calls.length, 0, "Invalid forms must never send a request");
   await page.evaluate(async () => {
     await new Promise(requestAnimationFrame);
     await new Promise(requestAnimationFrame);
   });
-  if (home) await form.getByLabel("دستگاه موردنظر").selectOption("fs-205");
+  if (home) await selectConsultationProduct(form, width, "fs-205");
   for (const [field, value] of [
     ["name", "کاربر آزمایشی"],
     ["organization", "آزمایشگاه آزمایشی"],
-    ["mobile", "۰۹۱۲۳۴۵۶۷۸۹"],
+    ["mobile", "09123456789"],
   ]) {
     await form.locator(`#lead-${field}`).fill(value);
     await page.evaluate(async () => {
@@ -121,7 +140,8 @@ async function reviewConsultation(page, route, width) {
     );
     assert.equal(await form.locator('button[type="submit"]').isDisabled(), true);
     assert.doesNotMatch(await form.locator("[role=status]").textContent(), /موفق/u);
-    assert.equal(await page.locator("dialog[open]").count(), 0);
+    assert.equal(await page.locator(".success-dialog[open]").count(), 0);
+    assert.equal(await page.locator(".consult-dialog[open]").count(), mobile ? 1 : 0);
     await form.evaluate((node) => node.requestSubmit());
     assert.equal(
       calls.length,
@@ -145,6 +165,7 @@ async function reviewConsultation(page, route, width) {
   const success = page.getByRole("dialog", { name: "اطلاعات با موفقیت ثبت شد." });
   await success.waitFor({ state: "visible" });
   const item = calls.at(-1);
+  assert.equal(item.honeypot, "");
   assert.equal(item.name, "کاربر آزمایشی");
   assert.equal(item.fullName, item.name);
   assert.equal(item.labName, item.organization);
@@ -172,7 +193,10 @@ async function reviewConsultation(page, route, width) {
   );
   assert.equal(await form.locator('[aria-invalid="true"]').count(), 0);
   assert.deepEqual(unexpected, [], "The browser must only post to the configured webhook");
-  if (home) assert.equal(await form.locator("select").inputValue(), "");
+  if (home) {
+    if (!mobile) assert.equal(await form.locator("select").inputValue(), "");
+    else assert.equal(await form.locator("input[type=radio]:checked").count(), 0);
+  }
   assert.equal(calls.length, home && width === 390 ? 2 : 1);
   assert.equal(await form.locator("[role=status]").textContent(), "");
   assert.equal(
@@ -189,15 +213,14 @@ async function reviewConsultation(page, route, width) {
   if (route === "/poct/fs-114" && width === 390) await page.keyboard.press("Escape");
   else await success.getByRole("button", { name: "متوجه شدم" }).click();
   await success.waitFor({ state: "hidden" });
-  await page.waitForFunction(() => {
-    const button = document.querySelector('#consultation form button[type="submit"]');
-    return document.body.style.overflow === "" && document.activeElement === button;
-  });
+  await page.waitForFunction((mobile) => {
+    const target = document.querySelector(
+      mobile ? '.mobile-cta a[href="#consultation"]' : '#consultation form button[type="submit"]',
+    );
+    return document.body.style.overflow === "" && document.activeElement === target;
+  }, mobile);
   assert.equal(await page.evaluate(() => document.body.style.overflow), "");
-  assert.equal(
-    await form.locator('button[type="submit"]').evaluate((node) => node === document.activeElement),
-    true,
-  );
+  if (mobile) assert.equal(await page.locator(".consult-dialog").isVisible(), false);
 }
 
 async function reviewFamilySelector(page, html, width) {

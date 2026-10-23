@@ -33,8 +33,9 @@ try {
     await page.waitForTimeout(5000);
     await page.reload({ waitUntil: "networkidle" });
   }
+  await page.locator('.mobile-cta a[href="#consultation"]').click();
   const form = page.locator("#consultation form");
-  await form.getByLabel("دستگاه موردنظر").selectOption("fs-205");
+  await form.locator('input[type="radio"][value="fs-205"]').check();
   for (const [field, value] of [
     ["name", "تست فنی سانا — ستون‌ها و پاپ‌آپ 2210B"],
     ["organization", "تست فنی — آزمایشگاه واقعی نیست"],
@@ -62,12 +63,14 @@ try {
   assert.equal(response.ok(), true);
   const success = page.getByRole("dialog", { name: "اطلاعات با موفقیت ثبت شد." });
   await success.waitFor({ state: "visible" });
-  for (const input of await form.locator("input").all()) assert.equal(await input.inputValue(), "");
-  assert.equal(await form.locator("select").inputValue(), "");
+  for (const input of await form.locator("input:not([type=radio])").all())
+    assert.equal(await input.inputValue(), "");
+  assert.equal(await form.locator("input[type=radio]:checked").count(), 0);
   assert.equal(requests, 1, "The smoke check must send exactly one synthetic lead");
   await page.screenshot({ path: path.join(output, "acknowledged-popup-390.png") });
   await success.getByRole("button", { name: "متوجه شدم" }).click();
   await success.waitFor({ state: "hidden" });
+  await page.locator('.mobile-cta a[href="#consultation"]').click();
   await form.screenshot({ path: path.join(output, "cleared-home-form-390.png") });
   console.log("LIVE LEAD PASS: one synthetic homepage lead accepted by the configured webhook");
 } finally {
