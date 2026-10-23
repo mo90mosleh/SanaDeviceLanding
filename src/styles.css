@@ -1305,7 +1305,9 @@ main > *,
   border-radius: 18px;
   background: var(--blue-soft);
   color: var(--blue);
-  font: 700 24px/1 Arial, sans-serif;
+  font:
+    700 24px/1 Arial,
+    sans-serif;
 }
 .digits-dialog h2 {
   margin: 0;
@@ -1423,7 +1425,9 @@ main > *,
   border-radius: 17px;
   background: #f7faf8;
   cursor: pointer;
-  transition: border-color 0.15s, background-color 0.15s;
+  transition:
+    border-color 0.15s,
+    background-color 0.15s;
 }
 .consult-product-option:last-of-type {
   margin-bottom: 0;
@@ -1468,7 +1472,9 @@ main > *,
 }
 .consult-product-copy strong {
   text-align: right;
-  font: 700 15px/1.5 Arial, sans-serif;
+  font:
+    700 15px/1.5 Arial,
+    sans-serif;
 }
 .consult-product-copy > span {
   font-size: 12px;

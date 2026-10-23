@@ -20,13 +20,35 @@ const valid = {
 };
 test("Mobile validation accepts only eleven ASCII digits starting with 09", () => {
   assert.deepEqual(validateLead(valid), {});
-  for (const mobile of ["۰۹۱۲۳۴۵۶۷۸۹", "٠٩١٢٣٤٥٦٧٨٩", "+989123456789", "00989123456789", "0912 345 6789", "0912-3456789", "09abcdefghi"]) {
+  for (const mobile of [
+    "۰۹۱۲۳۴۵۶۷۸۹",
+    "٠٩١٢٣٤٥٦٧٨٩",
+    "+989123456789",
+    "00989123456789",
+    "0912 345 6789",
+    "0912-3456789",
+    "09abcdefghi",
+  ]) {
     assert.ok(validateLead({ ...valid, mobile }).mobile);
   }
 });
 test("Mobile edits permit only the 09 prefix and eleven ASCII digits", () => {
-  for (const value of ["", "0", "09", "0912", "09123456789"]) assert.equal(acceptsMobileEdit(value), true);
-  for (const value of ["1", "9", "00", "02", "099999999999", "۰۹", "٠٩", "+98", "09 ", "09-", "09a"]) assert.equal(acceptsMobileEdit(value), false);
+  for (const value of ["", "0", "09", "0912", "09123456789"])
+    assert.equal(acceptsMobileEdit(value), true);
+  for (const value of [
+    "1",
+    "9",
+    "00",
+    "02",
+    "099999999999",
+    "۰۹",
+    "٠٩",
+    "+98",
+    "09 ",
+    "09-",
+    "09a",
+  ])
+    assert.equal(acceptsMobileEdit(value), false);
 });
 test("Invalid mobile and missing fields produce field errors", () => {
   for (const mobile of ["02112345678", "091234", "091234567890", "+971912345678", "abc"])
@@ -87,7 +109,11 @@ test("Submission posts JSON to the configured webhook and requires HTTP acknowle
     assert.ok(Number.isFinite(Date.parse(body.time)));
     assert.ok(calls[0].options.signal instanceof AbortSignal);
     await submitConsultation({ ...payload, honeypot: "https://bot.invalid" });
-    assert.equal(JSON.parse(calls.at(-1).options.body).honeypot, "https://bot.invalid", "n8n receives the unmodified trap value for filtering");
+    assert.equal(
+      JSON.parse(calls.at(-1).options.body).honeypot,
+      "https://bot.invalid",
+      "n8n receives the unmodified trap value for filtering",
+    );
     for (const response of [
       new Response("failed", { status: 502 }),
       new Response(null, { status: 400 }),

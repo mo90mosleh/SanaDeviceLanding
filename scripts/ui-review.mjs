@@ -1,4 +1,8 @@
-import { openMobileConsultation, selectConsultationProduct, reviewPhoneInput } from "./review-mobile-consultation.mjs";
+import {
+  openMobileConsultation,
+  selectConsultationProduct,
+  reviewPhoneInput,
+} from "./review-mobile-consultation.mjs";
 import assert from "node:assert/strict";
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
@@ -40,7 +44,9 @@ async function reviewConsultation(page, route, width) {
   assert.equal(await form.locator(".form-honeypot").getAttribute("aria-hidden"), "true");
 
   assert.equal(
-    await form.locator("input:not([type=hidden]):not([type=radio]):not([name=website]), select, textarea").count(),
+    await form
+      .locator("input:not([type=hidden]):not([type=radio]):not([name=website]), select, textarea")
+      .count(),
     home && !mobile ? 4 : 3,
   );
   if (home) {
@@ -206,12 +212,13 @@ async function reviewConsultation(page, route, width) {
   else await success.getByRole("button", { name: "متوجه شدم" }).click();
   await success.waitFor({ state: "hidden" });
   await page.waitForFunction((mobile) => {
-    const target = document.querySelector(mobile ? '.mobile-cta a[href="#consultation"]' : '#consultation form button[type="submit"]');
+    const target = document.querySelector(
+      mobile ? '.mobile-cta a[href="#consultation"]' : '#consultation form button[type="submit"]',
+    );
     return document.body.style.overflow === "" && document.activeElement === target;
   }, mobile);
   assert.equal(await page.evaluate(() => document.body.style.overflow), "");
   if (mobile) assert.equal(await page.locator(".consult-dialog").isVisible(), false);
-
 }
 
 async function reviewFamilySelector(page, html, width) {

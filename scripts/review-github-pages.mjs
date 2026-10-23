@@ -1,4 +1,8 @@
-import { openMobileConsultation, selectConsultationProduct, reviewPhoneInput } from "./review-mobile-consultation.mjs";
+import {
+  openMobileConsultation,
+  selectConsultationProduct,
+  reviewPhoneInput,
+} from "./review-mobile-consultation.mjs";
 import assert from "node:assert/strict";
 import { createServer } from "node:http";
 import { readFile, stat, mkdir, writeFile } from "node:fs/promises";
@@ -108,13 +112,16 @@ try {
         assert.ok(target.startsWith(base), `Unprefixed GitHub Pages URL: ${target}`);
       await openMobileConsultation(page, route, width);
       const form = page.locator("#consultation form");
-  await reviewPhoneInput(page, form);
-  assert.equal(await form.locator("#lead-name").getAttribute("maxlength"), "100");
-  assert.equal(await form.locator("#lead-organization").getAttribute("maxlength"), "100");
-  assert.equal(await form.locator("#lead-website").getAttribute("tabindex"), "-1");
-  assert.equal(await form.locator(".form-honeypot").getAttribute("aria-hidden"), "true");
+      await reviewPhoneInput(page, form);
+      assert.equal(await form.locator("#lead-name").getAttribute("maxlength"), "100");
+      assert.equal(await form.locator("#lead-organization").getAttribute("maxlength"), "100");
+      assert.equal(await form.locator("#lead-website").getAttribute("tabindex"), "-1");
+      assert.equal(await form.locator(".form-honeypot").getAttribute("aria-hidden"), "true");
 
-      assert.equal(await form.locator("input:not([type=radio]):not([name=website]), select").count(), route === "/" && width > 640 ? 4 : 3);
+      assert.equal(
+        await form.locator("input:not([type=radio]):not([name=website]), select").count(),
+        route === "/" && width > 640 ? 4 : 3,
+      );
       if (route === "/") {
         assert.ok((await page.locator('main a[href="#consultation"]').count()) >= 3);
         if (width > 640) {
@@ -128,8 +135,13 @@ try {
         assert.equal(await page.locator(".applications-grid .application-icon").count(), 0);
       }
       if (width <= 640 && ["/", "/cbc/bha5000", "/poct/fs-205"].includes(route)) {
-        await page.locator(".consult-dialog-body").evaluate(node => { node.scrollTop = 0; });
-        await captureReviewPreview(page, `mobile-form-${route === "/" ? "home" : route.split("/").at(-1)}-${width}`);
+        await page.locator(".consult-dialog-body").evaluate((node) => {
+          node.scrollTop = 0;
+        });
+        await captureReviewPreview(
+          page,
+          `mobile-form-${route === "/" ? "home" : route.split("/").at(-1)}-${width}`,
+        );
       }
       let calls = 0;
       await page.route("**/*", async (intercept) => {

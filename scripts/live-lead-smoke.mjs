@@ -63,7 +63,8 @@ try {
   assert.equal(response.ok(), true);
   const success = page.getByRole("dialog", { name: "اطلاعات با موفقیت ثبت شد." });
   await success.waitFor({ state: "visible" });
-  for (const input of await form.locator("input:not([type=radio])").all()) assert.equal(await input.inputValue(), "");
+  for (const input of await form.locator("input:not([type=radio])").all())
+    assert.equal(await input.inputValue(), "");
   assert.equal(await form.locator("input[type=radio]:checked").count(), 0);
   assert.equal(requests, 1, "The smoke check must send exactly one synthetic lead");
   await page.screenshot({ path: path.join(output, "acknowledged-popup-390.png") });
