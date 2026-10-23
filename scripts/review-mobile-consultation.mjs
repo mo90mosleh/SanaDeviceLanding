@@ -50,6 +50,18 @@ export async function openMobileConsultation(page, route, width) {
   const box = await dialog.boundingBox();
   assert.ok(box.y >= 0 && box.y + box.height <= 961, "Dialog must stay inside the mobile viewport");
   assert.equal(await dialog.evaluate((node) => node.scrollWidth <= node.clientWidth + 1), true);
+  if (width === 390) {
+    await page.setViewportSize({ width, height: 500 });
+    await page.waitForFunction(() => {
+      const rect = document.querySelector(".consult-dialog").getBoundingClientRect();
+      return rect.top >= 0 && rect.bottom <= 501;
+    });
+    await dialog.locator('button[type="submit"]').scrollIntoViewIfNeeded();
+    const button = await dialog.locator('button[type="submit"]').boundingBox();
+    assert.ok(button.y >= 0 && button.y + button.height <= 501);
+    await page.setViewportSize({ width, height: 960 });
+    await page.waitForFunction(() => document.querySelector(".consult-dialog").getBoundingClientRect().height > 500);
+  }
   const body = dialog.locator(".consult-dialog-body");
   await body.evaluate((node) => {
     node.scrollTop = 0;

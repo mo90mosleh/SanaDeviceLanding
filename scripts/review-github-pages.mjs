@@ -112,6 +112,11 @@ try {
         ))
         assert.ok(target.startsWith(base), `Unprefixed GitHub Pages URL: ${target}`);
       await reviewFamilyTheme(page, route);
+      if (route === "/" && width === 390) {
+        await page.locator(".slideshow-dots button").nth(3).click();
+        await captureReviewPreview(page, "wondfo-slideshow-390", { locator: page.locator(".hero-showcase") });
+        await page.locator(".slideshow-dots button").nth(0).click();
+      }
       await openMobileConsultation(page, route, width);
       const form = page.locator("#consultation form");
       await reviewPhoneInput(page, form);

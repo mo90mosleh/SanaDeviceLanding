@@ -96,11 +96,14 @@ export function Consultation({
         "--consult-viewport",
         `${window.visualViewport?.height || window.innerHeight}px`,
       );
+      dialog.style.setProperty("--consult-offset", `${window.visualViewport?.offsetTop || 0}px`);
     };
     resize();
     window.visualViewport?.addEventListener("resize", resize);
+    window.visualViewport?.addEventListener("scroll", resize);
     return () => {
       window.visualViewport?.removeEventListener("resize", resize);
+      window.visualViewport?.removeEventListener("scroll", resize);
       dialog.close();
       if (!completing.current) opener.current?.focus({ preventScroll: true });
     };

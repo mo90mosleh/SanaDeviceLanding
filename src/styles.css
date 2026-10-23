@@ -1359,10 +1359,14 @@ main > *,
   display: none;
 }
 .consult-dialog {
+  position: fixed;
+  inset-block-start: calc(var(--consult-offset, 0px) + var(--consult-viewport, 100dvh) / 2);
+  inset-block-end: auto;
+  transform: translateY(-50%);
   width: min(540px, calc(100% - 28px));
   max-height: min(940px, calc(var(--consult-viewport, 100dvh) - 28px));
   padding: 0;
-  margin: auto;
+  margin: 0 auto;
   border: 1px solid var(--line);
   border-radius: 26px;
   background: white;
