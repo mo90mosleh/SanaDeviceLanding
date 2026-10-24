@@ -51,10 +51,19 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     ],
     links: [
       { rel: "stylesheet", href: appCss },
-      { rel: "icon", href: assetPath("/favicon.ico"), sizes: "any" },
-      { rel: "icon", href: assetPath("/favicon.png"), type: "image/png" },
-      { rel: "apple-touch-icon", href: assetPath("/apple-touch-icon.png") },
-      { rel: "manifest", href: assetPath("/site.webmanifest") },
+      {
+        rel: "icon",
+        href: assetPath("/favicon.ico?v=red-s-20261024"),
+        sizes: "16x16 24x24 32x32 48x48 64x64 128x128 256x256",
+      },
+      {
+        rel: "icon",
+        href: assetPath("/favicon.png?v=red-s-20261024"),
+        type: "image/png",
+        sizes: "64x64",
+      },
+      { rel: "apple-touch-icon", href: assetPath("/apple-touch-icon.png?v=red-s-20261024") },
+      { rel: "manifest", href: assetPath("/site.webmanifest?v=red-s-20261024") },
     ],
   }),
   shellComponent: Shell,
