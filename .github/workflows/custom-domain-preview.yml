@@ -1,4 +1,4 @@
-name: Crawl SANA custom domain
+name: Validate SANA custom domain repair
 on:
   push:
     branches: [feature/sana-custom-domain]
@@ -6,12 +6,55 @@ permissions:
   contents: read
   pages: read
 jobs:
-  crawl:
+  validate:
     runs-on: ubuntu-24.04
-    timeout-minutes: 5
+    timeout-minutes: 12
+    env:
+      NITRO_PRESET: node-server
+      VITE_STATIC_SITE: "true"
     steps:
       - uses: actions/checkout@v4
-      - name: Crawl public pages and assets using GET and HEAD only
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - uses: actions/configure-pages@v5
+        id: pages
+      - name: Resolve actual custom domain configuration
         env:
-          GITHUB_TOKEN: ${{ github.token }}
-        run: python scripts/crawl-custom-domain.py
+          SANA_SITE_URL: ${{ steps.pages.outputs.base_url }}
+          SANA_BASE_PATH: ${{ steps.pages.outputs.base_path }}
+        run: node scripts/configure-pages-environment.mjs
+      - run: pnpm install --frozen-lockfile
+      - name: Format changed files
+        run: |
+          pnpm exec prettier --write 'scripts/github-pages-config.mjs' 'scripts/configure-pages-environment.mjs' 'tests/github-pages-config.test.mjs' '.github/workflows/github-pages.yml' 'scripts/check-webhook-cors.mjs' '.github/workflows/lead-webhook-smoke.yml' 'scripts/review-github-pages.mjs' 'scripts/crawl-published-site.mjs' 'docs/GITHUB-PAGES-PUBLICATION.md' 'README.md' 'docs/FRONTEND-INTEGRATION.md'
+          node --input-type=module <<'NODE'
+          import { readFileSync } from 'node:fs';
+          for (const file of ["scripts/github-pages-config.mjs","scripts/configure-pages-environment.mjs","tests/github-pages-config.test.mjs",".github/workflows/github-pages.yml","scripts/check-webhook-cors.mjs",".github/workflows/lead-webhook-smoke.yml","scripts/review-github-pages.mjs","scripts/crawl-published-site.mjs","docs/GITHUB-PAGES-PUBLICATION.md","README.md","docs/FRONTEND-INTEGRATION.md"]) console.log('SANA_FORMAT_FILE '+file+' '+readFileSync(file).toString('base64'));
+          NODE
+      - run: node --test tests/github-pages-config.test.mjs
+      - run: node --check scripts/crawl-published-site.mjs
+      - run: pnpm build
+      - run: pnpm typecheck
+      - run: pnpm test
+      - run: node scripts/export-github-pages.mjs
+      - name: Read-only webhook preflight from new domain
+        run: node scripts/check-webhook-cors.mjs
+      - name: Install isolated browser tooling
+        run: |
+          echo "SANA_QA_DIR=$RUNNER_TEMP/sana-pages-qa" >> "$GITHUB_ENV"
+          npm install --prefix "$RUNNER_TEMP/sana-pages-qa" --no-save playwright@1.56.1
+          "$RUNNER_TEMP/sana-pages-qa/node_modules/.bin/playwright" install chromium
+      - name: Review six static routes on mobile and desktop with mocked submissions
+        run: node scripts/review-github-pages.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: custom-domain-review
+          path: artifacts/ui-review
+          retention-days: 7
+          if-no-files-found: ignore

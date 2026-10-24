@@ -21,7 +21,6 @@ jobs:
     timeout-minutes: 12
     env:
       NITRO_PRESET: node-server
-      SANA_BASE_PATH: ${{ github.ref == 'refs/heads/feature/sana-repository-rename' && '/SanaDeviceLanding/' || format('/{0}/', github.event.repository.name) }}
       VITE_STATIC_SITE: "true"
     steps:
       - uses: actions/checkout@v4
@@ -32,6 +31,14 @@ jobs:
         with:
           node-version: 22
           cache: pnpm
+      - uses: actions/configure-pages@v5
+        id: pages
+      - name: Resolve publication URL from GitHub Pages settings
+        env:
+          SANA_SITE_URL: ${{ steps.pages.outputs.base_url }}
+          SANA_BASE_PATH: ${{ github.ref == 'refs/heads/feature/sana-repository-rename' && '/SanaDeviceLanding/' || steps.pages.outputs.base_path }}
+        run: node scripts/configure-pages-environment.mjs
+      - run: node --test tests/github-pages-config.test.mjs
       - run: pnpm install --frozen-lockfile
       - run: pnpm build
       - run: pnpm typecheck
@@ -60,14 +67,36 @@ jobs:
     if: github.ref == 'refs/heads/main'
     needs: build
     runs-on: ubuntu-24.04
-    timeout-minutes: 5
+    timeout-minutes: 8
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/configure-pages@v5
+        id: pages
         with:
           enablement: true
       - name: Deploy GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install read-only live browser tooling
+        run: |
+          echo "SANA_QA_DIR=$RUNNER_TEMP/sana-live-crawl" >> "$GITHUB_ENV"
+          npm install --prefix "$RUNNER_TEMP/sana-live-crawl" --no-save playwright@1.56.1
+          "$RUNNER_TEMP/sana-live-crawl/node_modules/.bin/playwright" install chromium
+      - name: Crawl the actual published domain without submitting forms
+        env:
+          SANA_SITE_URL: ${{ steps.pages.outputs.base_url }}
+          SANA_BASE_PATH: ${{ steps.pages.outputs.base_path }}
+        run: node scripts/crawl-published-site.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: live-domain-crawl
+          path: artifacts/live-crawl
+          retention-days: 7
+          if-no-files-found: ignore

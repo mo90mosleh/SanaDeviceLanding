@@ -110,7 +110,10 @@ try {
         .evaluateAll((nodes) =>
           nodes.map((node) => node.getAttribute("href") || node.getAttribute("src")),
         ))
-        assert.ok(target.startsWith(base), `Unprefixed GitHub Pages URL: ${target}`);
+        {
+          assert.ok(target.startsWith(base), `Unprefixed GitHub Pages URL: ${target}`);
+          if (base === "/") assert.ok(!target.startsWith("/SanaDeviceLanding/"), `Stale project prefix: ${target}`);
+        }
       await reviewFamilyTheme(page, route);
       if (["/cbc/bha3000", "/cbc/bha5000", "/poct/fs-205"].includes(route) && width === 390) {
         await captureReviewPreview(page, `brand-hero-${route.split("/").at(-1)}-${width}`, {
