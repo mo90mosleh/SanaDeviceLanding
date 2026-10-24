@@ -4,7 +4,7 @@ Persian RTL, mobile-first showcase for SANA's CBC and POCT diagnostic equipment,
 
 Repository: https://github.com/mo90mosleh/SanaDeviceLanding
 
-Website: https://mo90mosleh.github.io/SanaDeviceLanding/
+Website: https://cbc.ortanes.com/
 
 ## Local development
 
@@ -42,4 +42,4 @@ Forms collect name, laboratory name and Iranian mobile number. The homepage also
 
 ## Publication
 
-GitHub Actions builds, exports and reviews the existing application before publishing to GitHub Pages. The base path follows the actual repository name, and export/review tools share `scripts/github-pages-config.mjs`. A fresh push after the repository rename supplies the new GitHub context and updates the website path. The webhook endpoint and form data are unchanged by the rename.
+GitHub Actions builds, exports and reviews the existing application before publishing to GitHub Pages. The public URL and base path follow actual GitHub Pages settings: the custom domain `cbc.ortanes.com` publishes at `/`, while repository-based previews retain their own paths. Export, browser review and webhook CORS checks share `scripts/github-pages-config.mjs`. A read-only live crawl verifies the real domain after deployment. The webhook endpoint and form data are unchanged by publication configuration.
