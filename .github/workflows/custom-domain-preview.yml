@@ -1,0 +1,17 @@
+name: Crawl SANA custom domain
+on:
+  push:
+    branches: [feature/sana-custom-domain]
+permissions:
+  contents: read
+  pages: read
+jobs:
+  crawl:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Crawl public pages and assets using GET and HEAD only
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: python scripts/crawl-custom-domain.py
