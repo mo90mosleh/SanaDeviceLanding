@@ -1,0 +1,19 @@
+name: Inspect official PayamGostar SOAP documentation
+on:
+  push:
+    branches: [feature/sana-payamgostar-soap]
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@v4
+      - run: python scripts/inspect-payamgostar-docs.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: payamgostar-contract-inspection
+          path: artifacts/payamgostar-contract
+          retention-days: 7
