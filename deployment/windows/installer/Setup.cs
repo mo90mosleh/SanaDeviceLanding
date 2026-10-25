@@ -39,6 +39,8 @@ namespace SanaSetup {
                         string backend = Path.Combine(temp,"SanaBridgeService.exe");
                         Engine.ExtractBackend(backend);
                         Engine.Run(backend,"--self-test",240);
+                        // First install must succeed when no scheduled task exists.
+                        Engine.StopOwnedTask("SANA-Installer-Check-" + Guid.NewGuid().ToString("N"),backend);
                         Console.WriteLine("PACKAGE_CHECK_PASS");
                     } finally { Directory.Delete(temp,true); }
                     return 0;
@@ -173,6 +175,11 @@ namespace SanaSetup {
             string encoded=Convert.ToBase64String(Encoding.Unicode.GetBytes("$ErrorActionPreference='Stop'; "+script));
             Run(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System),"WindowsPowerShell\\v1.0\\powershell.exe"),"-NoProfile -NonInteractive -ExecutionPolicy Bypass -EncodedCommand "+encoded,timeout);
         }
+        internal static void StopOwnedTask(string name,string executable) {
+            // Enumerating avoids Get-ScheduledTask -TaskName raising ObjectNotFound on first install.
+            // Explicit success exit also prevents a missing task from becoming a process failure.
+            PowerShell("$tasks=@(Get-ScheduledTask -ErrorAction Stop | Where-Object {$_.TaskName -eq "+PS(name)+"}); foreach($t in $tasks){$actions=@($t.Actions); if($actions.Count -ne 1 -or $actions[0].Execute -ne "+PS(executable)+"){throw 'Task name collision'}; Stop-ScheduledTask -InputObject $t -ErrorAction Stop}; exit 0",30);
+        }
         static void BackendCommand(string executable,string config,string command,int timeout){Run(executable,"--env-file "+Quote(config)+" "+command,timeout);}
         static void Save(string filename,Dictionary<string,string> settings){File.WriteAllText(filename,json.Serialize(settings),new UTF8Encoding(false));}
         static void CopyIfExists(string source,string target){if(File.Exists(source))File.Copy(source,target,true);}
@@ -199,10 +206,11 @@ namespace SanaSetup {
                 progress("در حال بررسی ورود و مجوز خواندن؛ بدون ساخت رکورد…");
                 BackendCommand(candidate,candidateConfig,"--check-read-access",240);
                 CopyIfExists(Backend,Path.Combine(stage,"previous.exe"));CopyIfExists(Config,Path.Combine(stage,"previous.json"));CopyIfExists(Contract,Path.Combine(stage,"previous-contract.json"));
-                FriendlyFailure="نسخهٔ قبلی سرویس هنوز باز است یا پورت داخلی اشغال شده است.";
+                FriendlyFailure="بررسی اجرای خودکار ویندوز انجام نشد. دسترسی مدیر و سرویس Task Scheduler را بررسی کنید.";
                 progress("در حال تنظیم اجرای دائمی سرویس…");
-                PowerShell("$t=Get-ScheduledTask -TaskName "+PS(TaskName)+" -ErrorAction SilentlyContinue; if($t){if($t.Actions.Count -ne 1 -or $t.Actions[0].Execute -ne "+PS(Backend)+"){throw 'Task name collision'}; Stop-ScheduledTask -TaskName "+PS(TaskName)+"}",30);
+                StopOwnedTask(TaskName,Backend);
                 stopped=true;
+                FriendlyFailure="پورت داخلی 8081 در اختیار برنامهٔ دیگری است؛ هیچ برنامه‌ای متوقف نشد.";
                 bool free=false;for(int i=0;i<30;i++){try{TcpListener test=new TcpListener(IPAddress.Loopback,8081);test.Start();test.Stop();free=true;break;}catch(SocketException){Thread.Sleep(500);}}
                 if(!free)throw new InvalidOperationException("Port busy");
                 settings["PAYAMGOSTAR_CONTRACT_FILE"]=Contract;
