@@ -18,8 +18,9 @@ with string `UserKey` and `Value`. Result: `Message`, `Success`, `CrmId`.
 SearchForm inputs: `userName`, `password`, `typeKey`, `query`.
 Search results: `FormInfoList.FormInfo`; direct-ID reads also expose `FormInfo`.
 
-The query parameter is declared only as `xs:string`. These schemas do not
-specify a search language. A verified subject-scoped query template is still
-required; the service must not invent SQL, LINQ or another query expression.
+The query and typeKey parameters are declared only as `xs:string`. These schemas
+do not specify a search language or the semantic meaning of the type selector.
+A verified subject-scoped query template and independently verified typeKey are
+still required; the service must not invent SQL/LINQ or assume code-vs-GUID.
 No test may call the original live CRM. Tests serve this metadata on localhost
 and replace all SOAP responses with local fixtures.

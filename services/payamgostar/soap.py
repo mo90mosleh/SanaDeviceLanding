@@ -162,6 +162,9 @@ class FormClient:
             template = m.get("search_query_template")
             if m.get("search_query_verified") is not True or not isinstance(template, str) or template.count("{subject}") != 1:
                 raise ValueError("SearchForm query must be verified; its grammar is not defined by XSD")
+            key = m.get("search_type_key")
+            if not isinstance(key, str) or not key.strip() or m.get("read_arguments", {}).get("typeKey") != key:
+                raise ValueError("SearchForm typeKey requires independent verification")
         if "SaveForm" not in binding._operations:
             raise ValueError("Actual binding has no SaveForm")
         read = m["reconcile_operation"]
@@ -324,6 +327,13 @@ class FormClient:
             )
             if not isinstance(records, list):
                 raise ValueError()
+            if "single_record" in m["read_result"]:
+                single = path_value(response, m["read_result"]["single_record"])
+                if single is not None:
+                    if not isinstance(single, dict):
+                        raise ValueError()
+                    if single not in records:
+                        records = [*records, single]
             candidates = []
             p = m["record_paths"]
             for record in records:

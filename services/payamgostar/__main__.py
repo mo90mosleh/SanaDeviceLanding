@@ -47,10 +47,11 @@ def main():
         return
     if args.command == "prepare-contract":
         template = required("PAYAMGOSTAR_SEARCH_QUERY_TEMPLATE")
+        search_type_key = required("PAYAMGOSTAR_SEARCH_TYPE_KEY")
         if os.environ.get("PAYAMGOSTAR_SEARCH_QUERY_VERIFIED") != "true":
             raise ValueError("A verified SearchForm query is required")
         client = configured_crm(inspect_only=True)
-        manifest = validate_owner_manifest(client, template, True)
+        manifest = validate_owner_manifest(client, template, True, search_type_key)
         filename = Path(args.output or required("PAYAMGOSTAR_CONTRACT_FILE"))
         if not filename.is_absolute():
             raise ValueError("Contract file must use an absolute private path")

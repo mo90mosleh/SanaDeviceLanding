@@ -6,7 +6,7 @@
 
 WSDL اصلی و هر پنج XSD ارسالی مالک دریافت و بررسی شدند. شکل واقعی SaveForm، FormInfo، فیلدهای سفارشی و نتیجه‌ها اکنون در `profile.py` پیاده شده است. snapshot بدون آدرس نصب در `contracts/owner-2.8.8.2/` نگهداری می‌شود و تست‌ها آن را فقط روی localhost اجرا می‌کنند. شمارهٔ 2.8.8.2 نسخهٔ اعلام‌شدهٔ مالک است؛ ارتباط و مجوز حساب نصب زنده هنوز آزمایش نشده‌اند.
 
-مانع قراردادی باقی‌مانده، **زبان پارامتر query در SearchForm** است: XSD فقط xs:string می‌گوید و قالب SQL، LINQ یا متن دیگری را تعیین نمی‌کند. یک نمونهٔ معتبر جست‌وجوی Subject از مستندات/پشتیبانی پیام‌گستر و تأیید خواندنی آن لازم است. هیچ قالب production حدس زده نشده است.
+مانع قراردادی باقی‌مانده، **زبان پارامتر query در SearchForm** است: XSD فقط xs:string می‌گوید و قالب SQL، LINQ یا متن دیگری را تعیین نمی‌کند. یک نمونهٔ معتبر جست‌وجوی Subject و مقدار صحیح typeKey از مستندات/پشتیبانی پیام‌گستر و تأیید خواندنی آن لازم است؛ معنای typeKey نیز صرفاً از xs:string مشخص نمی‌شود. هیچ قالب production حدس زده نشده است.
 
 برای فعال‌سازی، میزبان دارای دسترسی شبکه، دیسک دائمی و envهای حساب سرویس هم لازم‌اند. GitHub Pages نمی‌تواند این سرویس یا دیتابیس آن را اجرا کند.
 
@@ -32,7 +32,7 @@ CRM را هیچ نود یا مرحله‌ای در n8n اجرا نمی‌کند.
 - custom fields: `formInfo.ExtendedProperties.BaseCrmObjectExtendedPropertyInfo` با UserKey و Value متنی.
 - SaveForm result: Message، Success و CrmId از نوع GUID.
 - SearchForm inputs: userName، password، typeKey و query.
-- SearchForm results: `FormInfoList.FormInfo`. متد FindFormById نیز FormInfo دارد، اما در مسیر ایجاد یا تطبیق بدون ID استفاده نمی‌شود.
+- SearchForm results: `FormInfoList.FormInfo` یا `FormInfo` منفرد. متد FindFormById نیز FormInfo دارد، اما در مسیر ایجاد یا تطبیق بدون ID استفاده نمی‌شود.
 
 Zeep از WSDL واقعی namespace، ترتیب عناصر، SOAPAction و XML را می‌سازد. profile، actionهای تأییدشده و fingerprint همهٔ WSDL/XSDهای خوانده‌شده را کنترل می‌کند. snapshot ارسالی جایگزین fingerprint قرارداد زنده نیست؛ آدرس‌های import آن فقط برای تست محلی تغییر کرده‌اند.
 
@@ -62,7 +62,7 @@ Zeep از WSDL واقعی namespace، ترتیب عناصر، SOAPAction و XML 
 2. متغیرهای `.env.example` از secret manager یا EnvironmentFile امن بارگذاری شوند؛ برنامه فایل .env را خودکار source نمی‌کند. هیچ مقدار محرمانه‌ای VITE_ نباشد.
 3. SANA_DB_PATH مسیر مطلق روی volume باشد. SANA_WEBHOOK_URL همان مقصد فعلی n8n و SANA_ALLOWED_ORIGIN مبدأ HTTPS سایت بدون slash نهایی است. bind پیش‌فرض 127.0.0.1 است؛ reverse proxy HTTPS، محدودیت زمان/اندازه و rate limit عمومی لازم است.
 4. PAYAMGOSTAR_WSDL_URL و PAYAMGOSTAR_ENDPOINT فقط در env سرور تنظیم شوند؛ مسیر endpoint باید /Services/API/IForm.svc باشد. HTTP نیازمند PAYAMGOSTAR_ALLOW_HTTP=true است؛ این flag رمزنگاری ایجاد نمی‌کند. ارتباط باید روی مسیر شبکهٔ مورد اعتماد باشد.
-5. قالب **تأییدشده** جست‌وجوی Subject را در PAYAMGOSTAR_SEARCH_QUERY_TEMPLATE قرار دهید. قالب باید دقیقاً یک `{subject}` داشته باشد. سپس PAYAMGOSTAR_SEARCH_QUERY_VERIFIED=true تنظیم شود؛ این flag تأیید اپراتور است و جای مستندات/تست خواندنی را نمی‌گیرد.
+5. قالب **تأییدشده** جست‌وجوی Subject را در PAYAMGOSTAR_SEARCH_QUERY_TEMPLATE قرار دهید. قالب باید دقیقاً یک `{subject}` داشته باشد. مقدار تأییدشدهٔ انتخابگر را نیز در PAYAMGOSTAR_SEARCH_TYPE_KEY قرار دهید؛ این پارامتر به‌صورت خودکار برابر CBCSalesOpp فرض نمی‌شود. سپس PAYAMGOSTAR_SEARCH_QUERY_VERIFIED=true تنظیم شود؛ این flag تأیید اپراتور است و جای مستندات/تست خواندنی را نمی‌گیرد.
 6. snapshot محلی هیچ grammar جست‌وجوی production پیشنهاد نمی‌کند. عبارت fixture-subject در تست‌ها صرفاً زبان mock است و نباید در env واقعی کپی شود.
 
 ```sh

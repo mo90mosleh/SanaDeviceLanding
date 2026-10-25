@@ -26,6 +26,8 @@ class ProfileConfigTests(unittest.TestCase):
         for template, verified in ((None, False), ("", True), ("anything", True), ("{subject}", False)):
             with self.assertRaises(ValueError):
                 owner_form_manifest("test-fingerprint", template, verified)
+        with self.assertRaises(ValueError):
+            owner_form_manifest("test-fingerprint", "fixture:{subject}", True)
 
 
 @unittest.skipUnless(importlib.util.find_spec("zeep"), "Install pinned server requirements")
@@ -67,7 +69,7 @@ class OwnerContractTests(unittest.TestCase):
         self.endpoint = f"http://127.0.0.1:{self.server.server_port}/Services/API/IForm.svc"
         inspector = FormClient(self.wsdl, self.endpoint, "dummy-user", "dummy-secret", None, allow_http=True)
         # Explicitly synthetic query grammar for the local peer, never a production example.
-        self.manifest = validate_owner_manifest(inspector, "fixture-subject:{subject}", True)
+        self.manifest = validate_owner_manifest(inspector, "fixture-subject:{subject}", True, "fixture-type-selector")
         self.file = Path(self.temp.name) / "manifest.json"
         self.file.write_text(json.dumps(self.manifest))
         self.client = FormClient(self.wsdl, self.endpoint, "dummy-user", "dummy-secret", self.file, allow_http=True)
@@ -92,7 +94,7 @@ class OwnerContractTests(unittest.TestCase):
         if operation == "SaveForm":
             self.element(result, "CrmId", "00000000-0000-0000-0000-000000000000" if self.mode == "zero-id" else CRM_ID)
         else:
-            self.element(result, "FormInfo")
+            single = self.element(result, "FormInfo")
             if self.mode == "empty": self.element(result, "FormInfoList")
             else:
                 records = e.SubElement(result, "{" + DATA_NS + "}FormInfoList")
@@ -108,6 +110,12 @@ class OwnerContractTests(unittest.TestCase):
                 self.element(record, "ParentCrmObjectId")
                 self.element(record, "IdentityId")
                 self.element(record, "Subject", self.item["subject"])
+                if self.mode in ("single", "both"):
+                    from copy import deepcopy
+                    result.replace(single, deepcopy(record))
+                    if self.mode == "single":
+                        result.remove(records)
+                        self.element(result, "FormInfoList")
         return e.tostring(envelope, xml_declaration=True, encoding="UTF-8")
 
     def test_actual_saveform_names_field_collection_order_and_action(self):
@@ -134,7 +142,10 @@ class OwnerContractTests(unittest.TestCase):
         self.assertEqual(action, ACTIONS["SearchForm"])
         root = self.etree.fromstring(data)
         self.assertEqual(root.xpath("//*[local-name()='query']/text()"), ["fixture-subject:DeviceOpp100100"])
-        self.assertEqual(root.xpath("//*[local-name()='typeKey']/text()"), ["CBCSalesOpp"])
+        self.assertEqual(root.xpath("//*[local-name()='typeKey']/text()"), ["fixture-type-selector"])
+        for mode in ("single", "both"):
+            self.mode = mode
+            self.assertEqual(self.client.reconcile(self.item), CRM_ID)
         self.mode = "collision"
         with self.assertRaises(DeliveryError): self.client.reconcile(self.item)
         self.mode = "empty"

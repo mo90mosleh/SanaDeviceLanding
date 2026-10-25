@@ -10,11 +10,13 @@ ACTIONS = {
 }
 
 
-def owner_form_manifest(fingerprint, search_query_template, search_query_verified=False):
+def owner_form_manifest(fingerprint, search_query_template, search_query_verified=False, search_type_key=None):
     if not search_query_verified or not isinstance(search_query_template, str):
         raise ValueError("SearchForm query grammar must be verified before preparing a live contract")
     if search_query_template.count("{subject}") != 1:
         raise ValueError("A verified subject-scoped SearchForm template is required")
+    if not isinstance(search_type_key, str) or not search_type_key.strip():
+        raise ValueError("SearchForm typeKey semantics must be verified; its XSD type is only string")
     return {
         "profile": "owner-iform-2.8.8.2",
         "verified": True,
@@ -25,6 +27,7 @@ def owner_form_manifest(fingerprint, search_query_template, search_query_verifie
         "reconcile_operation": "SearchForm",
         "search_query_verified": True,
         "search_query_template": search_query_template,
+        "search_type_key": search_type_key,
         "custom_fields": {"key_property": "UserKey", "value_property": "Value"},
         "save_arguments": {
             "userName": {"$value": "username"},
@@ -43,13 +46,14 @@ def owner_form_manifest(fingerprint, search_query_template, search_query_verifie
         "read_arguments": {
             "userName": {"$value": "username"},
             "password": {"$value": "password"},
-            "typeKey": {"$value": "crmObjectTypeCode"},
+            "typeKey": search_type_key,
             "query": {"$value": "searchQuery"},
         },
         "save_result": {"success": ["Success"], "message": ["Message"], "crm_id": ["CrmId"]},
         "read_result": {
             "success": ["Success"], "message": ["Message"],
             "records": ["FormInfoList", "FormInfo"],
+            "single_record": ["FormInfo"],
         },
         "record_paths": {
             "subject": ["Subject"], "type_code": ["CrmObjectTypeCode"],
@@ -61,8 +65,8 @@ def owner_form_manifest(fingerprint, search_query_template, search_query_verifie
     }
 
 
-def validate_owner_manifest(client, search_query_template, verified):
+def validate_owner_manifest(client, search_query_template, verified, search_type_key):
     """Validate local serialization against the LIVE loaded metadata; no SOAP POST."""
-    client.manifest = owner_form_manifest(client.fingerprint, search_query_template, verified)
+    client.manifest = owner_form_manifest(client.fingerprint, search_query_template, verified, search_type_key)
     client.verify_contract()
     return client.manifest
