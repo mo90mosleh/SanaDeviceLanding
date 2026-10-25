@@ -7,6 +7,17 @@ from .soap import FormClient
 from .store import Store
 
 
+def configured_crm(inspect_only=False):
+    return FormClient(
+        required("PAYAMGOSTAR_WSDL_URL"),
+        required("PAYAMGOSTAR_ENDPOINT"),
+        os.environ.get("PAYAMGOSTAR_USERNAME", "") if inspect_only else required("PAYAMGOSTAR_USERNAME"),
+        os.environ.get("PAYAMGOSTAR_PASSWORD", "") if inspect_only else required("PAYAMGOSTAR_PASSWORD"),
+        None if inspect_only else required("PAYAMGOSTAR_CONTRACT_FILE"),
+        allow_http=os.environ.get("PAYAMGOSTAR_ALLOW_HTTP") == "true",
+    )
+
+
 def main():
     os.umask(0o077)
     logging.getLogger("zeep").setLevel(logging.CRITICAL)
@@ -27,35 +38,17 @@ def main():
             parser.error("--submission-id is required")
         print(json.dumps(Store(required("SANA_DB_PATH")).status(args.submission_id)))
         return
-    store = Store(required("SANA_DB_PATH")) if args.command == "serve" else None
-    client = FormClient(
-        required("PAYAMGOSTAR_WSDL_URL"),
-        required("PAYAMGOSTAR_ENDPOINT"),
-        (
-            os.environ.get("PAYAMGOSTAR_USERNAME", "")
-            if args.command == "inspect-wsdl"
-            else required("PAYAMGOSTAR_USERNAME")
-        ),
-        (
-            os.environ.get("PAYAMGOSTAR_PASSWORD", "")
-            if args.command == "inspect-wsdl"
-            else required("PAYAMGOSTAR_PASSWORD")
-        ),
-        (
-            None
-            if args.command == "inspect-wsdl"
-            else required("PAYAMGOSTAR_CONTRACT_FILE")
-        ),
-        allow_http=os.environ.get("PAYAMGOSTAR_ALLOW_HTTP") == "true",
-    )
+    if args.command == "serve":
+        # Bind ingestion without waiting for WSDL, credentials, or the n8n endpoint.
+        serve(Store(required("SANA_DB_PATH")), configured_crm)
+        return
+    client = configured_crm(inspect_only=args.command == "inspect-wsdl")
     if args.command == "inspect-wsdl":
         print(json.dumps(client.inspect(), ensure_ascii=False, indent=2))
     elif args.command == "check-contract":
         print(
             "WSDL fingerprint, operations and schema serialization verified; no SOAP operation called"
         )
-    else:
-        serve(store, client)
 
 
 if __name__ == "__main__":

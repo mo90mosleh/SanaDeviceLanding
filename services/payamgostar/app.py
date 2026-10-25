@@ -1,13 +1,12 @@
 import hmac
 import json
 import os
-import threading
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import urlsplit
 from .mapping import InvalidLead
 from .soap import DeliveryError
 from .store import Conflict
-from .worker import Worker
+from .channels import DeliveryChannels
 
 
 def required(name):
@@ -42,7 +41,7 @@ def forward_webhook(url):
     return send
 
 
-def make_handler(store, allowed_origin, token=""):
+def make_handler(store, allowed_origin, token="", channel_status=None):
     class Handler(BaseHTTPRequestHandler):
         def log_message(self, *args):
             pass  # Never log bodies, credentials, query strings or contact information.
@@ -63,7 +62,7 @@ def make_handler(store, allowed_origin, token=""):
             self.respond(
                 200 if self.path == "/healthz" else 404,
                 (
-                    {"status": "ready"}
+                    {"status": "ready", **({"channels": channel_status()} if channel_status else {})}
                     if self.path == "/healthz"
                     else {"error": "not_found"}
                 ),
@@ -115,36 +114,24 @@ def make_handler(store, allowed_origin, token=""):
     return Handler
 
 
-def serve(store, crm):
+def serve(store, crm_factory):
     origin = required("SANA_ALLOWED_ORIGIN")
     parsed = urlsplit(origin)
     if parsed.scheme != "https" or parsed.path not in ("", "/") or origin.endswith("/"):
         raise ValueError(
             "SANA_ALLOWED_ORIGIN must be an HTTPS origin without a trailing slash"
         )
-    worker = Worker(store, crm, forward_webhook(required("SANA_WEBHOOK_URL")))
-    stop = threading.Event()
-
-    def loop():
-        while not stop.is_set():
-            for channel in ("webhook", "crm"):
-                try:
-                    worker.tick(channel)
-                except Exception:
-                    # A DB failure leaves the durable row/lease available for recovery.
-                    pass
-            stop.wait(0.5)
-
-    thread = threading.Thread(target=loop, daemon=True)
+    channels = DeliveryChannels(
+        store, crm_factory, lambda: forward_webhook(required("SANA_WEBHOOK_URL"))
+    )
     http = ThreadingHTTPServer(
         (os.environ.get("SANA_BIND", "127.0.0.1"), int(os.environ.get("PORT", "8081"))),
-        make_handler(store, origin, os.environ.get("SANA_INGEST_TOKEN", "")),
+        make_handler(store, origin, os.environ.get("SANA_INGEST_TOKEN", ""), channels.snapshot),
     )
     http.timeout = 15
-    thread.start()
+    channels.start()
     try:
         http.serve_forever()
     finally:
-        stop.set()
         http.server_close()
-        thread.join(timeout=60)
+        channels.close()
