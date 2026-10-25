@@ -139,7 +139,7 @@ test("Submission works on Safari without AbortSignal.timeout and clears its time
   const timers = new Set();
   Object.defineProperty(AbortSignal, "timeout", { configurable: true, value: undefined });
   globalThis.setTimeout = (callback, delay) => {
-    assert.equal(delay, 20_000);
+    assert.equal(delay, 60_000);
     const timer = originalSetTimeout(callback, delay);
     timers.add(timer);
     return timer;
@@ -208,6 +208,47 @@ test("HTTP acknowledgement is successful even when response stream cancellation 
     });
   } finally {
     globalThis.fetch = originalFetch;
+  }
+});
+test("Submission waits up to sixty seconds and reports timeout without retrying", async () => {
+  const originalFetch = globalThis.fetch;
+  const originalSetTimeout = globalThis.setTimeout;
+  const originalClearTimeout = globalThis.clearTimeout;
+  let expire;
+  let calls = 0;
+  let cleared = false;
+  globalThis.setTimeout = (callback, delay) => {
+    assert.equal(delay, 60_000);
+    expire = callback;
+    return 123;
+  };
+  globalThis.clearTimeout = (timer) => {
+    assert.equal(timer, 123);
+    cleared = true;
+  };
+  globalThis.fetch = async (_url, options) => {
+    calls++;
+    return new Promise((_resolve, reject) => {
+      options.signal.addEventListener("abort", () => reject(new Error("aborted")), { once: true });
+    });
+  };
+  try {
+    const pending = submitConsultation({
+      ...valid,
+      productModel: "FS-114",
+      manufacturer: "Wondfo",
+      productCategory: "POCT",
+      landingPage: "/",
+      utm: {},
+    });
+    expire();
+    await assert.rejects(pending, { code: "TIMEOUT" });
+    assert.equal(calls, 1);
+    assert.equal(cleared, true);
+  } finally {
+    globalThis.fetch = originalFetch;
+    globalThis.setTimeout = originalSetTimeout;
+    globalThis.clearTimeout = originalClearTimeout;
   }
 });
 test("UTM persists through page navigation, resets for a new campaign, ignores other input", () => {

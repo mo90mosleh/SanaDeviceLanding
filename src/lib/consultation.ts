@@ -53,7 +53,7 @@ export const consultationEndpoint =
   "https://n8n.alecasgari.com/webhook/83591aad-47e3-475b-99a9-2f3d6d408e00";
 export const submitConsultation: SubmissionHandler = async (payload) => {
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 20_000);
+  const timeout = setTimeout(() => controller.abort(), 60_000);
   try {
     const response = await fetch(consultationEndpoint, {
       method: "POST",

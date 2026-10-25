@@ -409,7 +409,9 @@ export function Consultation({
         اطلاعات تماس شما برای پیگیری درخواست مشاوره در اختیار سانا قرار می‌گیرد.
       </p>
       <button className="button primary full" type="submit" disabled={busy}>
-        <span className="button-label">{busy ? "در حال ارسال…" : "ثبت درخواست مشاوره"}</span>
+        <span className="button-label">
+          {busy ? "در حال ارسال… تا ۶۰ ثانیه صبر کنید" : "ثبت درخواست مشاوره"}
+        </span>
         {!mobile && <ArrowLeft className="cta-icon" size={20} strokeWidth={2} aria-hidden="true" />}
       </button>
       <p
