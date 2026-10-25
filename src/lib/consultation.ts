@@ -43,32 +43,38 @@ export const consultationEndpoint =
   import.meta.env?.["VITE_CONSULTATION_API_URL"] ||
   "https://n8n.alecasgari.com/webhook/83591aad-47e3-475b-99a9-2f3d6d408e00";
 export const submitConsultation: SubmissionHandler = async (payload) => {
-  const response = await fetch(consultationEndpoint, {
-    method: "POST",
-    mode: "cors",
-    credentials: "omit",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      ...payload,
-      honeypot: payload.honeypot || "",
-      fullName: payload.name,
-      labName: payload.organization,
-      product: payload.productModel,
-      company: payload.manufacturer,
-      pageUrl:
-        typeof window === "undefined"
-          ? payload.landingPage
-          : window.location.origin + window.location.pathname,
-      campaign: payload.utm.utm_campaign || "",
-      source: payload.utm.utm_source || "",
-      medium: payload.utm.utm_medium || "",
-      content: payload.utm.utm_content || "",
-      term: payload.utm.utm_term || "",
-      time: new Date().toISOString(),
-    }),
-    signal: AbortSignal.timeout(20_000),
-  });
-  if (!response.ok) throw new Error("The webhook did not acknowledge the request");
-  await response.body?.cancel();
-  return { status: "submitted" };
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 20_000);
+  try {
+    const response = await fetch(consultationEndpoint, {
+      method: "POST",
+      mode: "cors",
+      credentials: "omit",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        ...payload,
+        honeypot: payload.honeypot || "",
+        fullName: payload.name,
+        labName: payload.organization,
+        product: payload.productModel,
+        company: payload.manufacturer,
+        pageUrl:
+          typeof window === "undefined"
+            ? payload.landingPage
+            : window.location.origin + window.location.pathname,
+        campaign: payload.utm.utm_campaign || "",
+        source: payload.utm.utm_source || "",
+        medium: payload.utm.utm_medium || "",
+        content: payload.utm.utm_content || "",
+        term: payload.utm.utm_term || "",
+        time: new Date().toISOString(),
+      }),
+      signal: controller.signal,
+    });
+    if (!response.ok) throw new Error("The webhook did not acknowledge the request");
+    await response.body?.cancel();
+    return { status: "submitted" };
+  } finally {
+    clearTimeout(timeout);
+  }
 };

@@ -131,6 +131,53 @@ test("Submission posts JSON to the configured webhook and requires HTTP acknowle
     globalThis.fetch = originalFetch;
   }
 });
+test("Submission works on Safari without AbortSignal.timeout and clears its timer", async () => {
+  const originalFetch = globalThis.fetch;
+  const descriptor = Object.getOwnPropertyDescriptor(AbortSignal, "timeout");
+  const originalSetTimeout = globalThis.setTimeout;
+  const originalClearTimeout = globalThis.clearTimeout;
+  const timers = new Set();
+  Object.defineProperty(AbortSignal, "timeout", { configurable: true, value: undefined });
+  globalThis.setTimeout = (callback, delay) => {
+    assert.equal(delay, 20_000);
+    const timer = originalSetTimeout(callback, delay);
+    timers.add(timer);
+    return timer;
+  };
+  globalThis.clearTimeout = (timer) => {
+    timers.delete(timer);
+    originalClearTimeout(timer);
+  };
+  try {
+    globalThis.fetch = async (_url, options) => {
+      assert.ok(options.signal instanceof AbortSignal);
+      assert.equal(options.signal.aborted, false);
+      return new Response(null, { status: 200 });
+    };
+    const payload = {
+      ...valid,
+      productModel: "FS-114",
+      manufacturer: "Wondfo",
+      productCategory: "POCT",
+      landingPage: "/",
+      utm: {},
+    };
+    assert.deepEqual(await submitConsultation(payload), { status: "submitted" });
+    assert.equal(timers.size, 0);
+    globalThis.fetch = async () => {
+      throw new Error("offline");
+    };
+    await assert.rejects(submitConsultation(payload), /offline/);
+    assert.equal(timers.size, 0);
+  } finally {
+    for (const timer of timers) originalClearTimeout(timer);
+    globalThis.fetch = originalFetch;
+    globalThis.setTimeout = originalSetTimeout;
+    globalThis.clearTimeout = originalClearTimeout;
+    if (descriptor) Object.defineProperty(AbortSignal, "timeout", descriptor);
+    else delete AbortSignal.timeout;
+  }
+});
 test("UTM persists through page navigation, resets for a new campaign, ignores other input", () => {
   let value = null;
   const storage = {
