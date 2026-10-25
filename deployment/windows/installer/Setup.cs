@@ -21,6 +21,13 @@ namespace SanaSetup {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             try {
+                if (args.Length == 2 && args[0] == "--fixture-listener") {
+                    TcpListener listener=new TcpListener(IPAddress.Loopback,0);
+                    listener.Start();
+                    File.WriteAllText(args[1],((IPEndPoint)listener.LocalEndpoint).Port.ToString());
+                    try {Thread.Sleep(120000);} finally {listener.Stop();}
+                    return 0;
+                }
                 if (args.Length == 2 && args[0] == "--preview") {
                     using (SetupForm form = new SetupForm()) {
                         form.Show(); Application.DoEvents();
@@ -41,6 +48,7 @@ namespace SanaSetup {
                         Engine.Run(backend,"--self-test",240);
                         // First install must succeed when no scheduled task exists.
                         Engine.StopOwnedTask("SANA-Installer-Check-" + Guid.NewGuid().ToString("N"),backend);
+                        Engine.TestOwnedStop(temp);
                         Console.WriteLine("PACKAGE_CHECK_PASS");
                     } finally { Directory.Delete(temp,true); }
                     return 0;
@@ -176,9 +184,29 @@ namespace SanaSetup {
             Run(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System),"WindowsPowerShell\\v1.0\\powershell.exe"),"-NoProfile -NonInteractive -ExecutionPolicy Bypass -EncodedCommand "+encoded,timeout);
         }
         internal static void StopOwnedTask(string name,string executable) {
-            // Enumerating avoids Get-ScheduledTask -TaskName raising ObjectNotFound on first install.
-            // Explicit success exit also prevents a missing task from becoming a process failure.
-            PowerShell("$tasks=@(Get-ScheduledTask -ErrorAction Stop | Where-Object {$_.TaskName -eq "+PS(name)+"}); foreach($t in $tasks){$actions=@($t.Actions); if($actions.Count -ne 1 -or $actions[0].Execute -ne "+PS(executable)+"){throw 'Task name collision'}; Stop-ScheduledTask -InputObject $t -ErrorAction Stop}; exit 0",30);
+            // PyInstaller one-file executables have a parent and a child at the same path.
+            // Task Scheduler can stop the parent while leaving the listening child alive.
+            // Match and recheck the exact executable path; never stop a foreign port owner.
+            PowerShell("$tasks=@(Get-ScheduledTask -ErrorAction Stop | Where-Object {$_.TaskName -eq "+PS(name)+"}); foreach($t in $tasks){$actions=@($t.Actions); if($actions.Count -ne 1 -or $actions[0].Execute -ne "+PS(executable)+"){throw 'Task name collision'}; Stop-ScheduledTask -InputObject $t -ErrorAction Stop}; $expected="+PS(executable)+"; $owned=@(Get-CimInstance Win32_Process -ErrorAction Stop | Where-Object {$_.ExecutablePath -eq $expected}); foreach($item in $owned){$p=Get-Process -Id $item.ProcessId -ErrorAction SilentlyContinue; if($p -and $p.Path -eq $expected){Stop-Process -InputObject $p -Force -ErrorAction Stop; if(!$p.WaitForExit(10000)){throw 'Owned process did not stop'}}}; exit 0",60);
+        }
+        internal static void TestOwnedStop(string temp) {
+            string owned=Path.Combine(temp,"owned-fixture.exe"), foreign=Path.Combine(temp,"foreign-fixture.exe");
+            string ownReady=Path.Combine(temp,"owned.ready"), foreignReady=Path.Combine(temp,"foreign.ready");
+            File.Copy(Application.ExecutablePath,owned);File.Copy(Application.ExecutablePath,foreign);
+            using(Process one=new Process {StartInfo=new ProcessStartInfo(owned,"--fixture-listener "+Quote(ownReady)){UseShellExecute=false,CreateNoWindow=true}})
+            using(Process two=new Process {StartInfo=new ProcessStartInfo(foreign,"--fixture-listener "+Quote(foreignReady)){UseShellExecute=false,CreateNoWindow=true}}) {
+                one.Start();two.Start();
+                try {
+                    for(int i=0;i<100 && (!File.Exists(ownReady)||!File.Exists(foreignReady));i++)Thread.Sleep(100);
+                    if(!File.Exists(ownReady)||!File.Exists(foreignReady))throw new Exception("Listener fixture failed");
+                    StopOwnedTask("SANA-Installer-Check-"+Guid.NewGuid().ToString("N"),owned);
+                    if(!one.WaitForExit(10000)||two.HasExited)throw new Exception("Owned-process isolation failed");
+                    TcpListener probe=new TcpListener(IPAddress.Loopback,int.Parse(File.ReadAllText(ownReady)));
+                    probe.Start();probe.Stop();
+                } finally {
+                    if(!one.HasExited)one.Kill();if(!two.HasExited)two.Kill();one.WaitForExit();two.WaitForExit();
+                }
+            }
         }
         static void BackendCommand(string executable,string config,string command,int timeout){Run(executable,"--env-file "+Quote(config)+" "+command,timeout);}
         static void Save(string filename,Dictionary<string,string> settings){File.WriteAllText(filename,json.Serialize(settings),new UTF8Encoding(false));}
