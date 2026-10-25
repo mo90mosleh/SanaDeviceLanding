@@ -36,6 +36,15 @@ export function validateLead(fields: LeadFields): LeadErrors {
     errors.organization = "نام آزمایشگاه را وارد کنید.";
   return errors;
 }
+export class SubmissionError extends Error {
+  constructor(
+    public code: "NETWORK" | "TIMEOUT" | "SERVER",
+    public status?: number,
+  ) {
+    super(`Consultation submission failed: ${code}${status ? ` (${status})` : ""}`);
+    this.name = "SubmissionError";
+  }
+}
 export type SubmissionResult = { status: "submitted" };
 export type SubmissionHandler = (payload: LeadPayload) => Promise<SubmissionResult>;
 // Public by design: the owner approved direct n8n submission from GitHub Pages.
@@ -71,9 +80,11 @@ export const submitConsultation: SubmissionHandler = async (payload) => {
       }),
       signal: controller.signal,
     });
-    if (!response.ok) throw new Error("The webhook did not acknowledge the request");
-    await response.body?.cancel();
+    if (!response.ok) throw new SubmissionError("SERVER", response.status);
     return { status: "submitted" };
+  } catch (error) {
+    if (error instanceof SubmissionError) throw error;
+    throw new SubmissionError(controller.signal.aborted ? "TIMEOUT" : "NETWORK");
   } finally {
     clearTimeout(timeout);
   }

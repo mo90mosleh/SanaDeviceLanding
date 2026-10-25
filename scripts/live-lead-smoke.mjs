@@ -31,13 +31,14 @@ await page.addInitScript(() => {
     }
   };
 });
-page.on("pageerror", error => console.error("SAFARI_PAGE_ERROR", error.message));
-page.on("console", message => {
+page.on("pageerror", (error) => console.error("SAFARI_PAGE_ERROR", error.message));
+page.on("console", (message) => {
   if (message.type() === "error" || message.text().startsWith("SAFARI_"))
     console.log("SAFARI_CONSOLE", message.text());
 });
-page.on("requestfailed", request => {
-  if (request.url() === endpoint) console.error("SAFARI_REQUEST_FAILED", request.failure()?.errorText);
+page.on("requestfailed", (request) => {
+  if (request.url() === endpoint)
+    console.error("SAFARI_REQUEST_FAILED", request.failure()?.errorText);
 });
 let requests = 0;
 page.on("request", (request) => {

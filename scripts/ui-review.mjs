@@ -152,7 +152,7 @@ async function reviewConsultation(page, route, width) {
   }
   if (reject) {
     await page.waitForFunction(() =>
-      document.querySelector("#consultation [role=status]").textContent.includes("تأیید نشد"),
+      document.querySelector("#consultation [role=status]").textContent.includes("HTTP 502"),
     );
     assert.equal(
       await form.locator("#lead-name").inputValue(),

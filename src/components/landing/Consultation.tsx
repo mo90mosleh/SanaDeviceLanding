@@ -5,7 +5,12 @@ import { ProductImage } from "./ProductImage";
 import { products } from "./products";
 import type { Product } from "./products";
 import { readAttribution } from "@/lib/attribution";
-import { acceptsMobileEdit, submitConsultation, validateLead } from "@/lib/consultation";
+import {
+  acceptsMobileEdit,
+  submitConsultation,
+  validateLead,
+  SubmissionError,
+} from "@/lib/consultation";
 import type { LeadErrors, LeadFields, SubmissionHandler } from "@/lib/consultation";
 
 const empty: LeadFields = { name: "", organization: "", mobile: "" };
@@ -181,8 +186,18 @@ export function Consultation({
       completing.current = true;
       setFormOpen(false);
       setSuccessOpen(true);
-    } catch {
-      setMessage("ارسال درخواست تأیید نشد. لطفاً دوباره تلاش کنید یا با کارشناسان تماس بگیرید.");
+    } catch (error) {
+      if (error instanceof SubmissionError) {
+        setMessage(
+          error.code === "TIMEOUT"
+            ? "پاسخ سرور در مهلت مقرر نرسید (TIMEOUT). ممکن است درخواست ثبت شده باشد؛ پیش از ارسال مجدد با کارشناسان تماس بگیرید."
+            : error.code === "NETWORK"
+              ? "ارتباط با سرور تأیید نشد (NETWORK). اینترنت یا VPN را بررسی کنید و با شبکه دیگری امتحان کنید."
+              : `سرور ثبت درخواست خطا داد (HTTP ${error.status}). لطفاً با کارشناسان تماس بگیرید.`,
+        );
+      } else {
+        setMessage("ارسال درخواست تأیید نشد (CLIENT). لطفاً با کارشناسان تماس بگیرید.");
+      }
     } finally {
       pending.current = false;
       setBusy(false);

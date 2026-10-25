@@ -167,7 +167,7 @@ test("Submission works on Safari without AbortSignal.timeout and clears its time
     globalThis.fetch = async () => {
       throw new Error("offline");
     };
-    await assert.rejects(submitConsultation(payload), /offline/);
+    await assert.rejects(submitConsultation(payload), { code: "NETWORK" });
     assert.equal(timers.size, 0);
   } finally {
     for (const timer of timers) originalClearTimeout(timer);
@@ -176,6 +176,38 @@ test("Submission works on Safari without AbortSignal.timeout and clears its time
     globalThis.clearTimeout = originalClearTimeout;
     if (descriptor) Object.defineProperty(AbortSignal, "timeout", descriptor);
     else delete AbortSignal.timeout;
+  }
+});
+test("HTTP acknowledgement is successful even when response stream cancellation would fail", async () => {
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = async () => ({
+    ok: true,
+    status: 200,
+    body: {
+      cancel: async () => {
+        throw new Error("stream unavailable");
+      },
+    },
+  });
+  try {
+    assert.deepEqual(
+      await submitConsultation({
+        ...valid,
+        productModel: "FS-114",
+        manufacturer: "Wondfo",
+        productCategory: "POCT",
+        landingPage: "/",
+        utm: {},
+      }),
+      { status: "submitted" },
+    );
+    globalThis.fetch = async () => new Response(null, { status: 503 });
+    await assert.rejects(submitConsultation({ ...valid, utm: {} }), {
+      code: "SERVER",
+      status: 503,
+    });
+  } finally {
+    globalThis.fetch = originalFetch;
   }
 });
 test("UTM persists through page navigation, resets for a new campaign, ignores other input", () => {
