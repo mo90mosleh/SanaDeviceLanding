@@ -47,7 +47,7 @@ def self_test():
     from services.payamgostar.store import Store
     from services.payamgostar.soap import FormClient
     from services.payamgostar.profile import validate_owner_manifest,DOCUMENTED_SEARCH_TEMPLATE,DOCUMENTED_SEARCH_TYPE_KEY
-    root=Path(getattr(sys,"_MEIPASS",Path(__file__).resolve().parents[3]))
+    root=Path(sys._MEIPASS) if hasattr(sys,"_MEIPASS") else Path(__file__).resolve().parents[3]
     schemas=root/"services/payamgostar/contracts/owner-2.8.8.2"
     posts=[]
     class Handler(BaseHTTPRequestHandler):

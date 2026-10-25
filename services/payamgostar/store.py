@@ -4,7 +4,7 @@ import re
 import sqlite3
 import time
 import uuid
-from contextlib import contextmanager
+from contextlib import contextmanager, closing
 from pathlib import Path
 from .mapping import canonical, fingerprint, map_fields, InvalidLead
 
@@ -45,7 +45,7 @@ class Store:
         descriptor = os.open(path, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
         os.close(descriptor)
         instance = str(uuid.uuid4())
-        with sqlite3.connect(path) as db:
+        with closing(sqlite3.connect(path)) as db:
             db.executescript(
                 """
                 PRAGMA journal_mode=WAL;
@@ -66,6 +66,7 @@ class Store:
             """
             )
             db.execute("INSERT INTO metadata VALUES(?)", (instance,))
+            db.commit()
         marker = Path(str(path) + ".instance")
         descriptor = os.open(marker, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
         with os.fdopen(descriptor, "w") as stream:

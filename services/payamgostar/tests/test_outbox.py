@@ -113,6 +113,12 @@ class OutboxTests(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             Store(self.path)
 
+    def test_initialization_releases_windows_database_handles(self):
+        moved = str(Path(self.temp.name) / "moved.sqlite")
+        Path(self.path).rename(moved)
+        Path(self.path + ".instance").rename(moved + ".instance")
+        self.assertEqual(Store(moved).enqueue(lead()), "DeviceOpp100100")
+
     def test_first_subject_restart_and_idempotent_submission(self):
         self.assertEqual(self.store.enqueue(lead()), "DeviceOpp100100")
         self.assertEqual(Store(self.path).enqueue(lead()), "DeviceOpp100100")
