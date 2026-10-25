@@ -8,13 +8,36 @@ const origin = pagesUrl.replace(/\/$/u, "");
 const endpoint = "https://n8n.alecasgari.com/webhook/83591aad-47e3-475b-99a9-2f3d6d408e00";
 const output = "artifacts/live-lead";
 await mkdir(output, { recursive: true });
-const { chromium } = await import(
+const { webkit, devices } = await import(
   pathToFileURL(path.join(process.env.SANA_QA_DIR, "node_modules/playwright/index.mjs")).href
 );
-const browser = await chromium.launch();
+const browser = await webkit.launch();
 const page = await browser.newPage({
-  viewport: { width: 390, height: 960 },
+  ...devices["iPhone 13"],
+  locale: "fa-IR",
+  viewport: { width: 390, height: 844 },
   reducedMotion: "reduce",
+});
+await page.addInitScript(() => {
+  const originalFetch = window.fetch;
+  window.fetch = async (...args) => {
+    try {
+      const response = await originalFetch(...args);
+      console.info("SAFARI_FETCH", response.status, response.type);
+      return response;
+    } catch (error) {
+      console.error("SAFARI_FETCH_ERROR", error.name, error.message);
+      throw error;
+    }
+  };
+});
+page.on("pageerror", error => console.error("SAFARI_PAGE_ERROR", error.message));
+page.on("console", message => {
+  if (message.type() === "error" || message.text().startsWith("SAFARI_"))
+    console.log("SAFARI_CONSOLE", message.text());
+});
+page.on("requestfailed", request => {
+  if (request.url() === endpoint) console.error("SAFARI_REQUEST_FAILED", request.failure()?.errorText);
 });
 let requests = 0;
 page.on("request", (request) => {
@@ -23,7 +46,7 @@ page.on("request", (request) => {
 try {
   await page.goto(
     origin +
-      "/?utm_source=integration-test&utm_medium=qa&utm_campaign=sana-webhook-check&utm_content=popup-verification&utm_term=fs-205",
+      "/?utm_source=integration-test&utm_medium=qa&utm_campaign=sana-webhook-check&utm_content=safari-verification&utm_term=fs-205",
     { waitUntil: "networkidle" },
   );
   // Never submit a synthetic record until the newly published dialog is present.
@@ -37,7 +60,7 @@ try {
   const form = page.locator("#consultation form");
   await form.locator('input[type="radio"][value="fs-205"]').check();
   for (const [field, value] of [
-    ["name", "تست فنی سانا — ستون‌ها و پاپ‌آپ 2210B"],
+    ["name", "تست فنی سانا — بررسی Safari iOS"],
     ["organization", "تست فنی — آزمایشگاه واقعی نیست"],
     ["mobile", "09000000000"],
   ]) {

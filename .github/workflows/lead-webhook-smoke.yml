@@ -31,8 +31,8 @@ jobs:
         run: |
           echo "SANA_QA_DIR=$RUNNER_TEMP/sana-lead-smoke" >> "$GITHUB_ENV"
           npm install --prefix "$RUNNER_TEMP/sana-lead-smoke" --no-save playwright@1.56.1
-          "$RUNNER_TEMP/sana-lead-smoke/node_modules/.bin/playwright" install chromium
-      - name: Send one clearly labelled synthetic lead through the live homepage form
+          "$RUNNER_TEMP/sana-lead-smoke/node_modules/.bin/playwright" install --with-deps webkit
+      - name: Verify one labelled synthetic lead using mobile Safari WebKit
         run: node scripts/live-lead-smoke.mjs
       - uses: actions/upload-artifact@v4
         if: always()
