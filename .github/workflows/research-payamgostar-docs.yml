@@ -1,0 +1,13 @@
+name: Read official PayamGostar help and developer pages
+on:
+  push:
+    branches: [research/payamgostar-docs-access]
+permissions:
+  contents: read
+jobs:
+  read:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+      - run: python scripts/research-payamgostar-docs.py
