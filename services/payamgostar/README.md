@@ -6,7 +6,7 @@
 
 WSDL اصلی و هر پنج XSD ارسالی مالک دریافت و بررسی شدند. شکل واقعی SaveForm، FormInfo، فیلدهای سفارشی و نتیجه‌ها اکنون در `profile.py` پیاده شده است. snapshot بدون آدرس نصب در `contracts/owner-2.8.8.2/` نگهداری می‌شود و تست‌ها آن را فقط روی localhost اجرا می‌کنند. شمارهٔ 2.8.8.2 نسخهٔ اعلام‌شدهٔ مالک است؛ ارتباط و مجوز حساب نصب زنده هنوز آزمایش نشده‌اند.
 
-مانع قراردادی باقی‌مانده، **زبان پارامتر query در SearchForm** است: XSD فقط xs:string می‌گوید و قالب SQL، LINQ یا متن دیگری را تعیین نمی‌کند. یک نمونهٔ معتبر جست‌وجوی Subject و مقدار صحیح typeKey از مستندات/پشتیبانی پیام‌گستر و تأیید خواندنی آن لازم است؛ معنای typeKey نیز صرفاً از xs:string مشخص نمی‌شود. هیچ قالب production حدس زده نشده است.
+مانع معنای SearchForm با [PDF رسمی Form](https://developer.payamgostar.com/wp-content/uploads/2023/08/Form.pdf#page=9) رفع شد: صفحهٔ PDF ۹، typeKey را کد نوع فرم معرفی می‌کند؛ صفحات ۱۰ و ۱۱، Subject، عملگر == و مقدار رشته‌ای داخل کوتیشن را تأیید می‌کنند. تنظیم مستند این پروژه typeKey=CBCSalesOpp و query به‌شکل `Subject == "{subject}"` است. این تأیید مستندات است؛ دسترسی و رفتار نصب زنده هنوز آزمایش نشده‌اند.
 
 برای فعال‌سازی، میزبان دارای دسترسی شبکه، دیسک دائمی و envهای حساب سرویس هم لازم‌اند. GitHub Pages نمی‌تواند این سرویس یا دیتابیس آن را اجرا کند.
 
@@ -62,7 +62,7 @@ Zeep از WSDL واقعی namespace، ترتیب عناصر، SOAPAction و XML 
 2. متغیرهای `.env.example` از secret manager یا EnvironmentFile امن بارگذاری شوند؛ برنامه فایل .env را خودکار source نمی‌کند. هیچ مقدار محرمانه‌ای VITE_ نباشد.
 3. SANA_DB_PATH مسیر مطلق روی volume باشد. SANA_WEBHOOK_URL همان مقصد فعلی n8n و SANA_ALLOWED_ORIGIN مبدأ HTTPS سایت بدون slash نهایی است. bind پیش‌فرض 127.0.0.1 است؛ reverse proxy HTTPS، محدودیت زمان/اندازه و rate limit عمومی لازم است.
 4. PAYAMGOSTAR_WSDL_URL و PAYAMGOSTAR_ENDPOINT فقط در env سرور تنظیم شوند؛ مسیر endpoint باید /Services/API/IForm.svc باشد. HTTP نیازمند PAYAMGOSTAR_ALLOW_HTTP=true است؛ این flag رمزنگاری ایجاد نمی‌کند. ارتباط باید روی مسیر شبکهٔ مورد اعتماد باشد.
-5. قالب **تأییدشده** جست‌وجوی Subject را در PAYAMGOSTAR_SEARCH_QUERY_TEMPLATE قرار دهید. قالب باید دقیقاً یک `{subject}` داشته باشد. مقدار تأییدشدهٔ انتخابگر را نیز در PAYAMGOSTAR_SEARCH_TYPE_KEY قرار دهید؛ این پارامتر به‌صورت خودکار برابر CBCSalesOpp فرض نمی‌شود. سپس PAYAMGOSTAR_SEARCH_QUERY_VERIFIED=true تنظیم شود؛ این flag تأیید اپراتور است و جای مستندات/تست خواندنی را نمی‌گیرد.
+5. پیش‌فرض مستند `Subject == "{subject}"` در PAYAMGOSTAR_SEARCH_QUERY_TEMPLATE آماده است. قالب باید دقیقاً یک `{subject}` داشته باشد. مقدار تأییدشدهٔ انتخابگر را نیز در PAYAMGOSTAR_SEARCH_TYPE_KEY قرار دهید؛ پیش‌فرض CBCSalesOpp از کد فرم مالک و تعریف رسمی typeKey گرفته شده است. PAYAMGOSTAR_SEARCH_QUERY_VERIFIED=true نشان‌دهندهٔ تأیید مستندات رسمی است؛ آزمون نصب زنده همچنان باقی است.
 6. snapshot محلی هیچ grammar جست‌وجوی production پیشنهاد نمی‌کند. عبارت fixture-subject در تست‌ها صرفاً زبان mock است و نباید در env واقعی کپی شود.
 
 ```sh
@@ -104,7 +104,7 @@ DB و marker هم‌هویت باید روی همان volume بمانند؛ star
 
 ConnectTimeout پیش از اتصال حداکثر چهار بار با backoff تکرار می‌شود. Success/Message و GUID غیرصفر بررسی می‌شوند. SOAP Fault، خطای parse، Success بدون ID معتبر، timeout خواندن و lease منقضی ambiguous هستند. متن خام Fault/Message که می‌تواند credential یا دادهٔ شخصی بازتاب دهد لاگ نمی‌شود؛ فقط کد خطای کنترل‌شده ذخیره می‌شود.
 
-در ambiguous فقط SearchForm و تطبیق Subject، CBCSalesOpp، هویت/والد خالی و یازده مقدار اولیه انجام می‌شود. یک نتیجهٔ منطبق CrmId را ذخیره می‌کند؛ چند نتیجه/دادهٔ ناسازگار یا چهار جست‌وجوی بی‌نتیجه به needs_review می‌رود. **نتیجهٔ خالی مجوز SaveForm دوباره نیست**؛ ممکن است commit قبلی با تأخیر انجام شود. تا تکمیل query تأییدشده، CRM آمادهٔ فعال‌سازی نیست.
+در ambiguous فقط SearchForm و تطبیق Subject، CBCSalesOpp، هویت/والد خالی و یازده مقدار اولیه انجام می‌شود. یک نتیجهٔ منطبق CrmId را ذخیره می‌کند؛ چند نتیجه/دادهٔ ناسازگار یا چهار جست‌وجوی بی‌نتیجه به needs_review می‌رود. **نتیجهٔ خالی مجوز SaveForm دوباره نیست**؛ ممکن است commit قبلی با تأخیر انجام شود. برای فعال‌سازی، دسترسی شبکه و حساب سرویس نصب واقعی همچنان باید بررسی شوند.
 
 خرابی worker پس از انقضای lease ۱۸۰ثانیه‌ای همین مسیر تطبیق را طی می‌کند؛ token مانع overwrite توسط worker قدیمی است. پاسخ مبهم webhook هم خودکار replay نمی‌شود، چون بدون تغییر n8n نبودن اثر قبلی در Sheets/Telegram قابل اثبات نیست.
 

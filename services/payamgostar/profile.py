@@ -1,9 +1,12 @@
 """Form contract derived from the owner's actual IForm WSDL and five XSDs.
 
-Only the SearchForm query language remains an external configuration: the XSD
-declares it as a string, and does not document its grammar. Never guess SQL/LINQ.
+SearchForm semantics are documented in the official Form.pdf, PDF pages 9–11:
+https://developer.payamgostar.com/wp-content/uploads/2023/08/Form.pdf
+typeKey is the form type code, Subject supports ==, and string values are quoted.
 """
 BINDING = "{http://tempuri.org/}BasicHttpBinding_IForm"
+DOCUMENTED_SEARCH_TEMPLATE = 'Subject == "{subject}"'
+DOCUMENTED_SEARCH_TYPE_KEY = "CBCSalesOpp"
 ACTIONS = {
     "SaveForm": "http://tempuri.org/IForm/SaveForm",
     "SearchForm": "http://tempuri.org/IForm/SearchForm",

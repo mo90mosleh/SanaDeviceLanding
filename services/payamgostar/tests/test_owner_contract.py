@@ -7,7 +7,7 @@ import unittest
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import urlsplit
-from services.payamgostar.profile import owner_form_manifest, validate_owner_manifest, ACTIONS
+from services.payamgostar.profile import owner_form_manifest, validate_owner_manifest, ACTIONS, DOCUMENTED_SEARCH_TEMPLATE, DOCUMENTED_SEARCH_TYPE_KEY
 from services.payamgostar.soap import FormClient, DeliveryError
 from services.payamgostar.mapping import map_fields
 from services.payamgostar.tests.test_outbox import lead
@@ -22,6 +22,11 @@ CRM_ID = "11111111-2222-4333-8444-555555555555"
 
 
 class ProfileConfigTests(unittest.TestCase):
+    def test_official_form_pdf_search_settings(self):
+        manifest = owner_form_manifest("fingerprint", DOCUMENTED_SEARCH_TEMPLATE, True, DOCUMENTED_SEARCH_TYPE_KEY)
+        self.assertEqual(manifest["read_arguments"]["typeKey"], "CBCSalesOpp")
+        self.assertEqual(manifest["search_query_template"].replace("{subject}", "DeviceOpp100100"), 'Subject == "DeviceOpp100100"')
+
     def test_search_query_grammar_is_never_invented_from_xsd_string_type(self):
         for template, verified in ((None, False), ("", True), ("anything", True), ("{subject}", False)):
             with self.assertRaises(ValueError):
@@ -68,8 +73,8 @@ class OwnerContractTests(unittest.TestCase):
         self.wsdl = f"http://127.0.0.1:{self.server.server_port}/metadata/form.wsdl"
         self.endpoint = f"http://127.0.0.1:{self.server.server_port}/Services/API/IForm.svc"
         inspector = FormClient(self.wsdl, self.endpoint, "dummy-user", "dummy-secret", None, allow_http=True)
-        # Explicitly synthetic query grammar for the local peer, never a production example.
-        self.manifest = validate_owner_manifest(inspector, "fixture-subject:{subject}", True, "fixture-type-selector")
+        # Officially documented query; SOAP responses remain local test fixtures.
+        self.manifest = validate_owner_manifest(inspector, DOCUMENTED_SEARCH_TEMPLATE, True, DOCUMENTED_SEARCH_TYPE_KEY)
         self.file = Path(self.temp.name) / "manifest.json"
         self.file.write_text(json.dumps(self.manifest))
         self.client = FormClient(self.wsdl, self.endpoint, "dummy-user", "dummy-secret", self.file, allow_http=True)
@@ -141,8 +146,8 @@ class OwnerContractTests(unittest.TestCase):
         action, data = self.calls[-1]
         self.assertEqual(action, ACTIONS["SearchForm"])
         root = self.etree.fromstring(data)
-        self.assertEqual(root.xpath("//*[local-name()='query']/text()"), ["fixture-subject:DeviceOpp100100"])
-        self.assertEqual(root.xpath("//*[local-name()='typeKey']/text()"), ["fixture-type-selector"])
+        self.assertEqual(root.xpath("//*[local-name()='query']/text()"), ['Subject == "DeviceOpp100100"'])
+        self.assertEqual(root.xpath("//*[local-name()='typeKey']/text()"), ["CBCSalesOpp"])
         for mode in ("single", "both"):
             self.mode = mode
             self.assertEqual(self.client.reconcile(self.item), CRM_ID)

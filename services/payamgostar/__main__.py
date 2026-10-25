@@ -6,7 +6,7 @@ from pathlib import Path
 from .app import required, serve
 from .soap import FormClient
 from .store import Store
-from .profile import validate_owner_manifest
+from .profile import validate_owner_manifest, DOCUMENTED_SEARCH_TEMPLATE, DOCUMENTED_SEARCH_TYPE_KEY
 
 
 def configured_crm(inspect_only=False):
@@ -46,9 +46,9 @@ def main():
         serve(Store(required("SANA_DB_PATH")), configured_crm)
         return
     if args.command == "prepare-contract":
-        template = required("PAYAMGOSTAR_SEARCH_QUERY_TEMPLATE")
-        search_type_key = required("PAYAMGOSTAR_SEARCH_TYPE_KEY")
-        if os.environ.get("PAYAMGOSTAR_SEARCH_QUERY_VERIFIED") != "true":
+        template = os.environ.get("PAYAMGOSTAR_SEARCH_QUERY_TEMPLATE", DOCUMENTED_SEARCH_TEMPLATE)
+        search_type_key = os.environ.get("PAYAMGOSTAR_SEARCH_TYPE_KEY", DOCUMENTED_SEARCH_TYPE_KEY)
+        if os.environ.get("PAYAMGOSTAR_SEARCH_QUERY_VERIFIED", "true") != "true":
             raise ValueError("A verified SearchForm query is required")
         client = configured_crm(inspect_only=True)
         manifest = validate_owner_manifest(client, template, True, search_type_key)
