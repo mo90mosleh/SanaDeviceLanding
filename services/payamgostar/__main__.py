@@ -2,9 +2,11 @@ import argparse
 import json
 import logging
 import os
+from pathlib import Path
 from .app import required, serve
 from .soap import FormClient
 from .store import Store
+from .profile import validate_owner_manifest
 
 
 def configured_crm(inspect_only=False):
@@ -25,9 +27,10 @@ def main():
     parser = argparse.ArgumentParser(description="SANA server-only Form outbox")
     parser.add_argument(
         "command",
-        choices=("init-db", "inspect-wsdl", "check-contract", "serve", "status"),
+        choices=("init-db", "inspect-wsdl", "prepare-contract", "check-contract", "serve", "status"),
     )
     parser.add_argument("--submission-id")
+    parser.add_argument("--output")
     args = parser.parse_args()
     if args.command == "init-db":
         Store.initialize(required("SANA_DB_PATH"))
@@ -41,6 +44,22 @@ def main():
     if args.command == "serve":
         # Bind ingestion without waiting for WSDL, credentials, or the n8n endpoint.
         serve(Store(required("SANA_DB_PATH")), configured_crm)
+        return
+    if args.command == "prepare-contract":
+        template = required("PAYAMGOSTAR_SEARCH_QUERY_TEMPLATE")
+        if os.environ.get("PAYAMGOSTAR_SEARCH_QUERY_VERIFIED") != "true":
+            raise ValueError("A verified SearchForm query is required")
+        client = configured_crm(inspect_only=True)
+        manifest = validate_owner_manifest(client, template, True)
+        filename = Path(args.output or required("PAYAMGOSTAR_CONTRACT_FILE"))
+        if not filename.is_absolute():
+            raise ValueError("Contract file must use an absolute private path")
+        descriptor = os.open(filename, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
+        with os.fdopen(descriptor, "w") as stream:
+            json.dump(manifest, stream, ensure_ascii=False, indent=2)
+            stream.flush()
+            os.fsync(stream.fileno())
+        print("Owner Form contract pinned to loaded WSDL; local serialization passed; no SOAP operation called")
         return
     client = configured_crm(inspect_only=args.command == "inspect-wsdl")
     if args.command == "inspect-wsdl":

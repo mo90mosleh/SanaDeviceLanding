@@ -1,0 +1,68 @@
+"""Form contract derived from the owner's actual IForm WSDL and five XSDs.
+
+Only the SearchForm query language remains an external configuration: the XSD
+declares it as a string, and does not document its grammar. Never guess SQL/LINQ.
+"""
+BINDING = "{http://tempuri.org/}BasicHttpBinding_IForm"
+ACTIONS = {
+    "SaveForm": "http://tempuri.org/IForm/SaveForm",
+    "SearchForm": "http://tempuri.org/IForm/SearchForm",
+}
+
+
+def owner_form_manifest(fingerprint, search_query_template, search_query_verified=False):
+    if not search_query_verified or not isinstance(search_query_template, str):
+        raise ValueError("SearchForm query grammar must be verified before preparing a live contract")
+    if search_query_template.count("{subject}") != 1:
+        raise ValueError("A verified subject-scoped SearchForm template is required")
+    return {
+        "profile": "owner-iform-2.8.8.2",
+        "verified": True,
+        "wsdl_fingerprint": fingerprint,
+        "binding": BINDING,
+        "expected_actions": ACTIONS,
+        "crm_id_format": "uuid",
+        "reconcile_operation": "SearchForm",
+        "search_query_verified": True,
+        "search_query_template": search_query_template,
+        "custom_fields": {"key_property": "UserKey", "value_property": "Value"},
+        "save_arguments": {
+            "userName": {"$value": "username"},
+            "password": {"$value": "password"},
+            "formInfo": {
+                "CrmObjectTypeCode": {"$value": "crmObjectTypeCode"},
+                "CrmId": None,
+                "ParentCrmObjectId": {"$value": "emptyParent"},
+                "IdentityId": {"$value": "emptyIdentity"},
+                "Subject": {"$value": "subject"},
+                "ExtendedProperties": {
+                    "BaseCrmObjectExtendedPropertyInfo": {"$fields": True}
+                },
+            },
+        },
+        "read_arguments": {
+            "userName": {"$value": "username"},
+            "password": {"$value": "password"},
+            "typeKey": {"$value": "crmObjectTypeCode"},
+            "query": {"$value": "searchQuery"},
+        },
+        "save_result": {"success": ["Success"], "message": ["Message"], "crm_id": ["CrmId"]},
+        "read_result": {
+            "success": ["Success"], "message": ["Message"],
+            "records": ["FormInfoList", "FormInfo"],
+        },
+        "record_paths": {
+            "subject": ["Subject"], "type_code": ["CrmObjectTypeCode"],
+            "identity": ["IdentityId"], "parent": ["ParentCrmObjectId"],
+            "crm_id": ["CrmId"],
+            "fields": ["ExtendedProperties", "BaseCrmObjectExtendedPropertyInfo"],
+            "field_key": ["UserKey"], "field_value": ["Value"],
+        },
+    }
+
+
+def validate_owner_manifest(client, search_query_template, verified):
+    """Validate local serialization against the LIVE loaded metadata; no SOAP POST."""
+    client.manifest = owner_form_manifest(client.fingerprint, search_query_template, verified)
+    client.verify_contract()
+    return client.manifest

@@ -6,6 +6,8 @@ actual installation is mandatory, including a fingerprint of all WSDL/XSD bytes.
 
 import hashlib
 import json
+import re
+import uuid
 from pathlib import Path
 from urllib.parse import urlsplit
 from .mapping import FIELD_ALIASES, UTM_FIELDS
@@ -153,6 +155,13 @@ class FormClient:
                 "Actual WSDL fingerprint and verified contract are required"
             )
         binding = self.client.wsdl.bindings[m["binding"]]
+        for name, action in m.get("expected_actions", {}).items():
+            if name not in binding._operations or binding._operations[name].soapaction != action:
+                raise ValueError("SOAPAction differs from the owner-provided contract")
+        if m.get("profile") == "owner-iform-2.8.8.2":
+            template = m.get("search_query_template")
+            if m.get("search_query_verified") is not True or not isinstance(template, str) or template.count("{subject}") != 1:
+                raise ValueError("SearchForm query must be verified; its grammar is not defined by XSD")
         if "SaveForm" not in binding._operations:
             raise ValueError("Actual binding has no SaveForm")
         read = m["reconcile_operation"]
@@ -181,17 +190,32 @@ class FormClient:
                 raise ValueError("Incomplete verified contract")
         self.service = self.client.create_service(m["binding"], self.endpoint)
         # Preflight only serializes; it does not send anything to CRM.
-        context = {
-            **self.context,
-            "subject": "DeviceOpp100100",
-            "fields": {key: "" for key in ALL_FIELDS},
-        }
+        context = self.record_context("DeviceOpp100100", {key: "" for key in ALL_FIELDS})
         self._save_arguments(context)
         self.client.create_message(
             self.service,
             read,
             **render(m["read_arguments"], context, m["custom_fields"])
         )
+
+    def record_context(self, subject, fields):
+        context = {**self.context, "subject": subject, "fields": fields}
+        template = self.manifest.get("search_query_template")
+        if template is not None:
+            if not re.fullmatch(r"DeviceOpp[0-9]+", subject):
+                raise ValueError("Invalid stable subject")
+            context["searchQuery"] = template.replace("{subject}", subject)
+        return context
+
+    def valid_crm_id(self, value):
+        if not isinstance(value, str) or not value.strip():
+            return False
+        if self.manifest.get("crm_id_format") == "uuid":
+            try:
+                return uuid.UUID(value).int != 0
+            except (ValueError, AttributeError):
+                return False
+        return True
 
     def _save_arguments(self, context):
         from lxml import etree
@@ -270,14 +294,14 @@ class FormClient:
             raise DeliveryError("malformed_crm_result") from None
 
     def save(self, item):
-        context = {**self.context, "subject": item["subject"], "fields": item["fields"]}
+        context = self.record_context(item["subject"], item["fields"])
         response = self._result(
             self._invoke("SaveForm", self._save_arguments(context)),
             self.manifest["save_result"],
         )
         try:
             crm_id = path_value(response, self.manifest["save_result"]["crm_id"])
-            if not isinstance(crm_id, str) or not crm_id.strip():
+            if not self.valid_crm_id(crm_id):
                 raise ValueError()
             return crm_id
         except (KeyError, TypeError, ValueError):
@@ -285,7 +309,7 @@ class FormClient:
 
     def reconcile(self, item):
         m = self.manifest
-        context = {**self.context, "subject": item["subject"], "fields": item["fields"]}
+        context = self.record_context(item["subject"], item["fields"])
         response = self._result(
             self._invoke(
                 m["reconcile_operation"],
@@ -320,7 +344,7 @@ class FormClient:
                 ):
                     raise ValueError()
                 crm_id = path_value(record, p["crm_id"])
-                if not isinstance(crm_id, str) or not crm_id.strip():
+                if not self.valid_crm_id(crm_id):
                     raise ValueError()
                 candidates.append(crm_id)
             if len(candidates) > 1:
