@@ -27,6 +27,7 @@ def main():
             parser.error("--submission-id is required")
         print(json.dumps(Store(required("SANA_DB_PATH")).status(args.submission_id)))
         return
+    store = Store(required("SANA_DB_PATH")) if args.command == "serve" else None
     client = FormClient(
         required("PAYAMGOSTAR_WSDL_URL"),
         required("PAYAMGOSTAR_ENDPOINT"),
@@ -54,7 +55,7 @@ def main():
             "WSDL fingerprint, operations and schema serialization verified; no SOAP operation called"
         )
     else:
-        serve(Store(required("SANA_DB_PATH")), client)
+        serve(store, client)
 
 
 if __name__ == "__main__":

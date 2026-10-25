@@ -1,4 +1,5 @@
 import concurrent.futures
+import sqlite3
 import tempfile
 import unittest
 from pathlib import Path
@@ -131,6 +132,18 @@ class OutboxTests(unittest.TestCase):
             sorted(int(s.removeprefix("DeviceOpp")) for s in subjects),
             list(range(100100, 100132)),
         )
+
+    def test_failed_transaction_rolls_back_lead_deliveries_and_counter(self):
+        with self.store.transaction() as db:
+            db.execute("CREATE TRIGGER fail_insert BEFORE INSERT ON deliveries WHEN NEW.channel='crm' BEGIN SELECT RAISE(ABORT, 'synthetic failure'); END")
+        with self.assertRaises(sqlite3.IntegrityError):
+            self.store.enqueue(lead())
+        with self.store.transaction() as db:
+            self.assertEqual(db.execute("SELECT count(*) FROM leads").fetchone()[0], 0)
+            self.assertEqual(db.execute("SELECT count(*) FROM deliveries").fetchone()[0], 0)
+            self.assertEqual(db.execute("SELECT next_value FROM counter").fetchone()[0], 100100)
+            db.execute("DROP TRIGGER fail_insert")
+        self.assertEqual(self.store.enqueue(lead()), "DeviceOpp100100")
 
     def test_parallel_duplicates_allocate_one_subject_and_two_deliveries(self):
         with concurrent.futures.ThreadPoolExecutor(max_workers=8) as pool:

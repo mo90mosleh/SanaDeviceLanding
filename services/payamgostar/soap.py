@@ -294,7 +294,10 @@ class FormClient:
             m["read_result"],
         )
         try:
-            records = path_value(response, m["read_result"]["records"], empty_collection=True) or []
+            records = (
+                path_value(response, m["read_result"]["records"], empty_collection=True)
+                or []
+            )
             if not isinstance(records, list):
                 raise ValueError()
             candidates = []

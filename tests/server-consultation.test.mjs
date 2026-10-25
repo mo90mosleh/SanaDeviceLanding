@@ -21,9 +21,14 @@ test("Server mode preserves the first timestamp and submission ID across retries
     return Response.json({ status: "submitted" });
   };
   const payload = {
-    name: "کاربر آزمایشی", organization: "آزمایشگاه مهر", mobile: "09123456789",
-    productModel: "FS-114", manufacturer: "Wondfo", productCategory: "POCT",
-    landingPage: "/poct/fs-114", utm: { utm_source: "actual-qr", utm_campaign: "actual-campaign" },
+    name: "کاربر آزمایشی",
+    organization: "آزمایشگاه مهر",
+    mobile: "09123456789",
+    productModel: "FS-114",
+    manufacturer: "Wondfo",
+    productCategory: "POCT",
+    landingPage: "/poct/fs-114",
+    utm: { utm_source: "actual-qr", utm_campaign: "actual-campaign" },
   };
   try {
     const send = createConsultationSender(true, "https://gateway.example.test/api/leads");

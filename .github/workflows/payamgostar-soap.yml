@@ -3,7 +3,13 @@ on:
   push:
     branches: [feature/sana-payamgostar-soap]
   pull_request:
-    paths: ["services/**", "src/lib/consultation.ts", "tests/server-consultation.test.mjs", ".github/workflows/payamgostar-soap.yml"]
+    paths:
+      [
+        "services/**",
+        "src/lib/consultation.ts",
+        "tests/server-consultation.test.mjs",
+        ".github/workflows/payamgostar-soap.yml",
+      ]
 permissions:
   contents: read
 jobs:
