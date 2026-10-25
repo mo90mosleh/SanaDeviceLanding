@@ -12,8 +12,11 @@ FIELD_ALIASES = {
     "DeviceOppCompany": ("company", "Company", "manufacturer"),
 }
 UTM_FIELDS = {
-    "campaign": "DeviceOppCampaign", "source": "DeviceOppSource",
-    "medium": "DeviceOppMedium", "content": "DeviceOppContent", "term": "DeviceOppTerm",
+    "campaign": "DeviceOppCampaign",
+    "source": "DeviceOppSource",
+    "medium": "DeviceOppMedium",
+    "content": "DeviceOppContent",
+    "term": "DeviceOppTerm",
 }
 
 
@@ -33,13 +36,17 @@ def pick(values):
 def map_fields(payload):
     if not isinstance(payload, dict):
         raise InvalidLead("JSON object required")
-    mapped = {key: pick([payload.get(alias) for alias in aliases])
-              for key, aliases in FIELD_ALIASES.items()}
+    mapped = {
+        key: pick([payload.get(alias) for alias in aliases])
+        for key, aliases in FIELD_ALIASES.items()
+    }
     utm = payload.get("utm", {})
     if not isinstance(utm, dict):
         raise InvalidLead("utm must be an object")
     for name, destination in UTM_FIELDS.items():
-        mapped[destination] = pick([utm.get("utm_" + name), payload.get("utm_" + name), payload.get(name)])
+        mapped[destination] = pick(
+            [utm.get("utm_" + name), payload.get("utm_" + name), payload.get(name)]
+        )
     if not 3 <= len(mapped["DeviceOppLeadName"].strip()) <= 100:
         raise InvalidLead("Invalid full name")
     if not 2 <= len(mapped["DeviceOppOrgName"].strip()) <= 100:
@@ -54,7 +61,13 @@ def map_fields(payload):
 
 
 def canonical(payload):
-    return json.dumps(payload, ensure_ascii=False, sort_keys=True, separators=(",", ":"), allow_nan=False)
+    return json.dumps(
+        payload,
+        ensure_ascii=False,
+        sort_keys=True,
+        separators=(",", ":"),
+        allow_nan=False,
+    )
 
 
 def fingerprint(payload):
