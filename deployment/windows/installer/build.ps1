@@ -17,7 +17,11 @@ $Digest = (Get-FileHash $Backend -Algorithm SHA256).Hash.ToLowerInvariant()
 Set-Content -Path (Join-Path $Folder 'BuildInfo.cs') -Encoding UTF8 -Value ('namespace SanaSetup { static class BuildInfo { public const string BackendSha256 = "' + $Digest + '"; } }')
 $Compiler = Join-Path $env:WINDIR 'Microsoft.NET/Framework64/v4.0.30319/csc.exe'
 $Installer = Join-Path $Folder 'SANA-Setup.exe'
-& $Compiler /nologo /target:winexe /platform:x64 /codepage:65001 /reference:System.Windows.Forms.dll /reference:System.Drawing.dll /reference:System.Web.Extensions.dll "/resource:$Backend,backend.exe" "/resource:$PSScriptRoot/settings.example.json,settings.json" "/out:$Installer" "$PSScriptRoot/Setup.cs" "$Folder/BuildInfo.cs"
+$SetupSource = (Resolve-Path (Join-Path $PSScriptRoot 'Setup.cs')).Path
+$InfoSource = (Resolve-Path (Join-Path $Folder 'BuildInfo.cs')).Path
+$TemplateSource = (Resolve-Path (Join-Path $PSScriptRoot 'settings.example.json')).Path
+$CompilerArguments = @('/nologo','/target:winexe','/platform:x64','/codepage:65001','/reference:System.Windows.Forms.dll','/reference:System.Drawing.dll','/reference:System.Web.Extensions.dll',('/resource:' + $Backend + ',backend.exe'),('/resource:' + $TemplateSource + ',settings.json'),('/out:' + $Installer),$SetupSource,$InfoSource)
+& $Compiler @CompilerArguments
 if ($LASTEXITCODE -ne 0) { throw 'GUI compile failed' }
 $Check = Start-Process -FilePath $Installer -ArgumentList '--check-package' -PassThru -Wait
 if ($Check.ExitCode -ne 0) { throw 'Bundled package self test failed' }
