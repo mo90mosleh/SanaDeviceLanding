@@ -1,0 +1,9 @@
+{
+  "sourceCommit": "9c09c71ae984d0c0ca6dbd0bcf9a53379a804cf4",
+  "workflowRun": 40180674418,
+  "sha256": "170f01e5f65dab609e57197b9b44850ca8cdd9b114d9c6f2836147032b6ace67",
+  "bytes": 17233920,
+  "signed": false,
+  "windowsBuildAndPackageChecks": "passed",
+  "realCrmWrites": 0
+}
