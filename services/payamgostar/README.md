@@ -73,9 +73,9 @@ Zeep از WSDL/XSD واقعی namespace، binding، SOAPAction، ترتیب عن
 ابتدا روی میزبان دارای دسترسی، envهای فایل `.env.example` را از secret manager یا EnvironmentFile خارج مخزن بارگذاری کنید؛ فایل به‌صورت خودکار source نمی‌شود. سپس:
 
 ```sh
-python -m venv .venv-server
-.venv-server/bin/python -m pip install -r services/payamgostar/requirements.txt
-.venv-server/bin/python -m services.payamgostar inspect-wsdl
+python -m venv services/payamgostar/.venv
+services/payamgostar/.venv/bin/python -m pip install -r services/payamgostar/requirements.txt
+services/payamgostar/.venv/bin/python -m services.payamgostar inspect-wsdl
 ```
 
 این فرمان فقط GET مربوط به WSDL و XSDها را انجام می‌دهد. هیچ SOAP operation را اجرا نمی‌کند. خروجی، fingerprint محتوای تمام قراردادها و signature واقعی متدهاست؛ نام binding و متد خواندن Form باید از همین خروجی و مستندات قابل‌دسترسی تأیید شوند.
@@ -96,7 +96,7 @@ python -m venv .venv-server
 type code در کد CBCSalesOpp است. پیش از هر SaveForm، XML تولیدشده بررسی می‌شود: Subject ثابت، type code درست، تمام یازده UserKey/مقدار دقیقاً یک بار و IdentityId، ParentCrmObjectId و CrmId خالی. بنابراین عملیات ایجاد است، نه ویرایش یک CrmId موجود. هیچ هویت، فرم تعریف‌شده، فیلد یا workflow جدیدی ساخته نمی‌شود.
 
 ```sh
-.venv-server/bin/python -m services.payamgostar check-contract
+services/payamgostar/.venv/bin/python -m services.payamgostar check-contract
 ```
 
 check-contract فقط serialization را بررسی می‌کند و SaveForm یا متد خواندن را اجرا نمی‌کند. بدون قرارداد واقعی تأییدشده، سرویس serve راه‌اندازی نمی‌شود. اگر نصب، متد خواندن Form مناسب ندارد، آن را حدس نزنید؛ این مورد مانع فعال‌سازی امن تطبیق timeout است.
@@ -110,8 +110,8 @@ check-contract فقط serialization را بررسی می‌کند و SaveForm ی
 5. یک بار initialize کنید، سپس سرویس را زیر process supervisor پشت reverse proxy HTTPS اجرا کنید:
 
 ```sh
-.venv-server/bin/python -m services.payamgostar init-db
-.venv-server/bin/python -m services.payamgostar serve
+services/payamgostar/.venv/bin/python -m services.payamgostar init-db
+services/payamgostar/.venv/bin/python -m services.payamgostar serve
 ```
 
 6. SANA_WEBHOOK_URL دقیقاً مقصد فعلی n8n باشد. SANA_ALLOWED_ORIGIN مبدأ واقعی سایت بدون slash نهایی است. `/api/leads` برای مرورگر همان origin یا replay سروری با SANA_INGEST_TOKEN پذیرفته می‌شود؛ توکن replay را در مرورگر نگذارید. reverse proxy باید محدودیت اندازه/زمان درخواست و rate limit عمومی داشته باشد.
@@ -120,7 +120,7 @@ check-contract فقط serialization را بررسی می‌کند و SaveForm ی
 برای مشاهدهٔ وضعیت بدون نمایش payload یا افشای API عمومی:
 
 ```sh
-.venv-server/bin/python -m services.payamgostar status --submission-id ID
+services/payamgostar/.venv/bin/python -m services.payamgostar status --submission-id ID
 ```
 
 ## retry و محدودیت عدم تکرار
