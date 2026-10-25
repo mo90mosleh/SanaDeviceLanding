@@ -1,0 +1,17 @@
+{
+  "PAYAMGOSTAR_WSDL_URL": "http://79.127.121.10:8090/Services/API/IForm.svc?wsdl",
+  "PAYAMGOSTAR_ENDPOINT": "http://79.127.121.10:8090/Services/API/IForm.svc",
+  "PAYAMGOSTAR_USERNAME": "",
+  "PAYAMGOSTAR_PASSWORD": "",
+  "PAYAMGOSTAR_CONTRACT_FILE": "C:\\SanaCrmBridge\\private\\form-contract.json",
+  "PAYAMGOSTAR_ALLOW_HTTP": "true",
+  "PAYAMGOSTAR_SEARCH_QUERY_TEMPLATE": "Subject == \"{subject}\"",
+  "PAYAMGOSTAR_SEARCH_TYPE_KEY": "CBCSalesOpp",
+  "PAYAMGOSTAR_SEARCH_QUERY_VERIFIED": "true",
+  "SANA_DB_PATH": "C:\\SanaCrmBridge\\data\\outbox.sqlite",
+  "SANA_WEBHOOK_URL": "https://n8n.alecasgari.com/webhook/83591aad-47e3-475b-99a9-2f3d6d408e00",
+  "SANA_ALLOWED_ORIGIN": "https://cbc.ortanes.com",
+  "SANA_INGEST_TOKEN": "",
+  "SANA_BIND": "127.0.0.1",
+  "PORT": "8081"
+}

@@ -1,0 +1,45 @@
+name: Build and verify SANA Windows installer
+on:
+  push:
+    branches: [feature/sana-windows-installer]
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: windows-2022
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          architecture: x64
+      - name: Build frozen backend and native RTL installer
+        shell: pwsh
+        run: ./deployment/windows/installer/build.ps1
+      - name: Emit bounded screenshot and publish tested binary as a Git blob
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: python
+        run: |
+          import base64,hashlib,json,os,urllib.request
+          from pathlib import Path
+          root=Path('deployment/windows/installer/build')
+          image=base64.b64encode((root/'installer-preview.png').read_bytes()).decode()
+          for i in range(0,len(image),8000):print('INSTALLER_PREVIEW '+str(i//8000)+' '+image[i:i+8000])
+          data=(root/'SANA-Setup.exe').read_bytes()
+          assert len(data)<90_000_000,'Use a release asset if the executable exceeds the repository size limit'
+          payload=json.dumps({'encoding':'base64','content':base64.b64encode(data).decode()}).encode()
+          req=urllib.request.Request('https://api.github.com/repos/'+os.environ['GITHUB_REPOSITORY']+'/git/blobs',data=payload,method='POST',headers={'Authorization':'Bearer '+os.environ['GH_TOKEN'],'Accept':'application/vnd.github+json','Content-Type':'application/json'})
+          with urllib.request.urlopen(req,timeout=180) as response:blob=json.load(response)
+          print('TESTED_INSTALLER_BLOB '+json.dumps({'sha':blob['sha'],'sha256':hashlib.sha256(data).hexdigest(),'bytes':len(data)}))
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: sana-windows-installer
+          path: |
+            deployment/windows/installer/build/SANA-Setup.exe
+            deployment/windows/installer/build/installer-preview.png
+            deployment/windows/installer/build/verification.json
+          retention-days: 14
+          if-no-files-found: ignore
