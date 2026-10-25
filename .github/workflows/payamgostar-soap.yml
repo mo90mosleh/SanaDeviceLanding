@@ -1,19 +1,70 @@
-name: Inspect official PayamGostar SOAP documentation
+name: Verify SANA server-only PayamGostar delivery
 on:
   push:
     branches: [feature/sana-payamgostar-soap]
+  pull_request:
+    paths: ["services/**", "src/lib/consultation.ts", "tests/server-consultation.test.mjs", ".github/workflows/payamgostar-soap.yml"]
 permissions:
   contents: read
 jobs:
-  inspect:
+  verify:
     runs-on: ubuntu-24.04
-    timeout-minutes: 4
+    timeout-minutes: 12
+    env:
+      NITRO_PRESET: node-server
+      VITE_STATIC_SITE: "true"
+      SANA_BASE_PATH: "/"
+      SANA_SITE_URL: https://cbc.ortanes.com/
+      VITE_CONSULTATION_API_URL: https://forms.example.test/webhook
     steps:
       - uses: actions/checkout@v4
-      - run: python scripts/inspect-payamgostar-docs.py
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install -r services/payamgostar/requirements.txt black==25.9.0 ruff==0.14.3
+      - name: Format server code and check undefined/unused names
+        run: |
+          python -m black services/payamgostar services/__init__.py
+          python -m ruff check services/payamgostar --select F,E9 --fix
+      - name: Exercise SQLite concurrency, durable retries, HTTP and synthetic SOAP contract
+        run: |
+          python -c "import zeep"
+          python -m unittest discover -s services/payamgostar/tests -v
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec prettier --write src/lib/consultation.ts tests/server-consultation.test.mjs .github/workflows/payamgostar-soap.yml
+      - name: Export formatted sources for review
+        if: always()
+        run: |
+          python - <<'PY'
+          import base64
+          from pathlib import Path
+          files=list(Path("services").rglob("*.py"))+[Path("src/lib/consultation.ts"),Path("tests/server-consultation.test.mjs"),Path(".github/workflows/payamgostar-soap.yml")]
+          for file in files: print("PG_FORMAT_FILE "+str(file)+" "+base64.b64encode(file.read_bytes()).decode())
+          PY
+      - run: pnpm lint
+      - run: pnpm typecheck
+      - run: pnpm test
+      - run: node --test tests/server-consultation.test.mjs
+      - run: pnpm build
+      - run: node scripts/export-github-pages.mjs
+      - name: Install isolated browser tooling
+        run: |
+          echo "SANA_QA_DIR=$RUNNER_TEMP/sana-soap-browser" >> "$GITHUB_ENV"
+          npm install --prefix "$RUNNER_TEMP/sana-soap-browser" --no-save playwright@1.56.1
+          "$RUNNER_TEMP/sana-soap-browser/node_modules/.bin/playwright" install chromium
+      - name: Check existing forms and payloads on all static routes using intercepted requests
+        run: node scripts/review-github-pages.mjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: payamgostar-contract-inspection
-          path: artifacts/payamgostar-contract
+          name: payamgostar-review
+          path: artifacts/ui-review
           retention-days: 7
+          if-no-files-found: ignore

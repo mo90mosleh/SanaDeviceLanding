@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<!-- SYNTHETIC TEST CONTRACT ONLY. This is NOT PayamGostar's actual WSDL. -->
+<definitions xmlns="http://schemas.xmlsoap.org/wsdl/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:t="urn:sana:synthetic-form-fixture" targetNamespace="urn:sana:synthetic-form-fixture">
+ <types><xsd:schema targetNamespace="urn:sana:synthetic-form-fixture" elementFormDefault="qualified">
+  <xsd:complexType name="Pair"><xsd:sequence><xsd:element name="UserKey" type="xsd:string"/><xsd:element name="Value" type="xsd:string"/></xsd:sequence></xsd:complexType>
+  <xsd:complexType name="Pairs"><xsd:sequence><xsd:element name="Pair" type="t:Pair" minOccurs="0" maxOccurs="unbounded"/></xsd:sequence></xsd:complexType>
+  <xsd:complexType name="Form"><xsd:sequence>
+   <xsd:element name="Subject" type="xsd:string"/><xsd:element name="CrmObjectTypeCode" type="xsd:string"/>
+   <xsd:element name="IdentityId" type="xsd:string" nillable="true"/><xsd:element name="ParentCrmObjectId" type="xsd:string" nillable="true"/>
+   <xsd:element name="ExtendedProperties" type="t:Pairs"/><xsd:element name="CrmId" type="xsd:string" minOccurs="0"/>
+  </xsd:sequence></xsd:complexType>
+  <xsd:complexType name="Forms"><xsd:sequence><xsd:element name="Form" type="t:Form" minOccurs="0" maxOccurs="unbounded"/></xsd:sequence></xsd:complexType>
+  <xsd:complexType name="SaveResult"><xsd:sequence><xsd:element name="Success" type="xsd:boolean"/><xsd:element name="Message" type="xsd:string"/><xsd:element name="CrmId" type="xsd:string"/></xsd:sequence></xsd:complexType>
+  <xsd:complexType name="ReadResult"><xsd:sequence><xsd:element name="Success" type="xsd:boolean"/><xsd:element name="Message" type="xsd:string"/><xsd:element name="Forms" type="t:Forms"/></xsd:sequence></xsd:complexType>
+  <xsd:element name="SaveForm"><xsd:complexType><xsd:sequence><xsd:element name="username" type="xsd:string"/><xsd:element name="password" type="xsd:string"/><xsd:element name="form" type="t:Form"/></xsd:sequence></xsd:complexType></xsd:element>
+  <xsd:element name="SaveFormResponse"><xsd:complexType><xsd:sequence><xsd:element name="SaveFormResult" type="t:SaveResult"/></xsd:sequence></xsd:complexType></xsd:element>
+  <xsd:element name="GetForms"><xsd:complexType><xsd:sequence><xsd:element name="username" type="xsd:string"/><xsd:element name="password" type="xsd:string"/><xsd:element name="subject" type="xsd:string"/><xsd:element name="typeCode" type="xsd:string"/></xsd:sequence></xsd:complexType></xsd:element>
+  <xsd:element name="GetFormsResponse"><xsd:complexType><xsd:sequence><xsd:element name="GetFormsResult" type="t:ReadResult"/></xsd:sequence></xsd:complexType></xsd:element>
+ </xsd:schema></types>
+ <message name="SaveIn"><part name="parameters" element="t:SaveForm"/></message><message name="SaveOut"><part name="parameters" element="t:SaveFormResponse"/></message>
+ <message name="ReadIn"><part name="parameters" element="t:GetForms"/></message><message name="ReadOut"><part name="parameters" element="t:GetFormsResponse"/></message>
+ <portType name="FixtureFormPort"><operation name="SaveForm"><input message="t:SaveIn"/><output message="t:SaveOut"/></operation><operation name="GetForms"><input message="t:ReadIn"/><output message="t:ReadOut"/></operation></portType>
+ <binding name="FixtureBinding" type="t:FixtureFormPort"><soap:binding transport="http://schemas.xmlsoap.org/soap/http" style="document"/>
+  <operation name="SaveForm"><soap:operation soapAction="urn:fixture:save:v99"/><input><soap:body use="literal"/></input><output><soap:body use="literal"/></output></operation>
+  <operation name="GetForms"><soap:operation soapAction="urn:fixture:read:v99"/><input><soap:body use="literal"/></input><output><soap:body use="literal"/></output></operation>
+ </binding>
+ <service name="FixtureService"><port name="FixturePort" binding="t:FixtureBinding"><soap:address location="http://127.0.0.1/services/api/iform.svc"/></port></service>
+</definitions>
