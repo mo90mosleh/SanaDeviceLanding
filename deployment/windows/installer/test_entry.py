@@ -12,6 +12,23 @@ spec.loader.exec_module(entry)
 
 
 class InstallerEntryTests(unittest.TestCase):
+    def test_account_check_can_only_call_the_read_operation(self):
+        calls=[]
+        class Client:
+            manifest={"reconcile_operation":"SearchForm","read_arguments":{"query":{"$value":"query"}},"custom_fields":{},"read_result":{}}
+            def record_context(self,subject,fields):
+                self.subject=subject
+                return {"query":'Subject == "'+subject+'"'}
+            def _invoke(self,operation,args):
+                calls.append((operation,args))
+                return {"Success":True}
+            def _result(self,response,config):assert response["Success"]
+        client=Client()
+        entry.check_read_access(lambda:client)
+        self.assertEqual(len(calls),1)
+        self.assertEqual(calls[0][0],"SearchForm")
+        self.assertTrue(client.subject.removeprefix("DeviceOpp").isdigit())
+
     def test_utf8_private_config_and_rejecting_unknown_keys(self):
         with tempfile.TemporaryDirectory() as temp:
             path=Path(temp)/"config.json"

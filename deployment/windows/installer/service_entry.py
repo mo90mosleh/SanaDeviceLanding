@@ -40,6 +40,22 @@ def ensure_store(settings):
     print("STORE_READY")
 
 
+def check_read_access(factory=None):
+    """Authenticate using a narrowly scoped Form search, never a SaveForm call."""
+    import uuid
+    from services.payamgostar.soap import render, ALL_FIELDS
+    if factory is None:
+        from services.payamgostar.__main__ import configured_crm
+        factory = configured_crm
+    client = factory()
+    subject = "DeviceOpp" + str(uuid.uuid4().int)
+    context = client.record_context(subject, {key:"" for key in ALL_FIELDS})
+    manifest = client.manifest
+    response = client._invoke(manifest["reconcile_operation"], render(manifest["read_arguments"],context,manifest["custom_fields"]))
+    client._result(response,manifest["read_result"])
+    print("READ_ACCESS_CONFIRMED: no record was created")
+
+
 def self_test():
     import tempfile
     import threading
@@ -85,12 +101,15 @@ def main():
     parser.add_argument("--env-file")
     parser.add_argument("--self-test",action="store_true")
     parser.add_argument("--ensure-store",action="store_true")
+    parser.add_argument("--check-read-access",action="store_true")
     options,remaining=parser.parse_known_args()
     if options.self_test:
         self_test();return
     if not options.env_file:
         raise ValueError("Private configuration file required")
     settings=load_environment(options.env_file)
+    if options.check_read_access:
+        check_read_access();return
     if options.ensure_store:
         ensure_store(settings);return
     from services.payamgostar.__main__ import main as service_main

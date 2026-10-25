@@ -7,7 +7,8 @@ python -m unittest discover -s services/payamgostar/tests -v
 if ($LASTEXITCODE -ne 0) { throw 'Server tests failed' }
 python -m unittest discover -s deployment/windows/installer -p 'test_*.py' -v
 if ($LASTEXITCODE -ne 0) { throw 'Installer entry tests failed' }
-python -m PyInstaller --noconfirm --clean --onefile --name SanaBridgeService --paths . --collect-all zeep --collect-all lxml --collect-all certifi --add-data 'services/payamgostar/contracts;services/payamgostar/contracts' --distpath "$Folder/dist" --workpath "$Folder/work" --specpath "$Folder" deployment/windows/installer/service_entry.py
+$SchemaSource = Join-Path (Get-Location).Path 'services/payamgostar/contracts'
+python -m PyInstaller --noconfirm --clean --onefile --name SanaBridgeService --paths . --collect-all zeep --collect-all lxml --collect-all certifi --add-data "${SchemaSource};services/payamgostar/contracts" --distpath "$Folder/dist" --workpath "$Folder/work" --specpath "$Folder" deployment/windows/installer/service_entry.py
 if ($LASTEXITCODE -ne 0) { throw 'Backend freeze failed' }
 $Backend = Join-Path $Folder 'dist/SanaBridgeService.exe'
 & $Backend --self-test
