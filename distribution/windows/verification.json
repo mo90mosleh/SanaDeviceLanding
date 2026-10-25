@@ -1,9 +1,10 @@
 {
-  "sourceCommit": "9c09c71ae984d0c0ca6dbd0bcf9a53379a804cf4",
-  "workflowRun": 40180674418,
-  "sha256": "170f01e5f65dab609e57197b9b44850ca8cdd9b114d9c6f2836147032b6ace67",
-  "bytes": 17233920,
+  "sourceCommit": "62c9082ecadaa8e891c1b9cbcd3d88158795bd82",
+  "workflowRun": 40192098256,
+  "sha256": "ccfe501e68b68d8862536d7defb98182452569d86b5b9860f6e275afd3ef9594",
+  "bytes": 17234432,
   "signed": false,
   "windowsBuildAndPackageChecks": "passed",
+  "absentScheduledTaskRegression": "passed",
   "realCrmWrites": 0
 }
