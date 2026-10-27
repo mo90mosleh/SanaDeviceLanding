@@ -410,9 +410,17 @@ export function Consultation({
       </p>
       <button className="button primary full" type="submit" disabled={busy}>
         <span className="button-label">
-          {busy ? "در حال ارسال… تا ۶۰ ثانیه صبر کنید" : "ثبت درخواست مشاوره"}
+          {busy ? "در حال ارسال" : "ثبت درخواست مشاوره"}
         </span>
-        {!mobile && <ArrowLeft className="cta-icon" size={20} strokeWidth={2} aria-hidden="true" />}
+        {busy ? (
+          <span className="submission-loader" aria-hidden="true">
+            <span />
+            <span />
+            <span />
+          </span>
+        ) : (
+          !mobile && <ArrowLeft className="cta-icon" size={20} strokeWidth={2} aria-hidden="true" />
+        )}
       </button>
       <p
         className="submission-message"
